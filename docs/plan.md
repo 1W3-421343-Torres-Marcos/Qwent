@@ -7,7 +7,7 @@
 | F1 | Walking Skeleton + APK Base | [x] | 100% |
 | F2 | MVP Jugable — Motor Base + Tablero | [x] | 100% |
 | F3 | Habilidades Completas de The Witcher 3 | [x] | 100% |
-| F4 | Oponente IA + Mulligan | [~] | 25% |
+| F4 | Oponente IA + Mulligan | [~] | 50% |
 | F5 | Facciones, Líderes, Catálogo Real y Constructor de Mazos | [ ] | 0% |
 | F6 | Pulido Visual, UX Táctil y Release Offline | [ ] | 0% |
 
@@ -37,7 +37,7 @@
 
 ## F4: Oponente IA + Mulligan
 - [x] **F4.1**: Implementar fase de Mulligan inicial (cambio opcional de hasta 2 cartas antes de Ronda 1) en Core y UI. | *Módulos/Archivos*: `core-engine`, `board-ui`, `src/core/engine/`, `src/app/features/board/` | *Hecho*: Jugador puede devolver hasta 2 cartas al mazo, barajarlo y robar reemplazos (nunca van al descarte) con tests en verde.
-- [ ] **F4.2**: Implementar vista filtrada `AIPlayerView` y motor heurístico del Bot (ventaja de cartas, gestión de rondas, habilidades y pase). | *Módulos/Archivos*: `ai-opponent`, `src/core/ai/` | *Hecho*: IA decide acciones legales sin acceder a la mano ni mazo oculto del rival.
+- [x] **F4.2**: Implementar vista filtrada `AIPlayerView` y motor heurístico del Bot (ventaja de cartas, gestión de rondas, habilidades y pase). | *Módulos/Archivos*: `ai-opponent`, `src/core/ai/` | *Hecho*: IA decide acciones legales sin acceder a la mano ni mazo oculto del rival.
 - [ ] **F4.3**: Crear suite de simulación Bot vs. Bot (100+ partidas) e integrar turno automático de la IA en la UI. | *Módulos/Archivos*: `ai-opponent`, `board-ui`, `src/core/ai/` | *Hecho*: Simulaciones terminan sin bucles infinitos ni errores y modo 1 Jugador vs. IA es jugable.
 - [ ] **F4.4**: Verificación integral F4, suite de tests en verde, sync Capacitor y generación de APK F4. | *Módulos/Archivos*: `android-packaging`, `android/` | *Hecho*: Tests 100% en verde y `gwent-f4-debug.apk` generado y funcional.
 
@@ -74,3 +74,4 @@
 | 2026-11-23 | **F3.4**: Selectores pre-jugada cancelables (Ágil, Cuerno, Señuelo), modal `MEDIC_DISCARD` y fila encadenada `AGILE_ROW` + SVGs F3 compilando sin errores | **F3.5**: Verificación integral F3 y compilación de `gwent-f3-debug.apk` |
 | 2026-11-23 | **F3.5**: `npm run build:apk -- --phase=f3` completado (27 tests en verde, `builds/apks/gwent-f3-debug.apk` 3.98 MB) | Planificar e iniciar **F4** (Oponente IA + Mulligan) con `/plan F4` |
 | 2026-11-23 | **F4.1**: Fase inicial `MULLIGAN` (hasta 2 cambios devueltos y re-barajados al mazo, nunca descarte) en Core + modal táctil UI (30 tests en verde, `ng build` OK) | **F4.2**: Implementar `AIPlayerView` y motor heurístico del Bot en `src/core/ai/` |
+| 2026-11-23 | **F4.2**: `AIPlayerView` aislada (`ai-view.ts`), heurísticas de ronda/ventaja de cartas/Nilfgaard (`heuristics.ts`) y `decideAction` (`bot-player.ts`) validados (35 tests en verde) | **F4.3**: Suite de simulación Bot vs. Bot (120 partidas) e integración 1P vs. IA en UI |

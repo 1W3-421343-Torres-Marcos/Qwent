@@ -49,3 +49,6 @@ export {
   resolveSpy,
   resolveUnitEntry,
 } from './abilities/ability-resolver';
+export { createAIView } from './ai/ai-view';
+export type { AIOpponentView, AIPlayerSelfView, AIPlayerView } from './ai/ai-view';
+export { decideAction } from './ai/bot-player';
