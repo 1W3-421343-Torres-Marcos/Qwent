@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Diamond shield within safe adaptive zone -->
+    <path
+        android:fillColor="#362920"
+        android:strokeColor="#6E5536"
+        android:strokeWidth="2"
+        android:pathData="M54,24 L82,54 L54,84 L26,54 Z" />
+    <!-- Inner golden crown / Q emblem -->
+    <path
+        android:fillColor="#D97706"
+        android:pathData="M54,34 L62,46 L72,41 L67,62 L41,62 L36,41 L46,46 Z" />
+    <path
+        android:fillColor="#FDE047"
+        android:pathData="M42,66 L66,66 L66,70 L42,70 Z" />
+    <path
+        android:fillColor="#FDE047"
+        android:pathData="M54,37 L59,47 L54,53 L49,47 Z" />
+</vector>

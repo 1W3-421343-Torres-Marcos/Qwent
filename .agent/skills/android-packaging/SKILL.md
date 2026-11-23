@@ -35,4 +35,4 @@ description: Usar al configurar Capacitor, orientación horizontal, modo inmersi
 - [x] La app arranca forzada en orientación `sensorLandscape` y modo inmersivo sin barras visibles.
 - [x] `npm run build:apk` ejecuta tests, compila web, sincroniza Android y genera `builds/apks/gwent-f<N>-debug.apk` sin intervención manual.
 - [ ] El APK de la fase se instala/arranca correctamente 100% offline (sin `android.permission.INTERNET`) y muestra la versión/fase actual.
-- [ ] (F6) Ícono adaptativo y splash screen configurados y auditado sin permisos ni tráfico externo.
+- [x] (F6) Ícono adaptativo y splash screen configurados y auditado sin permisos ni tráfico externo.

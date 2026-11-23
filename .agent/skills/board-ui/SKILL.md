@@ -42,4 +42,4 @@ description: Usar al construir o modificar la interfaz táctil del tablero de 6 
 - [x] Tablero horizontal de 6 filas, zona de clima, gemas, contadores y mano legibles en resoluciones móviles `16:9` a `20:9`.
 - [x] Flujos interactivos completos para Ágil, Cuerno, Señuelo, Médico (incluyendo cadenas), Mulligan y overlays `ROUND_END`/`MATCH_END`.
 - [x] Botón "Pasar Ronda" protegido contra toques accidentales y cero dependencias/URLs externas.
-- [ ] (F6) Diseño visual completo de `docs/design.md` + animaciones livianas fluidas aplicadas.
+- [x] (F6) Diseño visual completo de `docs/design.md` + animaciones livianas fluidas aplicadas.

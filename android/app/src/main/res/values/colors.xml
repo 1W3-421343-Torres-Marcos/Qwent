@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#2A211B</color>
+    <color name="colorPrimaryDark">#1A1410</color>
+    <color name="colorAccent">#D97706</color>
+    <color name="qwent_tavern_dark">#1A1410</color>
+    <color name="qwent_board_wood">#2A211B</color>
+    <color name="qwent_bronze">#6E5536</color>
+    <color name="qwent_gold">#D97706</color>
+</resources>
