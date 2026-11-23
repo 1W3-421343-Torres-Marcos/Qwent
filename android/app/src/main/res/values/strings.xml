@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Qwent</string>
+    <string name="title_activity_main">Qwent</string>
+    <string name="package_name">com.qwent.tw3gwent</string>
+    <string name="custom_url_scheme">com.qwent.tw3gwent</string>
+</resources>

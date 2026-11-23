@@ -1,0 +1,69 @@
+import { describe, expect, it } from 'vitest';
+import rawCards from '../../../assets/data/cards.json';
+import rawStarterDecks from '../../../assets/data/starter-decks.json';
+import {
+  validateCatalog,
+  validateStarterDeck,
+  type CardDefinition,
+  type StarterDeckDefinition,
+} from '../../index';
+
+describe('Test Catalog & Starter Decks Integrity (F2.1)', () => {
+  const cards = rawCards as readonly CardDefinition[];
+  const decks = rawStarterDecks as readonly StarterDeckDefinition[];
+
+  it('validates cards.json schema and covers 20–35 test cards', () => {
+    expect(cards.length).toBeGreaterThanOrEqual(20);
+    expect(cards.length).toBeLessThanOrEqual(35);
+
+    const result = validateCatalog(cards);
+    expect(result.errors).toEqual([]);
+    expect(result.valid).toBe(true);
+  });
+
+  it('includes Heroes, all 3 Weathers, Clear Weather, Horn, and all F3 abilities', () => {
+    expect(cards.some((c) => c.isHero)).toBe(true);
+    expect(cards.some((c) => c.ability === 'WEATHER_FROST')).toBe(true);
+    expect(cards.some((c) => c.ability === 'WEATHER_FOG')).toBe(true);
+    expect(cards.some((c) => c.ability === 'WEATHER_RAIN')).toBe(true);
+    expect(cards.some((c) => c.ability === 'WEATHER_CLEAR')).toBe(true);
+    expect(cards.some((c) => c.type === 'SPECIAL' && c.ability === 'COMMANDERS_HORN')).toBe(true);
+    expect(cards.some((c) => c.type === 'UNIT' && c.ability === 'COMMANDERS_HORN')).toBe(true);
+    expect(cards.some((c) => c.ability === 'TIGHT_BOND')).toBe(true);
+    expect(cards.some((c) => c.ability === 'MORALE_BOOST')).toBe(true);
+    expect(cards.some((c) => c.ability === 'MUSTER')).toBe(true);
+    expect(cards.some((c) => c.type === 'UNIT' && c.allowedRows.length > 1)).toBe(true);
+    expect(cards.some((c) => c.ability === 'SPY')).toBe(true);
+    expect(cards.some((c) => c.ability === 'DECOY')).toBe(true);
+    expect(cards.some((c) => c.ability === 'MEDIC')).toBe(true);
+    expect(cards.some((c) => c.ability === 'SCORCH')).toBe(true);
+    expect(cards.some((c) => c.ability === 'SCORCH_ROW')).toBe(true);
+  });
+
+  it('validates both fixed starter decks against TW3 rules and includes all F3 mechanics', () => {
+    expect(decks.length).toBe(2);
+    const catalogMap = new Map(cards.map((c) => [c.id, c]));
+
+    for (const deck of decks) {
+      const validation = validateStarterDeck(deck, catalogMap);
+      expect(validation.errors).toEqual([]);
+      expect(validation.valid).toBe(true);
+      expect(deck.leaderId).toBeNull();
+
+      const deckCards = deck.cardIds.map((id) => catalogMap.get(id)!);
+      for (const ability of [
+        'TIGHT_BOND',
+        'MORALE_BOOST',
+        'MUSTER',
+        'SPY',
+        'DECOY',
+        'MEDIC',
+        'SCORCH',
+        'SCORCH_ROW',
+      ] as const) {
+        expect(deckCards.some((c) => c.ability === ability)).toBe(true);
+      }
+      expect(deckCards.some((c) => c.type === 'UNIT' && c.allowedRows.length > 1)).toBe(true);
+    }
+  });
+});
