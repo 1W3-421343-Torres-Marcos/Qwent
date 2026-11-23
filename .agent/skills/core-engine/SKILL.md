@@ -52,5 +52,5 @@ description: Usar al desarrollar o modificar el estado inmutable de partida, flu
 - [x] `GameState` y `GameAction` tipados con `strict: true` y cero mutaciones directas.
 - [x] Cálculo dinámico verificado con tests para clima + vínculo + moral + cuerno + Héroes en un mismo tablero.
 - [x] Flujo completo de partida (10 cartas, turnos, pasar, 2 gemas, empate y fin de partida) cubierto por tests en verde.
-- [ ] Fase `MULLIGAN` (hasta 2 cambios pre-Ronda 1) probada unitariamente.
+- [x] Fase `MULLIGAN` (hasta 2 cambios pre-Ronda 1) probada unitariamente.
 - [x] Cero imports de Angular, DOM o Capacitor en `src/core/`.

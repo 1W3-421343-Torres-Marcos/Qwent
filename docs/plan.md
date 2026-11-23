@@ -7,7 +7,7 @@
 | F1 | Walking Skeleton + APK Base | [x] | 100% |
 | F2 | MVP Jugable — Motor Base + Tablero | [x] | 100% |
 | F3 | Habilidades Completas de The Witcher 3 | [x] | 100% |
-| F4 | Oponente IA + Mulligan | [~] | 75% |
+| F4 | Oponente IA + Mulligan | [x] | 100% |
 | F5 | Facciones, Líderes, Catálogo Real y Constructor de Mazos | [ ] | 0% |
 | F6 | Pulido Visual, UX Táctil y Release Offline | [ ] | 0% |
 
@@ -39,7 +39,7 @@
 - [x] **F4.1**: Implementar fase de Mulligan inicial (cambio opcional de hasta 2 cartas antes de Ronda 1) en Core y UI. | *Módulos/Archivos*: `core-engine`, `board-ui`, `src/core/engine/`, `src/app/features/board/` | *Hecho*: Jugador puede devolver hasta 2 cartas al mazo, barajarlo y robar reemplazos (nunca van al descarte) con tests en verde.
 - [x] **F4.2**: Implementar vista filtrada `AIPlayerView` y motor heurístico del Bot (ventaja de cartas, gestión de rondas, habilidades y pase). | *Módulos/Archivos*: `ai-opponent`, `src/core/ai/` | *Hecho*: IA decide acciones legales sin acceder a la mano ni mazo oculto del rival.
 - [x] **F4.3**: Crear suite de simulación Bot vs. Bot (100+ partidas) e integrar turno automático de la IA en la UI. | *Módulos/Archivos*: `ai-opponent`, `board-ui`, `src/core/ai/` | *Hecho*: Simulaciones terminan sin bucles infinitos ni errores y modo 1 Jugador vs. IA es jugable.
-- [ ] **F4.4**: Verificación integral F4, suite de tests en verde, sync Capacitor y generación de APK F4. | *Módulos/Archivos*: `android-packaging`, `android/` | *Hecho*: Tests 100% en verde y `gwent-f4-debug.apk` generado y funcional.
+- [x] **F4.4**: Verificación integral F4, suite de tests en verde, sync Capacitor y generación de APK F4. | *Módulos/Archivos*: `android-packaging`, `android/` | *Hecho*: Tests 100% en verde y `gwent-f4-debug.apk` generado y funcional.
 
 ## F5: Facciones, Líderes, Catálogo Real y Constructor de Mazos
 - [ ] **F5.1**: Implementar las 4 pasivas de facción (Reinos del Norte, Nilfgaard, Monstruos, Scoia'tael) y habilidades de Líder (1 uso por partida), incluyendo UI e IA para Scoia'tael y Líderes. | *Módulos/Archivos*: `cards-and-abilities`, `core-engine`, `board-ui`, `ai-opponent`, `src/core/` | *Hecho*: Tests unitarios de pasivas de facción y activación de Líderes en verde, integrados en UI e IA.
@@ -76,3 +76,4 @@
 | 2026-11-23 | **F4.1**: Fase inicial `MULLIGAN` (hasta 2 cambios devueltos y re-barajados al mazo, nunca descarte) en Core + modal táctil UI (30 tests en verde, `ng build` OK) | **F4.2**: Implementar `AIPlayerView` y motor heurístico del Bot en `src/core/ai/` |
 | 2026-11-23 | **F4.2**: `AIPlayerView` aislada (`ai-view.ts`), heurísticas de ronda/ventaja de cartas/Nilfgaard (`heuristics.ts`) y `decideAction` (`bot-player.ts`) validados (35 tests en verde) | **F4.3**: Suite de simulación Bot vs. Bot (120 partidas) e integración 1P vs. IA en UI |
 | 2026-11-23 | **F4.3**: Simulación de 150 partidas Bot vs. Bot (0 bucles/errores, 37 tests en verde) + modo 1P vs. IA integrado en UI (`ng build` OK) | **F4.4**: Verificación integral F4, `gwent-f4-debug.apk` y tag `v0.4.0-f4` |
+| 2026-11-23 | **F4.4**: `npm run build:apk -- --phase=f4` completado (37 tests en verde, `builds/apks/gwent-f4-debug.apk` 3.97 MB) y tag `v0.4.0-f4` | Planificar e iniciar **F5** (Facciones, Líderes, Catálogo Real y Constructor de Mazos) con `/plan F5` |

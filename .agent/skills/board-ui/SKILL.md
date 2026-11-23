@@ -40,6 +40,6 @@ description: Usar al construir o modificar la interfaz táctil del tablero de 6 
 - [x] `GameFacadeService` desacoplado dirige toda interacción vía `GameState` inmutable y `GameAction`.
 - [x] El área jugable respeta la disposición espacial clásica de TW3 (3 columnas, 6 filas simétricas visibles simultáneamente con orden Total -> Cuerno -> Unidades, clima al centro-izquierda y pilas a la derecha).
 - [x] Tablero horizontal de 6 filas, zona de clima, gemas, contadores y mano legibles en resoluciones móviles `16:9` a `20:9`.
-- [ ] Flujos interactivos completos para Ágil, Cuerno, Señuelo, Médico (incluyendo cadenas), Mulligan y overlays `ROUND_END`/`MATCH_END`.
+- [x] Flujos interactivos completos para Ágil, Cuerno, Señuelo, Médico (incluyendo cadenas), Mulligan y overlays `ROUND_END`/`MATCH_END`.
 - [x] Botón "Pasar Ronda" protegido contra toques accidentales y cero dependencias/URLs externas.
 - [ ] (F6) Diseño visual completo de `docs/design.md` + animaciones livianas fluidas aplicadas.

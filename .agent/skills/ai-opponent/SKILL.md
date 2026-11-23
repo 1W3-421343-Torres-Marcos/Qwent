@@ -36,7 +36,7 @@ description: Usar al implementar o ajustar el bot oponente, la vista filtrada de
 - `src/core/ai/__tests__/ai-decisions.spec.ts`
 
 ## Criterios de Aceptación
-- [ ] `AIPlayerView` oculta estrictamente las cartas en mano y orden del mazo del jugador humano.
-- [ ] El Bot resuelve acciones normales y selecciones pendientes (`MEDIC`, `DECOY`, filas Ágiles/Cuerno) sin errores.
-- [ ] El Bot pasa de forma inteligente cuando ya superó a un rival que pasó o cuando conviene ceder Ronda 1 por ventaja de cartas.
-- [ ] Simulación automatizada de 100+ partidas Bot vs. Bot completa el 100% de las partidas en estado `MATCH_END` sin bucles infinitos.
+- [x] `AIPlayerView` oculta estrictamente las cartas en mano y orden del mazo del jugador humano.
+- [x] El Bot resuelve acciones normales y selecciones pendientes (`MEDIC`, `DECOY`, filas Ágiles/Cuerno) sin errores.
+- [x] El Bot pasa de forma inteligente cuando ya superó a un rival que pasó o cuando conviene ceder Ronda 1 por ventaja de cartas.
+- [x] Simulación automatizada de 100+ partidas Bot vs. Bot completa el 100% de las partidas en estado `MATCH_END` sin bucles infinitos.
