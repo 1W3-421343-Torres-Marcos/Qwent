@@ -1,15 +1,15 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import type { CardInstance, GameState, PlayerId, PlayerState } from '../../../../core';
-import { AbilityIconComponent } from '../../../shared/components/card-icons.component';
+import { AbilityIconComponent, RowIconComponent } from '../../../shared/components/card-icons.component';
 
 @Component({
   selector: 'app-board-overlays',
   standalone: true,
-  imports: [AbilityIconComponent],
+  imports: [AbilityIconComponent, RowIconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <!-- Opaque 2P Turn Handoff Overlay -->
-    @if (turnHandoffPending() && state().phase === 'PLAYING') {
+    @if (turnHandoffPending() && (state().phase === 'PLAYING' || state().phase === 'MULLIGAN')) {
       <div
         class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-tavern-dark/[0.98] p-6 text-center backdrop-blur-md"
       >
@@ -31,6 +31,88 @@ import { AbilityIconComponent } from '../../../shared/components/card-icons.comp
           >
             Mostrar mano y jugar
           </button>
+        </div>
+      </div>
+    }
+
+    <!-- Initial Mulligan Modal -->
+    @if (state().phase === 'MULLIGAN' && !turnHandoffPending()) {
+      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-3 backdrop-blur-sm">
+        <div
+          class="flex max-h-[92dvh] w-full max-w-4xl flex-col rounded-xl border-2 border-gold/80 bg-board-wood p-4 shadow-2xl"
+        >
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-bronze/60 pb-2">
+            <div>
+              <p class="text-[11px] font-bold uppercase tracking-widest text-gold">
+                Mulligan Inicial · {{ activePlayer().name }}
+              </p>
+              <h3 class="font-serif text-base sm:text-lg font-extrabold text-parchment">
+                Toca hasta 2 cartas para devolverlas al mazo y robar reemplazos
+              </h3>
+            </div>
+            <span
+              class="rounded border border-gold/60 bg-tavern-dark px-3 py-1 text-xs font-bold text-gold-bright"
+            >
+              Cambios restantes: {{ activePlayer().mulligansRemaining }}/2
+            </span>
+          </div>
+
+          <div class="mt-3 grid grid-cols-2 gap-2 overflow-y-auto sm:grid-cols-5">
+            @for (card of activePlayer().hand; track card.instanceId) {
+              <button
+                type="button"
+                (click)="mulliganSwapRequested.emit(card.instanceId)"
+                [disabled]="activePlayer().mulligansRemaining <= 0 || activePlayer().deck.length === 0"
+                class="flex min-h-[76px] flex-col justify-between rounded-lg border bg-tavern-dark/90 p-2 text-left transition hover:border-gold-bright active:scale-95 disabled:opacity-60"
+                [class.border-gold-bright]="card.card.isHero"
+                [class.border-bronze]="!card.card.isHero"
+              >
+                <div class="flex items-start justify-between gap-1">
+                  <span
+                    class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs font-extrabold"
+                    [class.border-gold-bright]="card.card.isHero"
+                    [class.text-gold-bright]="card.card.isHero"
+                    [class.border-bronze]="!card.card.isHero"
+                    [class.text-strength-normal]="!card.card.isHero"
+                  >
+                    {{ card.card.type === 'SPECIAL' ? '★' : card.card.baseStrength }}
+                  </span>
+
+                  <div class="flex items-center gap-1">
+                    @if (card.card.allowedRows.length > 0 && card.card.type === 'UNIT') {
+                      <span class="h-4 w-4 text-parchment/80">
+                        <app-row-icon [row]="card.card.allowedRows.length > 1 ? 'AGILE' : card.card.allowedRows[0]!" />
+                      </span>
+                    }
+                    @if (card.card.ability; as ability) {
+                      <span class="h-4 w-4 text-gold-bright">
+                        <app-ability-icon [ability]="ability" />
+                      </span>
+                    }
+                  </div>
+                </div>
+
+                <div>
+                  <p class="line-clamp-2 text-[11px] font-bold leading-tight text-parchment">
+                    {{ card.card.name }}
+                  </p>
+                  <p class="mt-0.5 line-clamp-1 text-[9px] text-parchment/65">
+                    {{ card.card.ability ?? 'Unidad estándar' }}
+                  </p>
+                </div>
+              </button>
+            }
+          </div>
+
+          <div class="mt-3 flex justify-end border-t border-bronze/60 pt-2">
+            <button
+              type="button"
+              (click)="finishMulliganRequested.emit()"
+              class="min-h-[44px] rounded-lg border-2 border-gold-bright bg-gold/25 px-6 py-2 text-xs sm:text-sm font-bold uppercase tracking-wider text-gold-bright transition active:scale-95"
+            >
+              Confirmar mano y comenzar
+            </button>
+          </div>
         </div>
       </div>
     }
@@ -210,6 +292,8 @@ export class BoardOverlaysComponent {
   readonly newMatchRequested = output<void>();
   readonly discardClosed = output<void>();
   readonly medicTargetSelected = output<string>();
+  readonly mulliganSwapRequested = output<string>();
+  readonly finishMulliganRequested = output<void>();
 
   winnerName(winner: PlayerId | 'DRAW' | null | undefined): string {
     if (!winner || winner === 'DRAW') {

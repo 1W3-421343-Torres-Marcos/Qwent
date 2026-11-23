@@ -34,6 +34,7 @@ function baseMatch(seed = 42): GameState {
   return createInitialGameState({
     rngSeed: seed,
     catalog,
+    skipMulligan: true,
     player1: {
       name: 'Norte',
       faction: decks[0]!.faction,

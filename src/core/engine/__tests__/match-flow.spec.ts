@@ -20,6 +20,7 @@ function createTestMatch(seed = 12345, leader1: CardDefinition | null = null): G
   return createInitialGameState({
     rngSeed: seed,
     catalog,
+    skipMulligan: true,
     player1: {
       name: 'Reinos del Norte',
       faction: deck1.faction,

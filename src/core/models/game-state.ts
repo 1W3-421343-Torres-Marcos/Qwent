@@ -38,6 +38,7 @@ export interface PlayerState {
   readonly rows: Readonly<Record<RowType, RowState>>;
   readonly totalScore: number;
   readonly mulligansRemaining: number;
+  readonly mulliganDone: boolean;
 }
 
 export interface RoundResult {

@@ -316,7 +316,7 @@ const HOLD_TO_PASS_MS = 600;
         </div>
       }
 
-      <!-- Overlays: 2P Turn Handoff, Medic Discard, Round End, Match End, Discard Pile -->
+      <!-- Overlays: 2P Turn Handoff, Mulligan, Medic Discard, Round End, Match End, Discard Pile -->
       <app-board-overlays
         [state]="facade.state()"
         [activePlayer]="facade.state().players[facade.state().activePlayer]"
@@ -328,6 +328,8 @@ const HOLD_TO_PASS_MS = 600;
         (newMatchRequested)="facade.startNewMatch()"
         (discardClosed)="facade.closeDiscardModal()"
         (medicTargetSelected)="facade.selectMedicTarget($event)"
+        (mulliganSwapRequested)="facade.mulliganSwap($event)"
+        (finishMulliganRequested)="facade.finishMulligan()"
       />
     </main>
   `,

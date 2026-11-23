@@ -15,10 +15,12 @@ export interface MatchSetupConfig {
   readonly player2: PlayerSetupConfig;
   readonly catalog: readonly CardDefinition[];
   readonly rngSeed: number;
+  readonly skipMulligan?: boolean;
 }
 
 const INITIAL_HAND_SIZE = 10;
 const INITIAL_GEMS = 2;
+const MAX_MULLIGANS = 2;
 
 export function createEmptyRows(): Readonly<Record<RowType, RowState>> {
   return {
@@ -60,6 +62,7 @@ function initializePlayerState(
   config: PlayerSetupConfig,
   catalogById: ReadonlyMap<string, CardDefinition>,
   seed: number,
+  skipMulligan: boolean,
 ): { readonly player: PlayerState; readonly nextSeed: number } {
   const rawDeck = buildDeckInstances(playerId, config.deckCardIds, catalogById);
   const shuffled = shuffleDeterministic(rawDeck, seed);
@@ -80,31 +83,51 @@ function initializePlayerState(
       discard: [],
       rows: createEmptyRows(),
       totalScore: 0,
-      mulligansRemaining: 0,
+      mulligansRemaining: skipMulligan ? 0 : MAX_MULLIGANS,
+      mulliganDone: skipMulligan,
     },
     nextSeed: shuffled.nextSeed,
   };
 }
 
 /**
- * Creates a clean initial GameState with shuffled decks, 10-card hands, 2 gems, and deterministic R1 coin flip.
+ * Creates a clean initial GameState with shuffled decks, 10-card hands, 2 gems,
+ * and either initial MULLIGAN phase (default) or PLAYING with deterministic R1 coin flip.
  */
 export function createInitialGameState(config: MatchSetupConfig): GameState {
   const catalogById = new Map(config.catalog.map((card) => [card.id, card]));
+  const skipMulligan = config.skipMulligan ?? false;
 
-  const p1Init = initializePlayerState('PLAYER_1', config.player1, catalogById, config.rngSeed);
-  const p2Init = initializePlayerState('PLAYER_2', config.player2, catalogById, p1Init.nextSeed);
-  const coinFlip = nextRng(p2Init.nextSeed);
-  const startingPlayer: PlayerId = coinFlip.value < 0.5 ? 'PLAYER_1' : 'PLAYER_2';
+  const p1Init = initializePlayerState('PLAYER_1', config.player1, catalogById, config.rngSeed, skipMulligan);
+  const p2Init = initializePlayerState('PLAYER_2', config.player2, catalogById, p1Init.nextSeed, skipMulligan);
 
-  // Touch ROW_TYPES to guarantee deterministic ordering invariant if needed
   void ROW_TYPES;
 
+  if (skipMulligan) {
+    const coinFlip = nextRng(p2Init.nextSeed);
+    const startingPlayer: PlayerId = coinFlip.value < 0.5 ? 'PLAYER_1' : 'PLAYER_2';
+
+    return {
+      phase: 'PLAYING',
+      roundNumber: 1,
+      activePlayer: startingPlayer,
+      rngSeed: coinFlip.nextSeed,
+      players: {
+        PLAYER_1: p1Init.player,
+        PLAYER_2: p2Init.player,
+      },
+      weather: createEmptyWeather(),
+      pendingSelection: null,
+      roundHistory: [],
+      winner: null,
+    };
+  }
+
   return {
-    phase: 'PLAYING',
+    phase: 'MULLIGAN',
     roundNumber: 1,
-    activePlayer: startingPlayer,
-    rngSeed: coinFlip.nextSeed,
+    activePlayer: 'PLAYER_1',
+    rngSeed: p2Init.nextSeed,
     players: {
       PLAYER_1: p1Init.player,
       PLAYER_2: p2Init.player,

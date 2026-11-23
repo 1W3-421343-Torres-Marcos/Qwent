@@ -12,6 +12,7 @@ import {
   resolveUnitEntry,
 } from '../abilities/ability-resolver';
 import { recalculateBoard } from '../scoring/calculate-strength';
+import { nextRng, shuffleDeterministic } from './prng';
 import { advanceToNextRound, getOpponentId, resolveRound } from './round-resolution';
 import { createEmptyWeather } from './setup';
 
@@ -373,11 +374,109 @@ function handlePassTurn(state: GameState, action: Extract<GameAction, { type: 'P
   return finalizeTurn(nextState, action.playerId);
 }
 
+function advanceMulliganTurn(state: GameState): GameState {
+  const p1 = state.players.PLAYER_1;
+  const p2 = state.players.PLAYER_2;
+
+  if (!p1.mulliganDone) {
+    return { ...state, activePlayer: 'PLAYER_1' };
+  }
+  if (!p2.mulliganDone) {
+    return { ...state, activePlayer: 'PLAYER_2' };
+  }
+
+  const coinFlip = nextRng(state.rngSeed);
+  const startingPlayer: PlayerId = coinFlip.value < 0.5 ? 'PLAYER_1' : 'PLAYER_2';
+
+  return {
+    ...state,
+    phase: 'PLAYING',
+    activePlayer: startingPlayer,
+    rngSeed: coinFlip.nextSeed,
+  };
+}
+
+function handleMulliganSwap(
+  state: GameState,
+  action: Extract<GameAction, { type: 'MULLIGAN_SWAP' }>,
+): GameState {
+  if (state.phase !== 'MULLIGAN' || state.activePlayer !== action.playerId) {
+    return state;
+  }
+
+  const player = state.players[action.playerId];
+  if (player.mulliganDone || player.mulligansRemaining <= 0 || player.deck.length === 0) {
+    return state;
+  }
+
+  const swapIndex = player.hand.findIndex((c) => c.instanceId === action.instanceId);
+  if (swapIndex === -1) {
+    return state;
+  }
+
+  const swappedCard = player.hand[swapIndex]!;
+  const replacement = player.deck[0]!;
+  const remainingDeck = player.deck.slice(1);
+  const reshuffledDeck = shuffleDeterministic([...remainingDeck, swappedCard], state.rngSeed);
+
+  const nextHand = player.hand.map((c, index) => (index === swapIndex ? replacement : c));
+  const nextRemaining = player.mulligansRemaining - 1;
+
+  const updatedState: GameState = {
+    ...state,
+    rngSeed: reshuffledDeck.nextSeed,
+    players: {
+      ...state.players,
+      [action.playerId]: {
+        ...player,
+        hand: nextHand,
+        deck: reshuffledDeck.items,
+        mulligansRemaining: nextRemaining,
+        mulliganDone: nextRemaining === 0,
+      },
+    },
+  };
+
+  return advanceMulliganTurn(updatedState);
+}
+
+function handleFinishMulligan(
+  state: GameState,
+  action: Extract<GameAction, { type: 'FINISH_MULLIGAN' }>,
+): GameState {
+  if (state.phase !== 'MULLIGAN' || state.activePlayer !== action.playerId) {
+    return state;
+  }
+
+  const player = state.players[action.playerId];
+  if (player.mulliganDone) {
+    return state;
+  }
+
+  const updatedState: GameState = {
+    ...state,
+    players: {
+      ...state.players,
+      [action.playerId]: {
+        ...player,
+        mulligansRemaining: 0,
+        mulliganDone: true,
+      },
+    },
+  };
+
+  return advanceMulliganTurn(updatedState);
+}
+
 /**
  * Pure state machine reducer advancing the match from a GameAction without mutating state.
  */
 export function dispatch(state: GameState, action: GameAction): GameState {
   switch (action.type) {
+    case 'MULLIGAN_SWAP':
+      return handleMulliganSwap(state, action);
+    case 'FINISH_MULLIGAN':
+      return handleFinishMulligan(state, action);
     case 'PLAY_CARD':
       return handlePlayCard(state, action);
     case 'SELECT_TARGET':
@@ -387,8 +486,6 @@ export function dispatch(state: GameState, action: GameAction): GameState {
     case 'ADVANCE_ROUND':
       return advanceToNextRound(state);
     case 'USE_LEADER':
-    case 'MULLIGAN_SWAP':
-    case 'FINISH_MULLIGAN':
       return state;
   }
 }

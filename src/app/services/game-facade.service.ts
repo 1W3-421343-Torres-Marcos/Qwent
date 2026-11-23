@@ -295,6 +295,27 @@ export class GameFacadeService {
     });
   }
 
+  mulliganSwap(instanceId: string): void {
+    if (this.turnHandoffPending() || this.isTransitioningTurn()) return;
+    const current = this.state();
+    if (current.phase !== 'MULLIGAN') return;
+    this.applyAction({
+      type: 'MULLIGAN_SWAP',
+      playerId: current.activePlayer,
+      instanceId,
+    });
+  }
+
+  finishMulligan(): void {
+    if (this.turnHandoffPending() || this.isTransitioningTurn()) return;
+    const current = this.state();
+    if (current.phase !== 'MULLIGAN') return;
+    this.applyAction({
+      type: 'FINISH_MULLIGAN',
+      playerId: current.activePlayer,
+    });
+  }
+
   advanceRound(): void {
     const prev = this.state();
     if (prev.phase !== 'ROUND_END') return;
@@ -331,6 +352,16 @@ export class GameFacadeService {
     this.state.set(next);
 
     if (next.phase === 'PENDING_SELECTION') {
+      return;
+    }
+
+    if (prev.phase === 'MULLIGAN') {
+      if (next.activePlayer !== prev.activePlayer) {
+        this.clearHandoffTimer();
+        this.isTransitioningTurn.set(false);
+        this.perspectivePlayerId.set(next.activePlayer);
+        this.turnHandoffPending.set(true);
+      }
       return;
     }
 

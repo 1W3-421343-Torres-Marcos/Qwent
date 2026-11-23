@@ -88,6 +88,7 @@ function createMockState(
         },
         totalScore: 0,
         mulligansRemaining: 0,
+        mulliganDone: true,
       },
       PLAYER_2: {
         id: 'PLAYER_2',
@@ -107,6 +108,7 @@ function createMockState(
         },
         totalScore: 0,
         mulligansRemaining: 0,
+        mulliganDone: true,
       },
     },
   };
