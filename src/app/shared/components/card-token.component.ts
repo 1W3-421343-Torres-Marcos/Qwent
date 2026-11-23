@@ -14,7 +14,7 @@ import { FactionEmblemComponent } from './faction-emblem.component';
       type="button"
       (click)="cardClicked.emit(card())"
       [title]="card().card.name"
-      class="relative flex h-full aspect-[3/4] shrink-0 flex-col justify-between overflow-hidden rounded border p-0.5 transition active:scale-95"
+      class="qwent-card-enter relative flex h-full aspect-[3/4] shrink-0 flex-col justify-between overflow-hidden rounded border p-0.5 transition active:scale-95"
       [class]="containerClasses()"
     >
       <!-- Optional local sprite with transparent SVG faction emblem fallback -->

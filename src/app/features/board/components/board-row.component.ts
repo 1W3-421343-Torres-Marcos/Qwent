@@ -20,6 +20,12 @@ const ROW_WEATHER_CLASSES: Readonly<Record<RowType, string>> = {
       class="relative flex h-full min-h-0 items-center gap-1.5 rounded border px-1.5 py-0.5 transition"
       [class]="rowContainerClasses()"
     >
+      @if (weatherActive()) {
+        <span
+          class="qwent-weather-pulse pointer-events-none absolute inset-0 rounded"
+          [class]="weatherOverlayClass()"
+        ></span>
+      }
       <!-- 1. Left: Row Total Badge -->
       <div
         class="qwent-num-shadow flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full border border-bronze bg-tavern-dark/95 font-serif text-[clamp(0.95rem,3.2vh,1.4rem)] font-extrabold text-parchment shadow"
@@ -99,6 +105,12 @@ export class BoardRowComponent {
     }
     return 'border-bronze/50 bg-tavern-dark/60';
   });
+
+  weatherOverlayClass(): string {
+    if (this.rowType() === 'CLOSE_COMBAT') return 'bg-weather-frost/30';
+    if (this.rowType() === 'RANGED') return 'bg-weather-fog/30';
+    return 'bg-weather-rain/30';
+  }
 
   onRowContainerClick(): void {
     if (this.isSelectable()) {

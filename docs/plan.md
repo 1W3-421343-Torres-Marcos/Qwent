@@ -9,7 +9,7 @@
 | F3 | Habilidades Completas de The Witcher 3 | [x] | 100% |
 | F4 | Oponente IA + Mulligan | [x] | 100% |
 | F5 | Facciones, Líderes, Catálogo Real y Constructor de Mazos | [x] | 100% |
-| F6 | Pulido Visual, UX Táctil y Release Offline | [~] | 33% |
+| F6 | Pulido Visual, UX Táctil y Release Offline | [~] | 67% |
 
 **Estados:** `[ ]` pendiente | `[~]` en curso | `[x]` completada
 
@@ -49,7 +49,7 @@
 
 ## F6: Pulido Visual, UX Táctil y Release Offline
 - [x] **F6.1**: Aplicar sistema de diseño completo de `docs/design.md` (temática taberna medieval, insignias SVG/CSS, marcos de Héroe y colores por facción). | *Módulos/Archivos*: `board-ui`, `deck-builder`, `src/app/` | *Hecho*: Interfaz cumple lineamientos visuales y de legibilidad en pantallas 16:9 a 20:9.
-- [ ] **F6.2**: Incorporar animaciones livianas de cartas, efectos visuales de clima/Scorch y feedback táctil/sonoro opcional. | *Módulos/Archivos*: `board-ui`, `src/app/features/board/` | *Hecho*: Transiciones fluidas a 60fps sin bloquear la interacción táctil.
+- [x] **F6.2**: Incorporar animaciones livianas de cartas, efectos visuales de clima/Scorch y feedback táctil/sonoro opcional. | *Módulos/Archivos*: `board-ui`, `src/app/features/board/` | *Hecho*: Transiciones fluidas a 60fps sin bloquear la interacción táctil.
 - [ ] **F6.3**: Configurar ícono adaptativo, splash screen de Android, auditoría 100% offline y compilación del APK F6 final. | *Módulos/Archivos*: `android-packaging`, `android/` | *Hecho*: Suite completa de tests en verde y `gwent-f6-debug.apk` listo para instalar y jugar offline.
 
 ---
@@ -82,3 +82,4 @@
 | 2026-11-23 | **F5.3**: Validador `validateDeck`, 4 mazos prearmados con Líderes reales (`starter-decks.json`), `DeckStorageService` (`qwent.decks.v1`), `DeckBuilderPageComponent` y selector en Menú/Facade verificados (54 tests en verde + `ng build` OK) | **F5.4**: Verificación integral F5, APK F5 y cierre con tag `v0.5.0-f5` |
 | 2026-11-23 | **F5.4**: `npm run build:apk -- --phase=f5` completado (54 tests en verde, `builds/apks/gwent-f5-debug.apk` 4.05 MB) y tag `v0.5.0-f5` | Planificar e iniciar **F6** (Pulido Visual, UX Táctil y Release Offline) con `/plan F6` |
 | 2026-11-23 | **F6.1**: Sistema visual TW3 completo en CSS/SVG (`FactionEmblemComponent`, `qwent-hero-frame`, `qwent-num-shadow`, `qwent-wood-surface`, `qwent-leather-row`, fallback de sprites locales) verificado (54 tests en verde + `ng build` limpio) | **F6.2**: Incorporar animaciones GPU 60fps, efectos Clima/Scorch y feedback audio/háptico offline |
+| 2026-11-23 | **F6.2**: Animaciones GPU (`card-enter`, `scorch-flash`, `horn-glow`, `weather-pulse` + `prefers-reduced-motion`) y `FeedbackService` offline (`AudioContext` + `navigator.vibrate`, `qwent.settings.v1`) verificados (`ng build` + 54 tests OK) | **F6.3**: Configurar ícono adaptativo, splash screen Android, auditoría 100% offline y APK F6 |

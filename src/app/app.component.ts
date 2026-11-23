@@ -3,6 +3,7 @@ import { PLAYABLE_FACTIONS, QWENT_PHASE, type PlayableFactionId } from '../core'
 import { BoardPageComponent } from './features/board/board-page.component';
 import { DeckBuilderPageComponent } from './features/deck-builder/deck-builder-page.component';
 import { DeckStorageService } from './services/deck-storage.service';
+import { FeedbackService } from './services/feedback.service';
 import { GameFacadeService, type GameMode } from './services/game-facade.service';
 import { FactionEmblemComponent } from './shared/components/faction-emblem.component';
 import { FACTION_META } from './shared/constants/faction-meta';
@@ -125,6 +126,33 @@ type ScreenView = 'MENU' | 'DECK_BUILDER' | 'BOARD';
               Constructor de Mazos
             </button>
           </div>
+
+          <div class="flex flex-wrap items-center justify-center gap-2 text-[11px]">
+            <button
+              type="button"
+              (click)="feedback.toggleSound()"
+              class="min-h-[36px] rounded-full border px-3 py-1 font-semibold transition active:scale-95"
+              [class]="
+                feedback.soundEnabled()
+                  ? 'border-gold/70 bg-tavern-dark/90 text-gold-bright'
+                  : 'border-bronze/50 bg-tavern-dark/60 text-parchment/60'
+              "
+            >
+              Sonido: {{ feedback.soundEnabled() ? 'Activo' : 'Silencio' }}
+            </button>
+            <button
+              type="button"
+              (click)="feedback.toggleHaptics()"
+              class="min-h-[36px] rounded-full border px-3 py-1 font-semibold transition active:scale-95"
+              [class]="
+                feedback.hapticsEnabled()
+                  ? 'border-gold/70 bg-tavern-dark/90 text-gold-bright'
+                  : 'border-bronze/50 bg-tavern-dark/60 text-parchment/60'
+              "
+            >
+              Vibración: {{ feedback.hapticsEnabled() ? 'Activa' : 'Desactivada' }}
+            </button>
+          </div>
         </section>
       </main>
     }
@@ -133,6 +161,7 @@ type ScreenView = 'MENU' | 'DECK_BUILDER' | 'BOARD';
 export class AppComponent {
   private readonly facade = inject(GameFacadeService);
   readonly deckStorage = inject(DeckStorageService);
+  readonly feedback = inject(FeedbackService);
 
   readonly phase = QWENT_PHASE;
   readonly factions = PLAYABLE_FACTIONS;

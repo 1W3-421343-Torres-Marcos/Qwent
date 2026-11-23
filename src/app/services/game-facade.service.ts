@@ -18,20 +18,25 @@ import {
 } from '../../core';
 import { FACTION_META } from '../shared/constants/faction-meta';
 import { DeckStorageService } from './deck-storage.service';
+import { FeedbackService } from './feedback.service';
 
 export type GameMode = 'VS_AI' | 'LOCAL_2P';
+export type VisualEffectType = 'SCORCH' | 'WEATHER' | 'HORN' | 'ROUND_END';
 
 const TURN_BREATHER_MS = 450;
 const AI_PLAY_DELAY_MS = 550;
 const AI_MULLIGAN_DELAY_MS = 250;
+const VISUAL_FX_DURATION_MS = 480;
 
 @Injectable({ providedIn: 'root' })
 export class GameFacadeService {
   private readonly destroyRef = inject(DestroyRef);
   private readonly deckStorage = inject(DeckStorageService);
+  private readonly feedback = inject(FeedbackService);
   private readonly catalog = rawCards as readonly CardDefinition[];
   private handoffTimerId: ReturnType<typeof setTimeout> | null = null;
   private aiTimerId: ReturnType<typeof setTimeout> | null = null;
+  private fxTimerId: ReturnType<typeof setTimeout> | null = null;
 
   readonly phaseLabel = QWENT_PHASE;
   readonly gameMode = signal<GameMode>('VS_AI');
@@ -43,6 +48,7 @@ export class GameFacadeService {
   readonly isTransitioningTurn = signal(false);
   readonly turnHandoffPending = signal(false);
   readonly isAiThinking = signal(false);
+  readonly visualEffect = signal<VisualEffectType | null>(null);
 
   readonly isHumanTurn = computed(
     () => this.gameMode() === 'LOCAL_2P' || this.state().activePlayer === 'PLAYER_1',
@@ -177,11 +183,14 @@ export class GameFacadeService {
   constructor() {
     this.destroyRef.onDestroy(() => {
       this.clearTimers();
+      this.clearFxTimer();
     });
   }
 
   startNewMatch(mode?: GameMode): void {
     this.clearTimers();
+    this.clearFxTimer();
+    this.visualEffect.set(null);
     const resolvedMode = mode ?? this.gameMode();
     this.gameMode.set(resolvedMode);
 
@@ -447,6 +456,7 @@ export class GameFacadeService {
     this.inspectedCard.set(null);
     this.discardModalPlayerId.set(null);
     this.state.set(next);
+    this.feedback.play('tap');
 
     if (this.gameMode() === 'VS_AI') {
       this.perspectivePlayerId.set('PLAYER_1');
@@ -488,6 +498,7 @@ export class GameFacadeService {
     this.inspectedCard.set(null);
     this.discardModalPlayerId.set(null);
     this.state.set(next);
+    this.emitVisualAndFeedback(prev, next, action);
 
     if (next.phase === 'ROUND_END' || next.phase === 'MATCH_END') {
       this.clearTimers();
@@ -620,5 +631,90 @@ export class GameFacadeService {
       clearTimeout(this.aiTimerId);
       this.aiTimerId = null;
     }
+  }
+
+  private clearFxTimer(): void {
+    if (this.fxTimerId !== null) {
+      clearTimeout(this.fxTimerId);
+      this.fxTimerId = null;
+    }
+  }
+
+  private triggerVisualEffect(effect: VisualEffectType): void {
+    this.clearFxTimer();
+    this.visualEffect.set(effect);
+    this.fxTimerId = setTimeout(() => {
+      this.fxTimerId = null;
+      this.visualEffect.set(null);
+    }, VISUAL_FX_DURATION_MS);
+  }
+
+  private emitVisualAndFeedback(prev: GameState, next: GameState, action: GameAction): void {
+    const weatherChanged =
+      prev.weather.frost !== next.weather.frost ||
+      prev.weather.fog !== next.weather.fog ||
+      prev.weather.rain !== next.weather.rain;
+
+    const hornAdded = (['PLAYER_1', 'PLAYER_2'] as const).some((p) =>
+      (['CLOSE_COMBAT', 'RANGED', 'SIEGE'] as const).some(
+        (r) => prev.players[p].rows[r].hornCard === null && next.players[p].rows[r].hornCard !== null,
+      ),
+    );
+
+    const scorchTriggered = this.didScorchOccur(prev, next, action);
+
+    if (scorchTriggered) {
+      this.triggerVisualEffect('SCORCH');
+      this.feedback.play('scorch');
+      return;
+    }
+
+    if (weatherChanged) {
+      this.triggerVisualEffect('WEATHER');
+      this.feedback.play('weather');
+      return;
+    }
+
+    if (hornAdded) {
+      this.triggerVisualEffect('HORN');
+      this.feedback.play('horn');
+      return;
+    }
+
+    if (next.phase === 'ROUND_END' || next.phase === 'MATCH_END') {
+      this.triggerVisualEffect('ROUND_END');
+      this.feedback.play('roundEnd');
+      return;
+    }
+
+    if (action.type === 'PASS_TURN') {
+      this.feedback.play('pass');
+      return;
+    }
+
+    this.feedback.play('cardPlay');
+  }
+
+  private didScorchOccur(prev: GameState, next: GameState, action: GameAction): boolean {
+    if (action.type === 'PLAY_CARD') {
+      const played = prev.players[action.playerId].hand.find(
+        (c) => c.instanceId === action.instanceId,
+      );
+      if (played?.card.ability === 'SCORCH') {
+        return true;
+      }
+      if (played?.card.ability === 'SCORCH_ROW') {
+        const oppId = getOpponentId(action.playerId);
+        return next.players[oppId].discard.length > prev.players[oppId].discard.length;
+      }
+    }
+    if (action.type === 'USE_LEADER') {
+      const ability = prev.players[action.playerId].leader?.leaderAbility;
+      if (ability === 'SCORCH_ENEMY_CLOSE_10' || ability === 'SCORCH_ENEMY_SIEGE_10') {
+        const oppId = getOpponentId(action.playerId);
+        return next.players[oppId].discard.length > prev.players[oppId].discard.length;
+      }
+    }
+    return false;
   }
 }

@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, output, signal } from '@angular/core';
 import type { FactionId } from '../../../core';
+import { FeedbackService } from '../../services/feedback.service';
 import { GameFacadeService } from '../../services/game-facade.service';
 import { AbilityIconComponent } from '../../shared/components/card-icons.component';
 import { CardDetailComponent } from '../../shared/components/card-detail.component';
@@ -309,13 +310,43 @@ const HOLD_TO_PASS_MS = 600;
             </div>
           </div>
 
-          <!-- Center Badge -->
-          <div class="text-center">
+          <!-- Center Badge & Feedback Toggles -->
+          <div class="flex flex-col items-center gap-1 text-center">
             <span
               class="inline-block rounded border border-bronze/60 bg-tavern-dark/80 px-1.5 py-0.5 text-[9px] font-bold uppercase text-gold"
             >
               {{ facade.phaseLabel }}
             </span>
+            <div class="flex items-center justify-center gap-1">
+              <button
+                type="button"
+                (click)="feedback.toggleSound()"
+                [attr.aria-label]="feedback.soundEnabled() ? 'Silenciar sonido' : 'Activar sonido'"
+                title="Sonido"
+                class="flex h-8 w-8 items-center justify-center rounded border text-xs transition active:scale-95"
+                [class]="
+                  feedback.soundEnabled()
+                    ? 'border-gold/70 bg-tavern-dark/90 text-gold-bright'
+                    : 'border-bronze/40 bg-tavern-dark/60 text-parchment/45'
+                "
+              >
+                {{ feedback.soundEnabled() ? '♪' : '✕' }}
+              </button>
+              <button
+                type="button"
+                (click)="feedback.toggleHaptics()"
+                [attr.aria-label]="feedback.hapticsEnabled() ? 'Desactivar vibración' : 'Activar vibración'"
+                title="Vibración"
+                class="flex h-8 w-8 items-center justify-center rounded border text-xs transition active:scale-95"
+                [class]="
+                  feedback.hapticsEnabled()
+                    ? 'border-gold/70 bg-tavern-dark/90 text-gold-bright'
+                    : 'border-bronze/40 bg-tavern-dark/60 text-parchment/45'
+                "
+              >
+                {{ feedback.hapticsEnabled() ? '≈' : '–' }}
+              </button>
+            </div>
           </div>
 
           <!-- Active Player Piles & Hold-to-Pass (Lower Third) -->
@@ -362,6 +393,13 @@ const HOLD_TO_PASS_MS = 600;
           </div>
         </aside>
       </div>
+
+      <!-- Non-blocking GPU Visual Effects Overlay (Scorch / Horn) -->
+      @if (facade.visualEffect() === 'SCORCH') {
+        <div class="qwent-scorch-overlay pointer-events-none fixed inset-0 z-20"></div>
+      } @else if (facade.visualEffect() === 'HORN') {
+        <div class="qwent-horn-overlay pointer-events-none fixed inset-0 z-20"></div>
+      }
 
       <!-- AI Thinking Indicator -->
       @if (facade.isAiThinking()) {
@@ -430,6 +468,7 @@ const HOLD_TO_PASS_MS = 600;
 })
 export class BoardPageComponent {
   readonly facade = inject(GameFacadeService);
+  readonly feedback = inject(FeedbackService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly exitToMenu = output<void>();
