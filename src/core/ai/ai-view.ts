@@ -1,4 +1,4 @@
-import type { CardDefinition, CardInstance, FactionId, PlayerId } from '../models/types';
+import type { CardDefinition, CardInstance, FactionId, PlayerId, RowType } from '../models/types';
 import type {
   GamePhase,
   GameState,
@@ -8,14 +8,15 @@ import type {
   RowState,
   WeatherState,
 } from '../models/game-state';
+import { canUseLeader } from '../abilities/leaders';
 import { getOpponentId } from '../engine/round-resolution';
-import type { RowType } from '../models/types';
 
 export interface AIPlayerSelfView {
   readonly id: PlayerId;
   readonly faction: Exclude<FactionId, 'NEUTRAL'>;
   readonly leader: CardDefinition | null;
   readonly leaderUsed: boolean;
+  readonly canUseLeader: boolean;
   readonly gems: number;
   readonly passed: boolean;
   readonly hand: readonly CardInstance[];
@@ -53,7 +54,7 @@ export interface AIPlayerView {
   readonly opponent: AIOpponentView;
 }
 
-function toSelfView(player: PlayerState): AIPlayerSelfView {
+function toSelfView(player: PlayerState, leaderUsable: boolean): AIPlayerSelfView {
   // Sort deck IDs lexicographically so real draw order is never exposed to the bot
   const unorderedDeckIds = player.deck.map((c) => c.definitionId).sort();
 
@@ -62,6 +63,7 @@ function toSelfView(player: PlayerState): AIPlayerSelfView {
     faction: player.faction,
     leader: player.leader,
     leaderUsed: player.leaderUsed,
+    canUseLeader: leaderUsable,
     gems: player.gems,
     passed: player.passed,
     hand: player.hand,
@@ -105,7 +107,7 @@ export function createAIView(state: GameState, botId: PlayerId): AIPlayerView {
     weather: state.weather,
     pendingSelection: state.pendingSelection,
     roundHistory: state.roundHistory,
-    me: toSelfView(state.players[botId]),
+    me: toSelfView(state.players[botId], canUseLeader(state, botId)),
     opponent: toOpponentView(state.players[opponentId]),
   };
 }

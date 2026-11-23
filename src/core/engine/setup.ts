@@ -1,6 +1,8 @@
 import { ROW_TYPES, type CardDefinition, type CardInstance, type FactionId, type PlayerId, type RowType } from '../models/types';
 import type { GameState, PlayerState, RowState, WeatherState } from '../models/game-state';
-import { nextRng, shuffleDeterministic } from './prng';
+import { resolveRound1StartState } from '../abilities/factions';
+import { applyPassiveStartLeaders } from '../abilities/leaders';
+import { shuffleDeterministic } from './prng';
 
 export interface PlayerSetupConfig {
   readonly id?: PlayerId;
@@ -100,41 +102,28 @@ export function createInitialGameState(config: MatchSetupConfig): GameState {
 
   const p1Init = initializePlayerState('PLAYER_1', config.player1, catalogById, config.rngSeed, skipMulligan);
   const p2Init = initializePlayerState('PLAYER_2', config.player2, catalogById, p1Init.nextSeed, skipMulligan);
+  const withStartLeaders = applyPassiveStartLeaders(p1Init.player, p2Init.player);
 
   void ROW_TYPES;
 
-  if (skipMulligan) {
-    const coinFlip = nextRng(p2Init.nextSeed);
-    const startingPlayer: PlayerId = coinFlip.value < 0.5 ? 'PLAYER_1' : 'PLAYER_2';
-
-    return {
-      phase: 'PLAYING',
-      roundNumber: 1,
-      activePlayer: startingPlayer,
-      rngSeed: coinFlip.nextSeed,
-      players: {
-        PLAYER_1: p1Init.player,
-        PLAYER_2: p2Init.player,
-      },
-      weather: createEmptyWeather(),
-      pendingSelection: null,
-      roundHistory: [],
-      winner: null,
-    };
-  }
-
-  return {
+  const baseState: GameState = {
     phase: 'MULLIGAN',
     roundNumber: 1,
     activePlayer: 'PLAYER_1',
     rngSeed: p2Init.nextSeed,
     players: {
-      PLAYER_1: p1Init.player,
-      PLAYER_2: p2Init.player,
+      PLAYER_1: withStartLeaders.p1,
+      PLAYER_2: withStartLeaders.p2,
     },
     weather: createEmptyWeather(),
     pendingSelection: null,
     roundHistory: [],
     winner: null,
   };
+
+  if (skipMulligan) {
+    return resolveRound1StartState(baseState);
+  }
+
+  return baseState;
 }

@@ -3,8 +3,10 @@ import type { AIPlayerView } from './ai-view';
 import {
   generatePlayCandidates,
   pickAgileRow,
+  pickLeaderDiscardTarget,
   pickMedicTarget,
   pickMulliganSwap,
+  pickScoiataelStarter,
   shouldBotPass,
 } from './heuristics';
 
@@ -48,6 +50,25 @@ export function decideAction(view: AIPlayerView): GameAction {
         type: 'SELECT_TARGET',
         playerId: botId,
         targetRow,
+      };
+    }
+    if (view.pendingSelection.type === 'LEADER_TARGET') {
+      const targetId = pickLeaderDiscardTarget(
+        view,
+        view.pendingSelection.source,
+        view.pendingSelection.eligibleInstanceIds,
+      );
+      return {
+        type: 'SELECT_TARGET',
+        playerId: botId,
+        targetInstanceId: targetId,
+      };
+    }
+    if (view.pendingSelection.type === 'SCOIATAEL_START_CHOICE') {
+      return {
+        type: 'SELECT_TARGET',
+        playerId: botId,
+        startingPlayer: pickScoiataelStarter(view),
       };
     }
   }

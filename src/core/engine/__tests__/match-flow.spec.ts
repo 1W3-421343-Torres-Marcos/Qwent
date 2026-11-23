@@ -179,7 +179,7 @@ describe('Match State Machine & Round Flow (F2.3)', () => {
       isHero: false,
       allowedRows: [],
       ability: null,
-      leaderAbility: 'TEST_LEADER',
+      leaderAbility: 'CLEAR_WEATHER_LEADER',
       maxCopies: 1,
       description: 'Test leader',
     };
@@ -238,8 +238,25 @@ describe('Match State Machine & Round Flow (F2.3)', () => {
   it('plays a complete 3-round match without auto-drawing between rounds and handles draw gem loss & match end', () => {
     const unit5 = catalog.find((c) => c.id === 'nr_ves')!;
     const unit6 = catalog.find((c) => c.id === 'nr_ballista')!;
+    const deck1 = decks[0]!;
 
-    let state = createTestMatch(99);
+    let state = createInitialGameState({
+      rngSeed: 99,
+      catalog,
+      skipMulligan: true,
+      player1: {
+        name: 'Norte 1',
+        faction: deck1.faction,
+        leader: null,
+        deckCardIds: deck1.cardIds,
+      },
+      player2: {
+        name: 'Norte 2',
+        faction: deck1.faction,
+        leader: null,
+        deckCardIds: deck1.cardIds,
+      },
+    });
     state = {
       ...state,
       activePlayer: 'PLAYER_1',

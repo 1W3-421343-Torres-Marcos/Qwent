@@ -4,6 +4,7 @@ import rawStarterDecks from '../../assets/data/starter-decks.json';
 import {
   QWENT_PHASE,
   canPlayCard,
+  canUseLeader,
   createAIView,
   createInitialGameState,
   decideAction,
@@ -86,6 +87,33 @@ export class GameFacadeService {
     return player.discard.filter((card) => eligible.has(card.instanceId));
   });
 
+  readonly leaderTargetChoices = computed<readonly CardInstance[]>(() => {
+    const current = this.state();
+    if (current.phase !== 'PENDING_SELECTION' || current.pendingSelection?.type !== 'LEADER_TARGET') {
+      return [];
+    }
+    const pending = current.pendingSelection;
+    const sourcePlayerId =
+      pending.source === 'OWN_DISCARD' ? pending.playerId : getOpponentId(pending.playerId);
+    const eligible = new Set(pending.eligibleInstanceIds);
+    return current.players[sourcePlayerId].discard.filter((card) => eligible.has(card.instanceId));
+  });
+
+  readonly canUseBottomLeader = computed(
+    () => !this.isHumanInputBlocked() && canUseLeader(this.state(), this.perspectivePlayerId()),
+  );
+
+  readonly inspectedIsUsableBottomLeader = computed(() => {
+    const inspected = this.inspectedCard();
+    const bottom = this.bottomPlayer();
+    return (
+      inspected !== null &&
+      inspected.card.type === 'LEADER' &&
+      inspected.instanceId === `leader_${bottom.id}` &&
+      this.canUseBottomLeader()
+    );
+  });
+
   readonly selectionPrompt = computed<string | null>(() => {
     if (!this.isHumanTurn() || this.isAiThinking()) {
       return null;
@@ -116,6 +144,9 @@ export class GameFacadeService {
   );
 
   readonly inspectorCanConfirmPlay = computed(() => {
+    if (this.inspectedIsUsableBottomLeader()) {
+      return true;
+    }
     const inspected = this.inspectedCard();
     const selected = this.selectedHandCard();
     if (!inspected || !selected || inspected.instanceId !== selected.instanceId) {
@@ -133,6 +164,10 @@ export class GameFacadeService {
     }
     return this.canPlayFromHand(selected.instanceId);
   });
+
+  readonly inspectorConfirmLabel = computed(() =>
+    this.inspectedIsUsableBottomLeader() ? 'Activar Líder' : 'Jugar carta',
+  );
 
   readonly discardModalPlayer = computed(() => {
     const id = this.discardModalPlayerId();
@@ -313,8 +348,62 @@ export class GameFacadeService {
     });
   }
 
+  inspectLeader(playerId: PlayerId): void {
+    const player = this.state().players[playerId];
+    if (!player.leader) return;
+    this.selectedInstanceId.set(null);
+    this.inspectedCard.set({
+      instanceId: `leader_${player.id}`,
+      definitionId: player.leader.id,
+      card: player.leader,
+      effectiveStrength: 0,
+    });
+  }
+
+  useLeader(): void {
+    if (!this.canUseBottomLeader()) return;
+    const current = this.state();
+    this.applyAction({
+      type: 'USE_LEADER',
+      playerId: current.activePlayer,
+    });
+  }
+
+  selectLeaderTarget(targetInstanceId: string): void {
+    if (this.isHumanInputBlocked()) return;
+    const current = this.state();
+    if (current.phase !== 'PENDING_SELECTION' || current.pendingSelection?.type !== 'LEADER_TARGET') {
+      return;
+    }
+    this.applyAction({
+      type: 'SELECT_TARGET',
+      playerId: current.activePlayer,
+      targetInstanceId,
+    });
+  }
+
+  selectScoiataelStarter(startingPlayer: PlayerId): void {
+    if (this.isHumanInputBlocked()) return;
+    const current = this.state();
+    if (
+      current.phase !== 'PENDING_SELECTION' ||
+      current.pendingSelection?.type !== 'SCOIATAEL_START_CHOICE'
+    ) {
+      return;
+    }
+    this.applyAction({
+      type: 'SELECT_TARGET',
+      playerId: current.activePlayer,
+      startingPlayer,
+    });
+  }
+
   playSelectedFromInspector(card: CardInstance): void {
     if (!this.inspectorCanConfirmPlay()) return;
+    if (card.card.type === 'LEADER') {
+      this.useLeader();
+      return;
+    }
     const targetRow = card.card.type === 'UNIT' ? card.card.allowedRows[0] : undefined;
     this.playCard(card.instanceId, targetRow);
   }
@@ -416,6 +505,29 @@ export class GameFacadeService {
     }
 
     if (next.phase === 'PENDING_SELECTION') {
+      if (
+        next.pendingSelection?.type === 'SCOIATAEL_START_CHOICE' &&
+        next.activePlayer !== prev.activePlayer
+      ) {
+        this.clearTimers();
+        this.isTransitioningTurn.set(false);
+        this.perspectivePlayerId.set(next.activePlayer);
+        this.turnHandoffPending.set(true);
+      }
+      return;
+    }
+
+    if (
+      prev.phase === 'PENDING_SELECTION' &&
+      prev.pendingSelection?.type === 'SCOIATAEL_START_CHOICE' &&
+      next.phase === 'PLAYING'
+    ) {
+      if (next.activePlayer !== prev.activePlayer) {
+        this.clearTimers();
+        this.isTransitioningTurn.set(false);
+        this.perspectivePlayerId.set(next.activePlayer);
+        this.turnHandoffPending.set(true);
+      }
       return;
     }
 
@@ -473,6 +585,8 @@ export class GameFacadeService {
   private buildNewMatchState(mode: GameMode): GameState {
     const deck1 = this.starterDecks[0]!;
     const deck2 = this.starterDecks[1]!;
+    const leader1 = deck1.leaderId ? (this.catalog.find((c) => c.id === deck1.leaderId) ?? null) : null;
+    const leader2 = deck2.leaderId ? (this.catalog.find((c) => c.id === deck2.leaderId) ?? null) : null;
 
     return createInitialGameState({
       rngSeed: (Date.now() ^ 0x5f3759df) | 0,
@@ -480,13 +594,13 @@ export class GameFacadeService {
       player1: {
         name: mode === 'VS_AI' ? 'Tú · Reinos del Norte' : 'Jugador 1 · Norte',
         faction: deck1.faction,
-        leader: null,
+        leader: leader1,
         deckCardIds: deck1.cardIds,
       },
       player2: {
         name: mode === 'VS_AI' ? 'IA · Nilfgaard' : 'Jugador 2 · Nilfgaard',
         faction: deck2.faction,
-        leader: null,
+        leader: leader2,
         deckCardIds: deck2.cardIds,
       },
     });

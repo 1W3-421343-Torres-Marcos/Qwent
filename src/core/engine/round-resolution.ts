@@ -1,5 +1,11 @@
-import { ROW_TYPES, type CardInstance, type PlayerId } from '../models/types';
+import { ROW_TYPES, type CardInstance, type PlayerId, type RowType } from '../models/types';
 import type { GameState, PlayerState, RoundResult, WeatherSlot } from '../models/game-state';
+import {
+  applyNorthernRealmsWinDraw,
+  resolveRoundWinnerWithFactions,
+  selectMonstersCarryover,
+} from '../abilities/factions';
+import { LEADER_HORN_DEFINITION_ID } from '../abilities/leaders';
 import { recalculateBoard } from '../scoring/calculate-strength';
 import { nextRng } from './prng';
 import { createEmptyRows, createEmptyWeather } from './setup';
@@ -11,14 +17,19 @@ export function getOpponentId(playerId: PlayerId): PlayerId {
   return playerId === 'PLAYER_1' ? 'PLAYER_2' : 'PLAYER_1';
 }
 
-function collectPlayerBoardCardsToDiscard(player: PlayerState): readonly CardInstance[] {
+function collectPlayerBoardCardsToDiscard(
+  player: PlayerState,
+  keptInstanceId: string | null,
+): readonly CardInstance[] {
   const toDiscard: CardInstance[] = [];
   for (const rowType of ROW_TYPES) {
     const row = player.rows[rowType];
     for (const card of row.cards) {
-      toDiscard.push(card);
+      if (card.instanceId !== keptInstanceId) {
+        toDiscard.push({ ...card, effectiveStrength: card.card.baseStrength });
+      }
     }
-    if (row.hornCard !== null) {
+    if (row.hornCard !== null && row.hornCard.definitionId !== LEADER_HORN_DEFINITION_ID) {
       toDiscard.push(row.hornCard);
     }
   }
@@ -50,12 +61,7 @@ export function resolveRound(state: GameState): GameState {
   const p1 = state.players.PLAYER_1;
   const p2 = state.players.PLAYER_2;
 
-  let roundWinner: PlayerId | 'DRAW' = 'DRAW';
-  if (p1.totalScore > p2.totalScore) {
-    roundWinner = 'PLAYER_1';
-  } else if (p2.totalScore > p1.totalScore) {
-    roundWinner = 'PLAYER_2';
-  }
+  const roundWinner = resolveRoundWinnerWithFactions(p1, p2);
 
   const p1Gems = roundWinner === 'PLAYER_1' ? p1.gems : Math.max(0, p1.gems - 1);
   const p2Gems = roundWinner === 'PLAYER_2' ? p2.gems : Math.max(0, p2.gems - 1);
@@ -105,6 +111,7 @@ export function advanceToNextRound(state: GameState): GameState {
 
   const p1 = state.players.PLAYER_1;
   const p2 = state.players.PLAYER_2;
+  const lastRound = state.roundHistory[state.roundHistory.length - 1];
 
   const weatherDiscards = collectWeatherSlotsToDiscard([
     state.weather.frost,
@@ -112,24 +119,53 @@ export function advanceToNextRound(state: GameState): GameState {
     state.weather.rain,
   ]);
 
-  const p1Next: PlayerState = {
+  const p1Monsters = selectMonstersCarryover(p1, state.rngSeed);
+  const p2Monsters = selectMonstersCarryover(p2, p1Monsters.nextSeed);
+
+  const buildCarryoverRows = (
+    kept: { readonly rowType: RowType; readonly card: CardInstance } | null,
+  ) => {
+    const rows = createEmptyRows();
+    if (!kept) {
+      return rows;
+    }
+    return {
+      ...rows,
+      [kept.rowType]: {
+        ...rows[kept.rowType],
+        cards: [kept.card],
+      },
+    };
+  };
+
+  const p1BaseNext: PlayerState = {
     ...p1,
     passed: false,
-    rows: createEmptyRows(),
+    rows: buildCarryoverRows(p1Monsters.kept),
     totalScore: 0,
-    discard: [...p1.discard, ...collectPlayerBoardCardsToDiscard(p1), ...weatherDiscards.PLAYER_1],
+    discard: [
+      ...p1.discard,
+      ...collectPlayerBoardCardsToDiscard(p1, p1Monsters.kept?.card.instanceId ?? null),
+      ...weatherDiscards.PLAYER_1,
+    ],
   };
 
-  const p2Next: PlayerState = {
+  const p2BaseNext: PlayerState = {
     ...p2,
     passed: false,
-    rows: createEmptyRows(),
+    rows: buildCarryoverRows(p2Monsters.kept),
     totalScore: 0,
-    discard: [...p2.discard, ...collectPlayerBoardCardsToDiscard(p2), ...weatherDiscards.PLAYER_2],
+    discard: [
+      ...p2.discard,
+      ...collectPlayerBoardCardsToDiscard(p2, p2Monsters.kept?.card.instanceId ?? null),
+      ...weatherDiscards.PLAYER_2,
+    ],
   };
 
-  const lastRound = state.roundHistory[state.roundHistory.length - 1];
-  let nextSeed = state.rngSeed;
+  const p1Next = applyNorthernRealmsWinDraw(p1BaseNext, lastRound?.winner === 'PLAYER_1');
+  const p2Next = applyNorthernRealmsWinDraw(p2BaseNext, lastRound?.winner === 'PLAYER_2');
+
+  let nextSeed = p2Monsters.nextSeed;
   let startingPlayer: PlayerId;
 
   if (lastRound && lastRound.winner !== 'DRAW') {

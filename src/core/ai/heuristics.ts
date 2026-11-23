@@ -1,4 +1,4 @@
-import { ROW_TYPES, type AbilityType, type CardInstance, type RowType } from '../models/types';
+import { ROW_TYPES, type AbilityType, type CardInstance, type LeaderAbilityType, type PlayerId, type RowType } from '../models/types';
 import type { GameAction } from '../models/actions';
 import type { RowState, WeatherState } from '../models/game-state';
 import { isScorchVulnerable, isValidDecoyTarget } from '../abilities/ability-resolver';
@@ -6,7 +6,7 @@ import { calculateRowStrength, isWeatherActiveForRow } from '../scoring/calculat
 import type { AIPlayerView } from './ai-view';
 
 export interface ScoredPlayCandidate {
-  readonly action: Extract<GameAction, { type: 'PLAY_CARD' }>;
+  readonly action: Extract<GameAction, { type: 'PLAY_CARD' | 'USE_LEADER' }>;
   readonly tacticalScore: number;
   readonly netPointSwing: number;
 }
@@ -89,34 +89,39 @@ export function pickMulliganSwap(view: AIPlayerView): string | null {
   return null;
 }
 
-/**
- * Picks the best unit to revive from discard during MEDIC_DISCARD pending selection.
- */
-export function pickMedicTarget(view: AIPlayerView, eligibleIds: readonly string[]): string {
-  const eligible = view.me.discard.filter((c) => eligibleIds.includes(c.instanceId));
+function scoreDiscardCandidate(view: AIPlayerView, candidate: CardInstance): number {
+  let score = candidate.card.baseStrength;
+  if (candidate.card.ability === 'SPY') {
+    score = 26 + (view.me.myDeckCount >= 2 ? 18 : view.me.myDeckCount * 7) - candidate.card.baseStrength;
+  } else if (candidate.card.ability === 'MEDIC') {
+    score += 14;
+  } else if (candidate.card.ability === 'SCORCH_ROW') {
+    const mirrorRow = view.opponent.rows[candidate.card.allowedRows[0]!];
+    score += mirrorRow.totalStrength >= 10 ? 20 : 2;
+  } else if (candidate.card.ability === 'MUSTER' && candidate.card.musterGroup) {
+    const hasDeckMatch = view.me.myDeckCardIds.length > 0;
+    score += hasDeckMatch ? 8 : 0;
+  } else if (candidate.card.ability === 'TIGHT_BOND' && candidate.card.bondGroup) {
+    const row = view.me.rows[candidate.card.allowedRows[0]!];
+    const mates = row.cards.filter((u) => u.card.bondGroup === candidate.card.bondGroup).length;
+    score += mates * candidate.card.baseStrength * 2;
+  } else if (candidate.card.ability === 'COMMANDERS_HORN') {
+    score += 8;
+  }
+  return score;
+}
+
+function pickBestDiscardUnit(
+  view: AIPlayerView,
+  pool: readonly CardInstance[],
+  eligibleIds: readonly string[],
+): string {
+  const eligible = pool.filter((c) => eligibleIds.includes(c.instanceId));
   let best = eligible[0]!;
   let bestScore = -Infinity;
 
   for (const candidate of eligible) {
-    let score = candidate.card.baseStrength;
-    if (candidate.card.ability === 'SPY') {
-      score = 26 + (view.me.myDeckCount >= 2 ? 18 : view.me.myDeckCount * 7) - candidate.card.baseStrength;
-    } else if (candidate.card.ability === 'MEDIC') {
-      score += 14;
-    } else if (candidate.card.ability === 'SCORCH_ROW') {
-      const mirrorRow = view.opponent.rows[candidate.card.allowedRows[0]!];
-      score += mirrorRow.totalStrength >= 10 ? 20 : 2;
-    } else if (candidate.card.ability === 'MUSTER' && candidate.card.musterGroup) {
-      const hasDeckMatch = view.me.myDeckCardIds.length > 0;
-      score += hasDeckMatch ? 8 : 0;
-    } else if (candidate.card.ability === 'TIGHT_BOND' && candidate.card.bondGroup) {
-      const row = view.me.rows[candidate.card.allowedRows[0]!];
-      const mates = row.cards.filter((u) => u.card.bondGroup === candidate.card.bondGroup).length;
-      score += mates * candidate.card.baseStrength * 2;
-    } else if (candidate.card.ability === 'COMMANDERS_HORN') {
-      score += 8;
-    }
-
+    const score = scoreDiscardCandidate(view, candidate);
     if (score > bestScore) {
       bestScore = score;
       best = candidate;
@@ -124,6 +129,32 @@ export function pickMedicTarget(view: AIPlayerView, eligibleIds: readonly string
   }
 
   return best.instanceId;
+}
+
+/**
+ * Picks the best unit to revive from discard during MEDIC_DISCARD pending selection.
+ */
+export function pickMedicTarget(view: AIPlayerView, eligibleIds: readonly string[]): string {
+  return pickBestDiscardUnit(view, view.me.discard, eligibleIds);
+}
+
+/**
+ * Picks the best discard unit for LEADER_TARGET (own or opponent discard).
+ */
+export function pickLeaderDiscardTarget(
+  view: AIPlayerView,
+  source: 'OWN_DISCARD' | 'OPPONENT_DISCARD',
+  eligibleIds: readonly string[],
+): string {
+  const pool = source === 'OWN_DISCARD' ? view.me.discard : view.opponent.discard;
+  return pickBestDiscardUnit(view, pool, eligibleIds);
+}
+
+/**
+ * Selects Round 1 starter when the bot controls Scoia'tael: forces opponent to open for card advantage.
+ */
+export function pickScoiataelStarter(view: AIPlayerView): PlayerId {
+  return view.opponent.id;
 }
 
 /**
@@ -298,11 +329,124 @@ function scoreUnitPlacement(view: AIPlayerView, instance: CardInstance, targetRo
   };
 }
 
+function evaluateLeaderCandidate(view: AIPlayerView): ScoredPlayCandidate | null {
+  if (!view.me.canUseLeader || !view.me.leader?.leaderAbility) {
+    return null;
+  }
+
+  const ability: LeaderAbilityType = view.me.leader.leaderAbility;
+  const action: Extract<GameAction, { type: 'USE_LEADER' }> = {
+    type: 'USE_LEADER',
+    playerId: view.me.id,
+  };
+
+  if (
+    ability === 'HORN_CLOSE_LEADER' ||
+    ability === 'HORN_RANGED_LEADER' ||
+    ability === 'HORN_SIEGE_LEADER'
+  ) {
+    const rowType: RowType =
+      ability === 'HORN_CLOSE_LEADER'
+        ? 'CLOSE_COMBAT'
+        : ability === 'HORN_RANGED_LEADER'
+          ? 'RANGED'
+          : 'SIEGE';
+    const row = view.me.rows[rowType];
+    const dummyHorn: CardInstance = {
+      instanceId: 'eval_leader_horn',
+      definitionId: 'leader_horn_effect',
+      card: view.me.leader,
+      effectiveStrength: 0,
+    };
+    const afterHorn = calculateRowStrength(
+      { ...row, hornCard: dummyHorn },
+      isWeatherActiveForRow(view.weather, rowType),
+    );
+    const gain = afterHorn.totalStrength - row.totalStrength;
+    return {
+      action,
+      tacticalScore: gain >= 6 ? gain * 1.15 : -20,
+      netPointSwing: gain,
+    };
+  }
+
+  if (ability === 'CLEAR_WEATHER_LEADER') {
+    const evalClear = evaluateClearWeather(view);
+    return {
+      action,
+      tacticalScore: evalClear.score,
+      netPointSwing: evalClear.swing,
+    };
+  }
+
+  if (
+    ability === 'PLAY_FROST_FROM_DECK' ||
+    ability === 'PLAY_FOG_FROM_DECK' ||
+    ability === 'PLAY_RAIN_FROM_DECK'
+  ) {
+    const mappedWeather: AbilityType =
+      ability === 'PLAY_FROST_FROM_DECK'
+        ? 'WEATHER_FROST'
+        : ability === 'PLAY_FOG_FROM_DECK'
+          ? 'WEATHER_FOG'
+          : 'WEATHER_RAIN';
+    const evalWeather = evaluateWeatherCard(view, mappedWeather);
+    return {
+      action,
+      tacticalScore: evalWeather.score,
+      netPointSwing: evalWeather.swing,
+    };
+  }
+
+  if (ability === 'SCORCH_ENEMY_CLOSE_10' || ability === 'SCORCH_ENEMY_SIEGE_10') {
+    const rowType: RowType = ability === 'SCORCH_ENEMY_CLOSE_10' ? 'CLOSE_COMBAT' : 'SIEGE';
+    const mirror = view.opponent.rows[rowType];
+    if (mirror.totalStrength < 10) {
+      return { action, tacticalScore: -35, netPointSwing: 0 };
+    }
+    let maxOpp = 0;
+    for (const unit of mirror.cards) {
+      if (isScorchVulnerable(unit) && unit.effectiveStrength > maxOpp) {
+        maxOpp = unit.effectiveStrength;
+      }
+    }
+    return {
+      action,
+      tacticalScore: maxOpp > 0 ? maxOpp * 1.4 : -35,
+      netPointSwing: maxOpp,
+    };
+  }
+
+  if (ability === 'REVIVE_OWN_DISCARD_TO_HAND' || ability === 'STEAL_ENEMY_DISCARD_TO_HAND') {
+    const pool =
+      ability === 'REVIVE_OWN_DISCARD_TO_HAND' ? view.me.discard : view.opponent.discard;
+    const eligible = pool.filter((c) => c.card.type === 'UNIT' && !c.card.isHero);
+    if (eligible.length === 0) {
+      return null;
+    }
+    let bestValue = 0;
+    for (const candidate of eligible) {
+      bestValue = Math.max(bestValue, scoreDiscardCandidate(view, candidate));
+    }
+    return {
+      action,
+      tacticalScore: 14 + bestValue * 0.65,
+      netPointSwing: 0,
+    };
+  }
+
+  return null;
+}
+
 /**
- * Generates and scores all legal PLAY_CARD candidates visible in AIPlayerView.
+ * Generates and scores all legal PLAY_CARD and USE_LEADER candidates visible in AIPlayerView.
  */
 export function generatePlayCandidates(view: AIPlayerView): readonly ScoredPlayCandidate[] {
   const candidates: ScoredPlayCandidate[] = [];
+  const leaderCandidate = evaluateLeaderCandidate(view);
+  if (leaderCandidate) {
+    candidates.push(leaderCandidate);
+  }
 
   for (const instance of view.me.hand) {
     const { card } = instance;

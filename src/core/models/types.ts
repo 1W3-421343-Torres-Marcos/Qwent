@@ -1,4 +1,4 @@
-export const QWENT_PHASE = 'F4' as const;
+export const QWENT_PHASE = 'F5' as const;
 
 export type PlayerId = 'PLAYER_1' | 'PLAYER_2';
 
@@ -12,6 +12,15 @@ export type FactionId =
   | 'MONSTERS'
   | 'SCOIATAEL'
   | 'NEUTRAL';
+
+export type PlayableFactionId = Exclude<FactionId, 'NEUTRAL'>;
+
+export const PLAYABLE_FACTIONS: readonly PlayableFactionId[] = [
+  'NORTHERN_REALMS',
+  'NILFGAARD',
+  'MONSTERS',
+  'SCOIATAEL',
+];
 
 export type CardType = 'UNIT' | 'SPECIAL' | 'LEADER';
 
@@ -46,7 +55,23 @@ export const ABILITY_TYPES: readonly AbilityType[] = [
   'WEATHER_CLEAR',
 ];
 
-export type LeaderAbilityType = string;
+export const LEADER_ABILITY_TYPES = [
+  'PLAY_FROST_FROM_DECK',
+  'PLAY_FOG_FROM_DECK',
+  'PLAY_RAIN_FROM_DECK',
+  'CLEAR_WEATHER_LEADER',
+  'HORN_CLOSE_LEADER',
+  'HORN_RANGED_LEADER',
+  'HORN_SIEGE_LEADER',
+  'SCORCH_ENEMY_CLOSE_10',
+  'SCORCH_ENEMY_SIEGE_10',
+  'REVIVE_OWN_DISCARD_TO_HAND',
+  'STEAL_ENEMY_DISCARD_TO_HAND',
+  'DRAW_EXTRA_CARD_START',
+  'CANCEL_ENEMY_LEADER',
+] as const;
+
+export type LeaderAbilityType = (typeof LEADER_ABILITY_TYPES)[number];
 
 export interface CardDefinition {
   readonly id: string;

@@ -1,4 +1,4 @@
-import type { CardDefinition, CardInstance, FactionId, PlayerId, RowType } from './types';
+import type { CardDefinition, CardInstance, FactionId, LeaderAbilityType, PlayerId, RowType } from './types';
 
 export type GamePhase =
   | 'MULLIGAN'
@@ -57,7 +57,13 @@ export type PendingSelection =
       readonly allowedRows: readonly RowType[];
     }
   | { readonly type: 'HORN_ROW'; readonly playerId: PlayerId; readonly instanceId: string }
-  | { readonly type: 'LEADER_TARGET'; readonly playerId: PlayerId; readonly leaderAbility: string }
+  | {
+      readonly type: 'LEADER_TARGET';
+      readonly playerId: PlayerId;
+      readonly leaderAbility: LeaderAbilityType;
+      readonly source: 'OWN_DISCARD' | 'OPPONENT_DISCARD';
+      readonly eligibleInstanceIds: readonly string[];
+    }
   | { readonly type: 'SCOIATAEL_START_CHOICE'; readonly playerId: PlayerId };
 
 export interface GameState {

@@ -32,7 +32,13 @@ const ROW_LABEL: Readonly<Record<RowType, string>> = {
             class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-base font-extrabold"
             [class]="strengthBadgeClass()"
           >
-            {{ card().card.type === 'SPECIAL' ? '★' : card().effectiveStrength }}
+            {{
+              card().card.type === 'LEADER'
+                ? '♛'
+                : card().card.type === 'SPECIAL'
+                  ? '★'
+                  : card().effectiveStrength
+            }}
           </span>
           <div>
             <h3 class="text-sm font-bold leading-tight text-parchment">{{ card().card.name }}</h3>
@@ -65,15 +71,23 @@ const ROW_LABEL: Readonly<Record<RowType, string>> = {
             <span>{{ rowLabel(row) }}</span>
           </div>
         } @empty {
-          <span class="text-xs text-parchment/75">Carta especial global</span>
+          <span class="text-xs text-parchment/75">
+            {{ card().card.type === 'LEADER' ? 'Carta de Líder' : 'Carta especial global' }}
+          </span>
         }
       </div>
 
-      @if (card().card.ability; as ability) {
-        <div class="mt-2 flex items-center gap-1.5 text-xs font-semibold text-gold-bright">
-          <span class="h-4 w-4"><app-ability-icon [ability]="ability" /></span>
-          <span>{{ ability }}</span>
+      @if (card().card.type === 'LEADER' && card().card.leaderAbility; as leaderAbility) {
+        <div class="mt-2 text-xs font-semibold text-gold-bright">
+          Líder · {{ leaderAbility }}
         </div>
+      } @else {
+        @if (card().card.ability; as ability) {
+          <div class="mt-2 flex items-center gap-1.5 text-xs font-semibold text-gold-bright">
+            <span class="h-4 w-4"><app-ability-icon [ability]="ability" /></span>
+            <span>{{ ability }}</span>
+          </div>
+        }
       }
 
       <p class="mt-1.5 text-xs leading-relaxed text-parchment/90">

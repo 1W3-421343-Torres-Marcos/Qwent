@@ -2,40 +2,66 @@ import { describe, expect, it } from 'vitest';
 import rawCards from '../../../assets/data/cards.json';
 import rawDecks from '../../../assets/data/starter-decks.json';
 import {
+  LEADER_ABILITY_TYPES,
+  PLAYABLE_FACTIONS,
   createAIView,
   createInitialGameState,
   decideAction,
   dispatch,
   type CardDefinition,
   type GameState,
+  type LeaderAbilityType,
+  type PlayableFactionId,
   type StarterDeckDefinition,
 } from '../../index';
 
 const catalog = rawCards as readonly CardDefinition[];
 const decks = rawDecks as readonly StarterDeckDefinition[];
 
-const MAX_ACTIONS_PER_MATCH = 200;
+const MAX_ACTIONS_PER_MATCH = 220;
+
+function makeSimLeader(faction: PlayableFactionId, ability: LeaderAbilityType): CardDefinition {
+  return {
+    id: `sim_leader_${faction}_${ability}`,
+    name: `Sim ${ability}`,
+    faction,
+    type: 'LEADER',
+    baseStrength: 0,
+    isHero: false,
+    allowedRows: [],
+    ability: null,
+    leaderAbility: ability,
+    maxCopies: 1,
+    description: ability,
+  };
+}
 
 function simulateBotMatch(
   seed: number,
   swapFactions = false,
+  p1FactionOverride?: PlayableFactionId,
+  p2FactionOverride?: PlayableFactionId,
+  p1Leader: CardDefinition | null = null,
+  p2Leader: CardDefinition | null = null,
 ): { readonly finalState: GameState; readonly steps: number } {
   const deckA = swapFactions ? decks[1]! : decks[0]!;
   const deckB = swapFactions ? decks[0]! : decks[1]!;
+  const f1 = p1FactionOverride ?? deckA.faction;
+  const f2 = p2FactionOverride ?? deckB.faction;
 
   let state = createInitialGameState({
     rngSeed: seed,
     catalog,
     player1: {
-      name: `Bot1_${deckA.faction}`,
-      faction: deckA.faction,
-      leader: null,
+      name: `Bot1_${f1}`,
+      faction: f1,
+      leader: p1Leader,
       deckCardIds: deckA.cardIds,
     },
     player2: {
-      name: `Bot2_${deckB.faction}`,
-      faction: deckB.faction,
-      leader: null,
+      name: `Bot2_${f2}`,
+      faction: f2,
+      leader: p2Leader,
       deckCardIds: deckB.cardIds,
     },
   });
@@ -93,6 +119,27 @@ describe('Bot vs. Bot Stress Simulation (F4.3)', () => {
     for (let seed = 1001; seed <= 1030; seed++) {
       const { finalState } = simulateBotMatch(seed, true);
       expect(finalState.phase).toBe('MATCH_END');
+    }
+  });
+
+  it('completes 120 multi-faction and Leader Bot vs. Bot matches covering all 4 factions & leader abilities', () => {
+    for (let i = 0; i < 120; i++) {
+      const f1 = PLAYABLE_FACTIONS[i % PLAYABLE_FACTIONS.length]!;
+      const f2 = PLAYABLE_FACTIONS[(i + 1) % PLAYABLE_FACTIONS.length]!;
+      const l1Ability = LEADER_ABILITY_TYPES[i % LEADER_ABILITY_TYPES.length]!;
+      const l2Ability = LEADER_ABILITY_TYPES[(i + 5) % LEADER_ABILITY_TYPES.length]!;
+
+      const { finalState, steps } = simulateBotMatch(
+        2000 + i,
+        i % 2 === 1,
+        f1,
+        f2,
+        makeSimLeader(f1, l1Ability),
+        makeSimLeader(f2, l2Ability),
+      );
+      expect(finalState.phase).toBe('MATCH_END');
+      expect(finalState.winner).not.toBeNull();
+      expect(steps).toBeLessThan(MAX_ACTIONS_PER_MATCH);
     }
   });
 });

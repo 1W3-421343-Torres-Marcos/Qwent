@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import type { CardInstance, GameState, PlayerId, PlayerState } from '../../../../core';
 import { AbilityIconComponent, RowIconComponent } from '../../../shared/components/card-icons.component';
 
@@ -9,7 +9,10 @@ import { AbilityIconComponent, RowIconComponent } from '../../../shared/componen
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <!-- Opaque 2P Turn Handoff Overlay -->
-    @if (turnHandoffPending() && (state().phase === 'PLAYING' || state().phase === 'MULLIGAN')) {
+    @if (
+      turnHandoffPending() &&
+      (state().phase === 'PLAYING' || state().phase === 'MULLIGAN' || state().phase === 'PENDING_SELECTION')
+    ) {
       <div
         class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-tavern-dark/[0.98] p-6 text-center backdrop-blur-md"
       >
@@ -205,7 +208,12 @@ import { AbilityIconComponent, RowIconComponent } from '../../../shared/componen
     }
 
     <!-- Medic Resurrection Target Selector (human player only) -->
-    @if (state().phase === 'PENDING_SELECTION' && state().pendingSelection?.type === 'MEDIC_DISCARD' && isHumanTurn()) {
+    @if (
+      state().phase === 'PENDING_SELECTION' &&
+      state().pendingSelection?.type === 'MEDIC_DISCARD' &&
+      !turnHandoffPending() &&
+      isHumanTurn()
+    ) {
       <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
         <div
           class="flex max-h-[85dvh] w-full max-w-2xl flex-col rounded-xl border-2 border-gold-bright bg-board-wood p-4 shadow-2xl"
@@ -240,6 +248,83 @@ import { AbilityIconComponent, RowIconComponent } from '../../../shared/componen
                 </div>
               </button>
             }
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Leader Discard Target Selector (human player only) -->
+    @if (leaderPending(); as leaderSel) {
+      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+        <div
+          class="flex max-h-[85dvh] w-full max-w-2xl flex-col rounded-xl border-2 border-gold-bright bg-board-wood p-4 shadow-2xl"
+        >
+          <div class="border-b border-bronze/60 pb-2 text-center">
+            <p class="text-[11px] font-bold uppercase tracking-widest text-gold">
+              Habilidad de Líder · {{ leaderSel.source === 'OWN_DISCARD' ? 'Tu descarte' : 'Descarte rival' }}
+            </p>
+            <h3 class="font-serif text-lg font-extrabold text-parchment">
+              Elige una unidad no-Héroe para llevar a tu mano
+            </h3>
+          </div>
+
+          <div class="mt-3 grid grid-cols-2 gap-2 overflow-y-auto sm:grid-cols-3">
+            @for (card of leaderChoices(); track card.instanceId) {
+              <button
+                type="button"
+                (click)="leaderTargetSelected.emit(card.instanceId)"
+                class="flex min-h-[56px] items-center gap-2 rounded-lg border border-bronze bg-tavern-dark/90 p-2 text-left transition hover:border-gold-bright active:scale-95"
+              >
+                <span
+                  class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-gold/70 bg-row-leather text-sm font-extrabold text-strength-normal"
+                >
+                  {{ card.card.baseStrength }}
+                </span>
+                <div class="min-w-0 flex-1">
+                  <p class="truncate text-xs font-bold text-parchment">{{ card.card.name }}</p>
+                  @if (card.card.ability; as ability) {
+                    <div class="mt-0.5 flex items-center gap-1 text-[10px] text-gold-bright">
+                      <span class="h-3 w-3"><app-ability-icon [ability]="ability" /></span>
+                      <span class="truncate">{{ ability }}</span>
+                    </div>
+                  }
+                </div>
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Scoia'tael Start Choice Modal (human player only) -->
+    @if (scoiataelPending(); as stChoice) {
+      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-6 backdrop-blur-sm">
+        <div class="w-full max-w-md rounded-xl border-2 border-gold-bright bg-board-wood p-6 text-center shadow-2xl">
+          <p class="text-xs font-bold uppercase tracking-[0.2em] text-gold">
+            Pasiva Scoia'tael
+          </p>
+          <h3 class="mt-2 font-serif text-xl font-extrabold text-parchment">
+            ¿Quién comienza la Ronda 1?
+          </h3>
+          <p class="mt-1 text-xs text-parchment/75">
+            {{ activePlayer().name }} puede ceder el primer turno para obtener ventaja de información.
+          </p>
+
+          <div class="mt-5 grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              (click)="scoiataelStarterSelected.emit(stChoice.playerId)"
+              class="min-h-[48px] rounded-lg border border-bronze bg-tavern-dark px-4 py-3 text-xs sm:text-sm font-bold uppercase tracking-wider text-parchment transition hover:border-gold active:scale-95"
+            >
+              Empiezo yo
+            </button>
+            <button
+              type="button"
+              (click)="scoiataelStarterSelected.emit(opponentOf(stChoice.playerId))"
+              class="min-h-[48px] rounded-lg border-2 border-gold-bright bg-gold/25 px-4 py-3 text-xs sm:text-sm font-bold uppercase tracking-wider text-gold-bright transition active:scale-95"
+            >
+              Empieza el rival
+            </button>
           </div>
         </div>
       </div>
@@ -296,6 +381,7 @@ export class BoardOverlaysComponent {
   readonly isHumanTurn = input(true);
   readonly discardPlayer = input<PlayerState | null>(null);
   readonly medicChoices = input<readonly CardInstance[]>([]);
+  readonly leaderChoices = input<readonly CardInstance[]>([]);
 
   readonly handoffConfirmed = output<void>();
   readonly advanceRoundRequested = output<void>();
@@ -303,8 +389,30 @@ export class BoardOverlaysComponent {
   readonly menuRequested = output<void>();
   readonly discardClosed = output<void>();
   readonly medicTargetSelected = output<string>();
+  readonly leaderTargetSelected = output<string>();
+  readonly scoiataelStarterSelected = output<PlayerId>();
   readonly mulliganSwapRequested = output<string>();
   readonly finishMulliganRequested = output<void>();
+
+  readonly leaderPending = computed(() => {
+    const s = this.state();
+    if (s.phase !== 'PENDING_SELECTION' || this.turnHandoffPending() || !this.isHumanTurn()) {
+      return null;
+    }
+    return s.pendingSelection?.type === 'LEADER_TARGET' ? s.pendingSelection : null;
+  });
+
+  readonly scoiataelPending = computed(() => {
+    const s = this.state();
+    if (s.phase !== 'PENDING_SELECTION' || this.turnHandoffPending() || !this.isHumanTurn()) {
+      return null;
+    }
+    return s.pendingSelection?.type === 'SCOIATAEL_START_CHOICE' ? s.pendingSelection : null;
+  });
+
+  opponentOf(playerId: PlayerId): PlayerId {
+    return playerId === 'PLAYER_1' ? 'PLAYER_2' : 'PLAYER_1';
+  }
 
   winnerName(winner: PlayerId | 'DRAW' | null | undefined): string {
     if (!winner || winner === 'DRAW') {

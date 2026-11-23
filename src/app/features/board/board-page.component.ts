@@ -60,6 +60,21 @@ const HOLD_TO_PASS_MS = 600;
             <p class="mt-0.5 text-[10px] text-parchment/70">
               Mano rival: <span class="font-bold text-parchment">{{ facade.topPlayer().hand.length }}</span>
             </p>
+            @if (facade.topPlayer().leader; as topLeader) {
+              <button
+                type="button"
+                (click)="$event.stopPropagation(); facade.inspectLeader(facade.topPlayer().id)"
+                class="mt-1 flex w-full items-center justify-between gap-1 rounded border border-bronze/50 bg-row-leather/80 px-1.5 py-0.5 text-left text-[9px] hover:border-gold"
+              >
+                <span class="truncate font-semibold text-parchment/90">♛ {{ topLeader.name }}</span>
+                <span
+                  class="shrink-0 rounded px-1 font-bold uppercase"
+                  [class]="facade.topPlayer().leaderUsed ? 'text-parchment/45' : 'text-gold'"
+                >
+                  {{ facade.topPlayer().leaderUsed ? 'Usado' : 'Listo' }}
+                </span>
+              </button>
+            }
           </section>
 
           <!-- Shared Weather Box (Exact Center of Left Column) -->
@@ -136,6 +151,29 @@ const HOLD_TO_PASS_MS = 600;
               Tu mano: <span class="font-bold text-parchment">{{ facade.bottomPlayer().hand.length }}</span>
               · Ronda {{ facade.state().roundNumber }}/3
             </p>
+            @if (facade.bottomPlayer().leader; as bottomLeader) {
+              <button
+                type="button"
+                (click)="$event.stopPropagation(); facade.inspectLeader(facade.bottomPlayer().id)"
+                class="mt-1 flex min-h-[32px] w-full items-center justify-between gap-1 rounded border px-1.5 py-1 text-left text-[10px] transition active:scale-95"
+                [class]="
+                  facade.canUseBottomLeader()
+                    ? 'border-gold-bright bg-gold/20 text-gold-bright hover:bg-gold/30'
+                    : 'border-bronze/50 bg-row-leather/80 text-parchment/75'
+                "
+              >
+                <span class="truncate font-bold">♛ {{ bottomLeader.name }}</span>
+                <span class="shrink-0 text-[9px] font-extrabold uppercase">
+                  {{
+                    facade.bottomPlayer().leaderUsed
+                      ? 'Usado'
+                      : facade.canUseBottomLeader()
+                        ? 'Activar'
+                        : 'Pasivo'
+                  }}
+                </span>
+              </button>
+            }
           </section>
         </aside>
 
@@ -326,13 +364,14 @@ const HOLD_TO_PASS_MS = 600;
           <app-card-detail
             [card]="inspected"
             [canConfirmPlay]="facade.inspectorCanConfirmPlay()"
+            [playButtonLabel]="facade.inspectorConfirmLabel()"
             (closed)="facade.closeInspector()"
             (playRequested)="facade.playSelectedFromInspector($event)"
           />
         </div>
       }
 
-      <!-- Overlays: 2P Turn Handoff, Mulligan, Medic Discard, Round End, Match End, Discard Pile -->
+      <!-- Overlays: 2P Turn Handoff, Mulligan, Medic/Leader Discard, Scoia'tael, Round/Match End -->
       <app-board-overlays
         [state]="facade.state()"
         [activePlayer]="facade.state().players[facade.state().activePlayer]"
@@ -340,12 +379,15 @@ const HOLD_TO_PASS_MS = 600;
         [isHumanTurn]="facade.isHumanTurn()"
         [discardPlayer]="facade.discardModalPlayer()"
         [medicChoices]="facade.medicDiscardChoices()"
+        [leaderChoices]="facade.leaderTargetChoices()"
         (handoffConfirmed)="facade.confirmTurnHandoff()"
         (advanceRoundRequested)="facade.advanceRound()"
         (newMatchRequested)="facade.startNewMatch()"
         (menuRequested)="exitToMenu.emit()"
         (discardClosed)="facade.closeDiscardModal()"
         (medicTargetSelected)="facade.selectMedicTarget($event)"
+        (leaderTargetSelected)="facade.selectLeaderTarget($event)"
+        (scoiataelStarterSelected)="facade.selectScoiataelStarter($event)"
         (mulliganSwapRequested)="facade.mulliganSwap($event)"
         (finishMulliganRequested)="facade.finishMulligan()"
       />

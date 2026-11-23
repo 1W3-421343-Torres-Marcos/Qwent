@@ -258,4 +258,106 @@ describe('AIPlayerView & Bot Heuristics (F4.2)', () => {
       targetRow: 'RANGED',
     });
   });
+
+  it('handles SCOIATAEL_START_CHOICE, LEADER_TARGET, and USE_LEADER tactics', () => {
+    // 1. Scoia'tael bot yields Round 1 start to opponent for card advantage
+    const stState = createInitialGameState({
+      rngSeed: 12,
+      catalog,
+      skipMulligan: true,
+      player1: { name: 'P1', faction: 'NORTHERN_REALMS', deckCardIds: decks[0]!.cardIds },
+      player2: { name: 'BotST', faction: 'SCOIATAEL', deckCardIds: decks[0]!.cardIds },
+    });
+    expect(stState.phase).toBe('PENDING_SELECTION');
+    expect(decideAction(createAIView(stState, 'PLAYER_2'))).toEqual({
+      type: 'SELECT_TARGET',
+      playerId: 'PLAYER_2',
+      startingPlayer: 'PLAYER_1',
+    });
+
+    // 2. LEADER_TARGET chooses Spy from discard
+    const emhyrSteal: CardDefinition = {
+      id: 'leader_emhyr_steal',
+      name: 'Emhyr',
+      faction: 'NILFGAARD',
+      type: 'LEADER',
+      baseStrength: 0,
+      isHero: false,
+      allowedRows: [],
+      ability: null,
+      leaderAbility: 'STEAL_ENEMY_DISCARD_TO_HAND',
+      maxCopies: 1,
+      description: 'Steal',
+    };
+    const leaderTargetState: GameState = {
+      ...baseMatch(),
+      phase: 'PENDING_SELECTION',
+      activePlayer: 'PLAYER_2',
+      pendingSelection: {
+        type: 'LEADER_TARGET',
+        playerId: 'PLAYER_2',
+        leaderAbility: 'STEAL_ENEMY_DISCARD_TO_HAND',
+        source: 'OPPONENT_DISCARD',
+        eligibleInstanceIds: ['p1_unit', 'p1_spy'],
+      },
+      players: {
+        ...baseMatch().players,
+        PLAYER_1: {
+          ...baseMatch().players.PLAYER_1,
+          discard: [inst('p1_unit', 'nr_ves'), inst('p1_spy', 'nr_prince_stennis')],
+        },
+        PLAYER_2: {
+          ...baseMatch().players.PLAYER_2,
+          leader: emhyrSteal,
+          leaderUsed: true,
+        },
+      },
+    };
+    expect(decideAction(createAIView(leaderTargetState, 'PLAYER_2'))).toEqual({
+      type: 'SELECT_TARGET',
+      playerId: 'PLAYER_2',
+      targetInstanceId: 'p1_spy',
+    });
+
+    // 3. USE_LEADER chosen when horn doubles a stacked Siege row strongly
+    const foltestHorn: CardDefinition = {
+      id: 'leader_foltest_siege',
+      name: 'Foltest Siege',
+      faction: 'NORTHERN_REALMS',
+      type: 'LEADER',
+      baseStrength: 0,
+      isHero: false,
+      allowedRows: [],
+      ability: null,
+      leaderAbility: 'HORN_SIEGE_LEADER',
+      maxCopies: 1,
+      description: 'Double Siege',
+    };
+    let useLeaderState = baseMatch();
+    useLeaderState = recalculateBoard({
+      ...useLeaderState,
+      activePlayer: 'PLAYER_2',
+      players: {
+        ...useLeaderState.players,
+        PLAYER_2: {
+          ...useLeaderState.players.PLAYER_2,
+          leader: foltestHorn,
+          leaderUsed: false,
+          hand: [inst('p2_small', 'nr_ves')],
+          rows: {
+            ...useLeaderState.players.PLAYER_2.rows,
+            SIEGE: {
+              cards: [inst('s1', 'nr_ballista'), inst('s2', 'nr_trebuchet')],
+              hornCard: null,
+              totalStrength: 12,
+            },
+          },
+        },
+      },
+    });
+    expect(decideAction(createAIView(useLeaderState, 'PLAYER_2'))).toEqual({
+      type: 'USE_LEADER',
+      playerId: 'PLAYER_2',
+    });
+  });
 });

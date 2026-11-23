@@ -11,8 +11,10 @@ import {
   resolveSpy,
   resolveUnitEntry,
 } from '../abilities/ability-resolver';
+import { resolveRound1StartState } from '../abilities/factions';
+import { resolveLeaderTargetSelection, resolveLeaderUse } from '../abilities/leaders';
 import { recalculateBoard } from '../scoring/calculate-strength';
-import { nextRng, shuffleDeterministic } from './prng';
+import { shuffleDeterministic } from './prng';
 import { advanceToNextRound, getOpponentId, resolveRound } from './round-resolution';
 import { createEmptyWeather } from './setup';
 
@@ -336,11 +338,25 @@ function handleSelectTarget(
     return state;
   }
 
+  if (state.pendingSelection.type === 'SCOIATAEL_START_CHOICE') {
+    if (action.startingPlayer !== 'PLAYER_1' && action.startingPlayer !== 'PLAYER_2') {
+      return state;
+    }
+    return {
+      ...state,
+      phase: 'PLAYING',
+      activePlayer: action.startingPlayer,
+      pendingSelection: null,
+    };
+  }
+
   let nextState = state;
   if (state.pendingSelection.type === 'MEDIC_DISCARD' && action.targetInstanceId) {
     nextState = resolveMedicSelection(state, action.playerId, action.targetInstanceId);
   } else if (state.pendingSelection.type === 'AGILE_ROW' && action.targetRow) {
     nextState = resolveAgileSelection(state, action.playerId, action.targetRow);
+  } else if (state.pendingSelection.type === 'LEADER_TARGET' && action.targetInstanceId) {
+    nextState = resolveLeaderTargetSelection(state, action.playerId, action.targetInstanceId);
   }
 
   if (nextState === state) {
@@ -385,15 +401,7 @@ function advanceMulliganTurn(state: GameState): GameState {
     return { ...state, activePlayer: 'PLAYER_2' };
   }
 
-  const coinFlip = nextRng(state.rngSeed);
-  const startingPlayer: PlayerId = coinFlip.value < 0.5 ? 'PLAYER_1' : 'PLAYER_2';
-
-  return {
-    ...state,
-    phase: 'PLAYING',
-    activePlayer: startingPlayer,
-    rngSeed: coinFlip.nextSeed,
-  };
+  return resolveRound1StartState(state);
 }
 
 function handleMulliganSwap(
@@ -485,7 +493,9 @@ export function dispatch(state: GameState, action: GameAction): GameState {
       return handlePassTurn(state, action);
     case 'ADVANCE_ROUND':
       return advanceToNextRound(state);
-    case 'USE_LEADER':
-      return state;
+    case 'USE_LEADER': {
+      const nextState = resolveLeaderUse(state, action.playerId);
+      return nextState === state ? state : finalizeTurn(nextState, action.playerId);
+    }
   }
 }

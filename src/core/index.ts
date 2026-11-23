@@ -1,4 +1,10 @@
-export { ABILITY_TYPES, QWENT_PHASE, ROW_TYPES } from './models/types';
+export {
+  ABILITY_TYPES,
+  LEADER_ABILITY_TYPES,
+  PLAYABLE_FACTIONS,
+  QWENT_PHASE,
+  ROW_TYPES,
+} from './models/types';
 export type {
   AbilityType,
   CardDefinition,
@@ -6,6 +12,7 @@ export type {
   CardType,
   FactionId,
   LeaderAbilityType,
+  PlayableFactionId,
   PlayerId,
   RowType,
   StarterDeckDefinition,
@@ -49,6 +56,20 @@ export {
   resolveSpy,
   resolveUnitEntry,
 } from './abilities/ability-resolver';
+export {
+  applyNorthernRealmsWinDraw,
+  resolveRound1StartState,
+  resolveRoundWinnerWithFactions,
+  selectMonstersCarryover,
+} from './abilities/factions';
+export type { MonstersCarryoverResult } from './abilities/factions';
+export {
+  LEADER_HORN_DEFINITION_ID,
+  applyPassiveStartLeaders,
+  canUseLeader,
+  resolveLeaderTargetSelection,
+  resolveLeaderUse,
+} from './abilities/leaders';
 export { createAIView } from './ai/ai-view';
 export type { AIOpponentView, AIPlayerSelfView, AIPlayerView } from './ai/ai-view';
 export { decideAction } from './ai/bot-player';
