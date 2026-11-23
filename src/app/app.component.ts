@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { QWENT_PHASE } from '../core';
 import { BoardPageComponent } from './features/board/board-page.component';
-import { GameFacadeService } from './services/game-facade.service';
+import { GameFacadeService, type GameMode } from './services/game-facade.service';
 
 @Component({
   selector: 'app-root',
@@ -10,7 +10,7 @@ import { GameFacadeService } from './services/game-facade.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (inMatch()) {
-      <app-board-page />
+      <app-board-page (exitToMenu)="inMatch.set(false)" />
     } @else {
       <main
         class="flex h-dvh w-screen items-center justify-center bg-tavern-dark text-parchment p-[env(safe-area-inset-top)_env(safe-area-inset-right)_env(safe-area-inset-bottom)_env(safe-area-inset-left)]"
@@ -22,7 +22,7 @@ import { GameFacadeService } from './services/game-facade.service';
             <span
               class="rounded border border-gold/60 bg-row-leather px-3 py-1 text-xs font-bold uppercase tracking-widest text-gold"
             >
-              Fase {{ phase }} — Habilidades TW3
+              Fase {{ phase }} — IA + Mulligan
             </span>
             <span
               class="rounded border border-bronze bg-tavern-dark/80 px-3 py-1 text-xs font-medium text-parchment/80"
@@ -36,17 +36,26 @@ import { GameFacadeService } from './services/game-facade.service';
               QWENT
             </h1>
             <p class="mt-1 text-sm text-parchment/85">
-              Reinos del Norte vs. Imperio Nilfgaardiano (2 Jugadores Local)
+              Reinos del Norte vs. Imperio Nilfgaardiano
             </p>
           </header>
 
-          <button
-            type="button"
-            (click)="startLocalMatch()"
-            class="mt-2 min-h-[48px] w-full max-w-xs rounded-lg border-2 border-gold-bright bg-gold/25 px-6 py-3 text-sm font-bold uppercase tracking-wider text-gold-bright shadow-lg transition active:scale-95"
-          >
-            Jugar Partida Local
-          </button>
+          <div class="mt-2 grid w-full max-w-md grid-cols-1 gap-3 sm:grid-cols-2">
+            <button
+              type="button"
+              (click)="startMatch('VS_AI')"
+              class="min-h-[48px] rounded-lg border-2 border-gold-bright bg-gold/25 px-4 py-3 text-xs sm:text-sm font-bold uppercase tracking-wider text-gold-bright shadow-lg transition active:scale-95"
+            >
+              Jugar vs. IA (1P)
+            </button>
+            <button
+              type="button"
+              (click)="startMatch('LOCAL_2P')"
+              class="min-h-[48px] rounded-lg border border-bronze bg-tavern-dark px-4 py-3 text-xs sm:text-sm font-bold uppercase tracking-wider text-parchment transition hover:border-gold active:scale-95"
+            >
+              Local 2 Jugadores
+            </button>
+          </div>
         </section>
       </main>
     }
@@ -57,8 +66,8 @@ export class AppComponent {
   readonly phase = QWENT_PHASE;
   readonly inMatch = signal(false);
 
-  startLocalMatch(): void {
-    this.facade.startNewMatch();
+  startMatch(mode: GameMode): void {
+    this.facade.startNewMatch(mode);
     this.inMatch.set(true);
   }
 }

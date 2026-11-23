@@ -35,8 +35,8 @@ import { AbilityIconComponent, RowIconComponent } from '../../../shared/componen
       </div>
     }
 
-    <!-- Initial Mulligan Modal -->
-    @if (state().phase === 'MULLIGAN' && !turnHandoffPending()) {
+    <!-- Initial Mulligan Modal (human player only) -->
+    @if (state().phase === 'MULLIGAN' && !turnHandoffPending() && isHumanTurn()) {
       <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-3 backdrop-blur-sm">
         <div
           class="flex max-h-[92dvh] w-full max-w-4xl flex-col rounded-xl border-2 border-gold/80 bg-board-wood p-4 shadow-2xl"
@@ -184,19 +184,28 @@ import { AbilityIconComponent, RowIconComponent } from '../../../shared/componen
             }
           </div>
 
-          <button
-            type="button"
-            (click)="newMatchRequested.emit()"
-            class="mt-5 min-h-[48px] w-full rounded-lg border-2 border-gold-bright bg-gold/25 px-6 py-3 text-sm font-bold uppercase tracking-wider text-gold-bright transition active:scale-95"
-          >
-            Nueva Partida
-          </button>
+          <div class="mt-5 grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              (click)="menuRequested.emit()"
+              class="min-h-[48px] rounded-lg border border-bronze bg-tavern-dark px-4 py-3 text-sm font-bold uppercase tracking-wider text-parchment transition active:scale-95"
+            >
+              Menú Principal
+            </button>
+            <button
+              type="button"
+              (click)="newMatchRequested.emit()"
+              class="min-h-[48px] rounded-lg border-2 border-gold-bright bg-gold/25 px-4 py-3 text-sm font-bold uppercase tracking-wider text-gold-bright transition active:scale-95"
+            >
+              Nueva Partida
+            </button>
+          </div>
         </div>
       </div>
     }
 
-    <!-- Medic Resurrection Target Selector -->
-    @if (state().phase === 'PENDING_SELECTION' && state().pendingSelection?.type === 'MEDIC_DISCARD') {
+    <!-- Medic Resurrection Target Selector (human player only) -->
+    @if (state().phase === 'PENDING_SELECTION' && state().pendingSelection?.type === 'MEDIC_DISCARD' && isHumanTurn()) {
       <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
         <div
           class="flex max-h-[85dvh] w-full max-w-2xl flex-col rounded-xl border-2 border-gold-bright bg-board-wood p-4 shadow-2xl"
@@ -284,12 +293,14 @@ export class BoardOverlaysComponent {
   readonly state = input.required<GameState>();
   readonly activePlayer = input.required<PlayerState>();
   readonly turnHandoffPending = input.required<boolean>();
+  readonly isHumanTurn = input(true);
   readonly discardPlayer = input<PlayerState | null>(null);
   readonly medicChoices = input<readonly CardInstance[]>([]);
 
   readonly handoffConfirmed = output<void>();
   readonly advanceRoundRequested = output<void>();
   readonly newMatchRequested = output<void>();
+  readonly menuRequested = output<void>();
   readonly discardClosed = output<void>();
   readonly medicTargetSelected = output<string>();
   readonly mulliganSwapRequested = output<string>();

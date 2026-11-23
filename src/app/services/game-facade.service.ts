@@ -4,7 +4,9 @@ import rawStarterDecks from '../../assets/data/starter-decks.json';
 import {
   QWENT_PHASE,
   canPlayCard,
+  createAIView,
   createInitialGameState,
+  decideAction,
   dispatch,
   getOpponentId,
   type CardDefinition,
@@ -16,7 +18,11 @@ import {
   type StarterDeckDefinition,
 } from '../../core';
 
+export type GameMode = 'VS_AI' | 'LOCAL_2P';
+
 const TURN_BREATHER_MS = 450;
+const AI_PLAY_DELAY_MS = 550;
+const AI_MULLIGAN_DELAY_MS = 250;
 
 @Injectable({ providedIn: 'root' })
 export class GameFacadeService {
@@ -24,15 +30,22 @@ export class GameFacadeService {
   private readonly catalog = rawCards as readonly CardDefinition[];
   private readonly starterDecks = rawStarterDecks as readonly StarterDeckDefinition[];
   private handoffTimerId: ReturnType<typeof setTimeout> | null = null;
+  private aiTimerId: ReturnType<typeof setTimeout> | null = null;
 
   readonly phaseLabel = QWENT_PHASE;
-  readonly state = signal<GameState>(this.buildNewMatchState());
-  readonly perspectivePlayerId = signal<PlayerId>(this.state().activePlayer);
+  readonly gameMode = signal<GameMode>('VS_AI');
+  readonly state = signal<GameState>(this.buildNewMatchState('VS_AI'));
+  readonly perspectivePlayerId = signal<PlayerId>('PLAYER_1');
   readonly selectedInstanceId = signal<string | null>(null);
   readonly inspectedCard = signal<CardInstance | null>(null);
   readonly discardModalPlayerId = signal<PlayerId | null>(null);
   readonly isTransitioningTurn = signal(false);
-  readonly turnHandoffPending = signal(true);
+  readonly turnHandoffPending = signal(false);
+  readonly isAiThinking = signal(false);
+
+  readonly isHumanTurn = computed(
+    () => this.gameMode() === 'LOCAL_2P' || this.state().activePlayer === 'PLAYER_1',
+  );
 
   readonly bottomPlayer = computed(() => this.state().players[this.perspectivePlayerId()]);
   readonly topPlayer = computed(() => this.state().players[getOpponentId(this.perspectivePlayerId())]);
@@ -74,6 +87,9 @@ export class GameFacadeService {
   });
 
   readonly selectionPrompt = computed<string | null>(() => {
+    if (!this.isHumanTurn() || this.isAiThinking()) {
+      return null;
+    }
     const current = this.state();
     if (current.phase === 'PENDING_SELECTION' && current.pendingSelection?.type === 'AGILE_ROW') {
       return `Médico: elige una fila permitida para ${current.pendingSelection.card.card.name}`;
@@ -94,6 +110,7 @@ export class GameFacadeService {
 
   readonly canCancelSelection = computed(
     () =>
+      this.isHumanTurn() &&
       this.state().phase === 'PLAYING' &&
       (this.isSelectingDecoyTarget() || this.isSelectingHornTarget() || this.isSelectingAgilePrePlay()),
   );
@@ -104,7 +121,7 @@ export class GameFacadeService {
     if (!inspected || !selected || inspected.instanceId !== selected.instanceId) {
       return false;
     }
-    if (this.turnHandoffPending() || this.isTransitioningTurn() || this.state().phase !== 'PLAYING') {
+    if (this.isHumanInputBlocked() || this.state().phase !== 'PLAYING') {
       return false;
     }
     if (
@@ -124,20 +141,31 @@ export class GameFacadeService {
 
   constructor() {
     this.destroyRef.onDestroy(() => {
-      this.clearHandoffTimer();
+      this.clearTimers();
     });
   }
 
-  startNewMatch(): void {
-    this.clearHandoffTimer();
-    const fresh = this.buildNewMatchState();
+  startNewMatch(mode?: GameMode): void {
+    this.clearTimers();
+    const resolvedMode = mode ?? this.gameMode();
+    this.gameMode.set(resolvedMode);
+
+    const fresh = this.buildNewMatchState(resolvedMode);
     this.state.set(fresh);
-    this.perspectivePlayerId.set(fresh.activePlayer);
     this.selectedInstanceId.set(null);
     this.inspectedCard.set(null);
     this.discardModalPlayerId.set(null);
     this.isTransitioningTurn.set(false);
-    this.turnHandoffPending.set(true);
+    this.isAiThinking.set(false);
+
+    if (resolvedMode === 'VS_AI') {
+      this.perspectivePlayerId.set('PLAYER_1');
+      this.turnHandoffPending.set(false);
+      this.scheduleAiTurnIfNeeded();
+    } else {
+      this.perspectivePlayerId.set(fresh.activePlayer);
+      this.turnHandoffPending.set(true);
+    }
   }
 
   confirmTurnHandoff(): void {
@@ -168,12 +196,15 @@ export class GameFacadeService {
   }
 
   canPlayFromHand(instanceId: string): boolean {
+    if (!this.isHumanTurn() || this.isAiThinking()) {
+      return false;
+    }
     const current = this.state();
     return canPlayCard(current, current.activePlayer, instanceId);
   }
 
   isOwnRowSelectable(rowType: RowType): boolean {
-    if (this.turnHandoffPending() || this.isTransitioningTurn()) {
+    if (this.isHumanInputBlocked()) {
       return false;
     }
     const current = this.state();
@@ -197,7 +228,7 @@ export class GameFacadeService {
   }
 
   onHandCardTap(card: CardInstance): void {
-    if (this.turnHandoffPending() || this.isTransitioningTurn() || this.state().phase !== 'PLAYING') {
+    if (this.isHumanInputBlocked() || this.state().phase !== 'PLAYING') {
       return;
     }
     if (!this.canPlayFromHand(card.instanceId)) {
@@ -251,6 +282,7 @@ export class GameFacadeService {
   }
 
   onOwnUnitTap(targetCard: CardInstance): void {
+    if (this.isHumanInputBlocked()) return;
     const selected = this.selectedHandCard();
     const current = this.state();
     if (!selected || !this.isSelectingDecoyTarget()) {
@@ -269,6 +301,7 @@ export class GameFacadeService {
   }
 
   selectMedicTarget(targetInstanceId: string): void {
+    if (this.isHumanInputBlocked()) return;
     const current = this.state();
     if (current.phase !== 'PENDING_SELECTION' || current.pendingSelection?.type !== 'MEDIC_DISCARD') {
       return;
@@ -287,7 +320,7 @@ export class GameFacadeService {
   }
 
   passTurn(): void {
-    if (this.turnHandoffPending() || this.isTransitioningTurn()) return;
+    if (this.isHumanInputBlocked()) return;
     const current = this.state();
     this.applyAction({
       type: 'PASS_TURN',
@@ -296,7 +329,7 @@ export class GameFacadeService {
   }
 
   mulliganSwap(instanceId: string): void {
-    if (this.turnHandoffPending() || this.isTransitioningTurn()) return;
+    if (this.isHumanInputBlocked()) return;
     const current = this.state();
     if (current.phase !== 'MULLIGAN') return;
     this.applyAction({
@@ -307,7 +340,7 @@ export class GameFacadeService {
   }
 
   finishMulligan(): void {
-    if (this.turnHandoffPending() || this.isTransitioningTurn()) return;
+    if (this.isHumanInputBlocked()) return;
     const current = this.state();
     if (current.phase !== 'MULLIGAN') return;
     this.applyAction({
@@ -325,8 +358,24 @@ export class GameFacadeService {
     this.inspectedCard.set(null);
     this.discardModalPlayerId.set(null);
     this.state.set(next);
-    this.perspectivePlayerId.set(next.activePlayer);
-    this.turnHandoffPending.set(true);
+
+    if (this.gameMode() === 'VS_AI') {
+      this.perspectivePlayerId.set('PLAYER_1');
+      this.turnHandoffPending.set(false);
+      this.scheduleAiTurnIfNeeded();
+    } else {
+      this.perspectivePlayerId.set(next.activePlayer);
+      this.turnHandoffPending.set(true);
+    }
+  }
+
+  private isHumanInputBlocked(): boolean {
+    return (
+      this.turnHandoffPending() ||
+      this.isTransitioningTurn() ||
+      this.isAiThinking() ||
+      !this.isHumanTurn()
+    );
   }
 
   private playCard(instanceId: string, targetRow?: RowType): void {
@@ -351,13 +400,28 @@ export class GameFacadeService {
     this.discardModalPlayerId.set(null);
     this.state.set(next);
 
+    if (next.phase === 'ROUND_END' || next.phase === 'MATCH_END') {
+      this.clearTimers();
+      this.isTransitioningTurn.set(false);
+      this.isAiThinking.set(false);
+      this.turnHandoffPending.set(false);
+      return;
+    }
+
+    if (this.gameMode() === 'VS_AI') {
+      this.perspectivePlayerId.set('PLAYER_1');
+      this.turnHandoffPending.set(false);
+      this.scheduleAiTurnIfNeeded();
+      return;
+    }
+
     if (next.phase === 'PENDING_SELECTION') {
       return;
     }
 
     if (prev.phase === 'MULLIGAN') {
       if (next.activePlayer !== prev.activePlayer) {
-        this.clearHandoffTimer();
+        this.clearTimers();
         this.isTransitioningTurn.set(false);
         this.perspectivePlayerId.set(next.activePlayer);
         this.turnHandoffPending.set(true);
@@ -365,15 +429,8 @@ export class GameFacadeService {
       return;
     }
 
-    if (next.phase === 'ROUND_END' || next.phase === 'MATCH_END') {
-      this.clearHandoffTimer();
-      this.isTransitioningTurn.set(false);
-      this.turnHandoffPending.set(false);
-      return;
-    }
-
     if (next.phase === 'PLAYING' && next.activePlayer !== prev.activePlayer) {
-      this.clearHandoffTimer();
+      this.clearTimers();
       this.isTransitioningTurn.set(true);
       this.handoffTimerId = setTimeout(() => {
         this.handoffTimerId = null;
@@ -384,7 +441,36 @@ export class GameFacadeService {
     }
   }
 
-  private buildNewMatchState(): GameState {
+  private scheduleAiTurnIfNeeded(): void {
+    if (this.gameMode() !== 'VS_AI') return;
+    const current = this.state();
+    const isAiPhase =
+      current.phase === 'MULLIGAN' ||
+      current.phase === 'PLAYING' ||
+      current.phase === 'PENDING_SELECTION';
+
+    if (!isAiPhase || current.activePlayer !== 'PLAYER_2') {
+      this.isAiThinking.set(false);
+      return;
+    }
+
+    if (this.aiTimerId !== null) {
+      clearTimeout(this.aiTimerId);
+    }
+
+    this.isAiThinking.set(true);
+    const delayMs = current.phase === 'MULLIGAN' ? AI_MULLIGAN_DELAY_MS : AI_PLAY_DELAY_MS;
+    this.aiTimerId = setTimeout(() => {
+      this.aiTimerId = null;
+      this.isAiThinking.set(false);
+      const latest = this.state();
+      if (latest.activePlayer !== 'PLAYER_2') return;
+      const aiAction = decideAction(createAIView(latest, 'PLAYER_2'));
+      this.applyAction(aiAction);
+    }, delayMs);
+  }
+
+  private buildNewMatchState(mode: GameMode): GameState {
     const deck1 = this.starterDecks[0]!;
     const deck2 = this.starterDecks[1]!;
 
@@ -392,13 +478,13 @@ export class GameFacadeService {
       rngSeed: (Date.now() ^ 0x5f3759df) | 0,
       catalog: this.catalog,
       player1: {
-        name: 'Jugador 1 · Norte',
+        name: mode === 'VS_AI' ? 'Tú · Reinos del Norte' : 'Jugador 1 · Norte',
         faction: deck1.faction,
         leader: null,
         deckCardIds: deck1.cardIds,
       },
       player2: {
-        name: 'Jugador 2 · Nilfgaard',
+        name: mode === 'VS_AI' ? 'IA · Nilfgaard' : 'Jugador 2 · Nilfgaard',
         faction: deck2.faction,
         leader: null,
         deckCardIds: deck2.cardIds,
@@ -406,10 +492,14 @@ export class GameFacadeService {
     });
   }
 
-  private clearHandoffTimer(): void {
+  private clearTimers(): void {
     if (this.handoffTimerId !== null) {
       clearTimeout(this.handoffTimerId);
       this.handoffTimerId = null;
+    }
+    if (this.aiTimerId !== null) {
+      clearTimeout(this.aiTimerId);
+      this.aiTimerId = null;
     }
   }
 }

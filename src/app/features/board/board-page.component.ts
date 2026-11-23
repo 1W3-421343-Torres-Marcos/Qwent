@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, output, signal } from '@angular/core';
 import { GameFacadeService } from '../../services/game-facade.service';
 import { AbilityIconComponent } from '../../shared/components/card-icons.component';
 import { CardDetailComponent } from '../../shared/components/card-detail.component';
@@ -270,7 +270,13 @@ const HOLD_TO_PASS_MS = 600;
               (pointerup)="cancelHoldPass()"
               (pointerleave)="cancelHoldPass()"
               (pointercancel)="cancelHoldPass()"
-              [disabled]="facade.turnHandoffPending() || facade.isTransitioningTurn() || facade.bottomPlayer().passed"
+              [disabled]="
+                facade.turnHandoffPending() ||
+                facade.isTransitioningTurn() ||
+                facade.isAiThinking() ||
+                !facade.isHumanTurn() ||
+                facade.bottomPlayer().passed
+              "
               class="relative min-h-[48px] w-full overflow-hidden rounded-lg border-2 border-gold/70 bg-tavern-dark px-1 py-2 text-[11px] font-extrabold uppercase tracking-wide text-gold disabled:opacity-45"
             >
               <span
@@ -284,6 +290,16 @@ const HOLD_TO_PASS_MS = 600;
           </div>
         </aside>
       </div>
+
+      <!-- AI Thinking Indicator -->
+      @if (facade.isAiThinking()) {
+        <div
+          class="fixed left-1/2 top-2 z-30 flex -translate-x-1/2 items-center gap-2 rounded-full border border-gold/70 bg-tavern-dark/95 px-4 py-1.5 text-xs font-bold tracking-wider text-gold shadow-xl"
+        >
+          <span class="h-2 w-2 animate-ping rounded-full bg-gold-bright"></span>
+          <span>{{ facade.state().phase === 'MULLIGAN' ? 'IA revisando mano...' : 'IA pensando jugada...' }}</span>
+        </div>
+      }
 
       <!-- Target Selection Floating Prompt -->
       @if (facade.selectionPrompt(); as prompt) {
@@ -321,11 +337,13 @@ const HOLD_TO_PASS_MS = 600;
         [state]="facade.state()"
         [activePlayer]="facade.state().players[facade.state().activePlayer]"
         [turnHandoffPending]="facade.turnHandoffPending()"
+        [isHumanTurn]="facade.isHumanTurn()"
         [discardPlayer]="facade.discardModalPlayer()"
         [medicChoices]="facade.medicDiscardChoices()"
         (handoffConfirmed)="facade.confirmTurnHandoff()"
         (advanceRoundRequested)="facade.advanceRound()"
         (newMatchRequested)="facade.startNewMatch()"
+        (menuRequested)="exitToMenu.emit()"
         (discardClosed)="facade.closeDiscardModal()"
         (medicTargetSelected)="facade.selectMedicTarget($event)"
         (mulliganSwapRequested)="facade.mulliganSwap($event)"
@@ -338,6 +356,7 @@ export class BoardPageComponent {
   readonly facade = inject(GameFacadeService);
   private readonly destroyRef = inject(DestroyRef);
 
+  readonly exitToMenu = output<void>();
   readonly holdProgress = signal(0);
   private holdIntervalId: ReturnType<typeof setInterval> | null = null;
   private holdStartTimestamp = 0;
@@ -366,6 +385,8 @@ export class BoardPageComponent {
     if (
       this.facade.turnHandoffPending() ||
       this.facade.isTransitioningTurn() ||
+      this.facade.isAiThinking() ||
+      !this.facade.isHumanTurn() ||
       this.facade.bottomPlayer().passed ||
       this.facade.state().phase !== 'PLAYING'
     ) {
