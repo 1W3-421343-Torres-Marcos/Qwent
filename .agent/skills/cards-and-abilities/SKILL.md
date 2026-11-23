@@ -43,5 +43,5 @@ description: Usar al trabajar en el esquema cards.json, resolución de habilidad
 ## Criterios de Aceptación
 - [x] Esquema `cards.json` validado con array `allowedRows` y unión estricta de habilidades.
 - [x] Tests unitarios en verde para todos los casos borde: `SCORCH`, `SCORCH_ROW` (>=10), `MEDIC` (y cadenas), `SPY`, `DECOY`, Climas + `WEATHER_CLEAR`, `TIGHT_BOND`, `MORALE_BOOST`, `COMMANDERS_HORN` y `MUSTER`.
-- [ ] (F5) Pasivas de las 4 facciones y habilidades de Líder implementadas y probadas.
-- [ ] (F5) Script `scripts/etl-cards.ts` genera y valida el catálogo real completo de forma determinista.
+- [x] (F5) Pasivas de las 4 facciones y habilidades de Líder implementadas y probadas.
+- [x] (F5) Script `scripts/etl-cards.ts` genera y valida el catálogo real completo de forma determinista.

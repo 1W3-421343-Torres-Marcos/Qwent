@@ -32,7 +32,7 @@ description: Usar al implementar el constructor de mazos, selector de facción y
 - `src/app/features/deck-builder/deck-builder-page.component.*`
 
 ## Criterios de Aceptación
-- [ ] `validateDeck` hace cumplir: `>= 22` unidades, `<= 10` especiales, restricción de facción + neutrales, 1 líder válido y límite `maxCopies`, cubierto por tests unitarios.
-- [ ] El usuario puede cambiar entre las 4 facciones, elegir Líder y armar/editar mazos táctilmente.
-- [ ] Los mazos guardados persisten 100% offline en `localStorage` y pueden seleccionarse para iniciar partida contra la IA.
-- [ ] Mazos prearmados funcionales disponibles sin necesidad de armar uno desde cero.
+- [x] `validateDeck` hace cumplir: `>= 22` unidades, `<= 10` especiales, restricción de facción + neutrales, 1 líder válido y límite `maxCopies`, cubierto por tests unitarios.
+- [x] El usuario puede cambiar entre las 4 facciones, elegir Líder y armar/editar mazos táctilmente.
+- [x] Los mazos guardados persisten 100% offline en `localStorage` y pueden seleccionarse para iniciar partida contra la IA.
+- [x] Mazos prearmados funcionales disponibles sin necesidad de armar uno desde cero.

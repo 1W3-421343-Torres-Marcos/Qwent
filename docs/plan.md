@@ -8,7 +8,7 @@
 | F2 | MVP Jugable — Motor Base + Tablero | [x] | 100% |
 | F3 | Habilidades Completas de The Witcher 3 | [x] | 100% |
 | F4 | Oponente IA + Mulligan | [x] | 100% |
-| F5 | Facciones, Líderes, Catálogo Real y Constructor de Mazos | [~] | 75% |
+| F5 | Facciones, Líderes, Catálogo Real y Constructor de Mazos | [x] | 100% |
 | F6 | Pulido Visual, UX Táctil y Release Offline | [ ] | 0% |
 
 **Estados:** `[ ]` pendiente | `[~]` en curso | `[x]` completada
@@ -45,7 +45,7 @@
 - [x] **F5.1**: Implementar las 4 pasivas de facción (Reinos del Norte, Nilfgaard, Monstruos, Scoia'tael) y habilidades de Líder (1 uso por partida), incluyendo UI e IA para Scoia'tael y Líderes. | *Módulos/Archivos*: `cards-and-abilities`, `core-engine`, `board-ui`, `ai-opponent`, `src/core/` | *Hecho*: Tests unitarios de pasivas de facción y activación de Líderes en verde, integrados en UI e IA.
 - [x] **F5.2**: Crear script ETL determinista (`scripts/etl-cards.ts`) para importar y validar el catálogo real completo hacia `cards.json`. | *Módulos/Archivos*: `cards-and-abilities`, `scripts/etl-cards.ts`, `src/assets/data/cards.json` | *Hecho*: Catálogo completo generado y tests de integridad de esquema 100% en verde.
 - [x] **F5.3**: Implementar validación de mazos (mín. 22 unidades, máx. 10 especiales, facción/neutrales) y pantalla de Deck Builder con persistencia offline. | *Módulos/Archivos*: `deck-builder`, `src/core/deck/`, `src/app/features/deck-builder/` | *Hecho*: Usuario puede armar, validar, guardar y jugar con mazos propios offline.
-- [ ] **F5.4**: Verificación integral F5, suite de tests en verde, sync Capacitor y generación de APK F5. | *Módulos/Archivos*: `android-packaging`, `android/` | *Hecho*: Tests 100% en verde y `gwent-f5-debug.apk` generado y funcional.
+- [x] **F5.4**: Verificación integral F5, suite de tests en verde, sync Capacitor y generación de APK F5. | *Módulos/Archivos*: `android-packaging`, `android/` | *Hecho*: Tests 100% en verde y `gwent-f5-debug.apk` generado y funcional.
 
 ## F6: Pulido Visual, UX Táctil y Release Offline
 - [ ] **F6.1**: Aplicar sistema de diseño completo de `docs/design.md` (temática taberna medieval, insignias SVG/CSS, marcos de Héroe y colores por facción). | *Módulos/Archivos*: `board-ui`, `deck-builder`, `src/app/` | *Hecho*: Interfaz cumple lineamientos visuales y de legibilidad en pantallas 16:9 a 20:9.
@@ -80,3 +80,4 @@
 | 2026-11-23 | **F5.1**: Las 4 pasivas de facción y habilidades de Líder implementadas y probadas en Core (`factions.ts`, `leaders.ts`), IA (`ai-view.ts`, `heuristics.ts`) y UI (`BoardPage`, `BoardOverlays`), con 47 tests en verde (incluidas 270 simulaciones Bot vs. Bot) y `ng build` OK | **F5.2**: Crear script ETL determinista (`scripts/etl-cards.ts`) y catálogo de 4 facciones + Líderes |
 | 2026-11-23 | **F5.2**: Script ETL determinista `scripts/etl-cards.ts` (CSV/JSON), dataset curado base `scripts/data/base-cards.json` y catálogo `cards.json` (74 cartas con las 4 facciones y 16 Líderes) validado con `etl-cards.spec.ts` (50 tests en verde) | **F5.3**: Validador de mazos, 4 mazos prearmados y Deck Builder offline |
 | 2026-11-23 | **F5.3**: Validador `validateDeck`, 4 mazos prearmados con Líderes reales (`starter-decks.json`), `DeckStorageService` (`qwent.decks.v1`), `DeckBuilderPageComponent` y selector en Menú/Facade verificados (54 tests en verde + `ng build` OK) | **F5.4**: Verificación integral F5, APK F5 y cierre con tag `v0.5.0-f5` |
+| 2026-11-23 | **F5.4**: `npm run build:apk -- --phase=f5` completado (54 tests en verde, `builds/apks/gwent-f5-debug.apk` 4.05 MB) y tag `v0.5.0-f5` | Planificar e iniciar **F6** (Pulido Visual, UX Táctil y Release Offline) con `/plan F6` |
