@@ -1,14 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
-import type { CardInstance, FactionId, RowType } from '../../../core';
+import type { CardInstance, RowType } from '../../../core';
+import { FACTION_META } from '../constants/faction-meta';
 import { AbilityIconComponent, RowIconComponent } from './card-icons.component';
-
-const FACTION_LABEL: Readonly<Record<FactionId, string>> = {
-  NORTHERN_REALMS: 'Reinos del Norte',
-  NILFGAARD: 'Nilfgaard',
-  MONSTERS: 'Monstruos',
-  SCOIATAEL: "Scoia'tael",
-  NEUTRAL: 'Neutral',
-};
 
 const ROW_LABEL: Readonly<Record<RowType, string>> = {
   CLOSE_COMBAT: 'Cuerpo a cuerpo',
@@ -119,7 +112,7 @@ export class CardDetailComponent {
   readonly closed = output<void>();
   readonly playRequested = output<CardInstance>();
 
-  readonly factionName = computed(() => FACTION_LABEL[this.card().card.faction]);
+  readonly factionName = computed(() => FACTION_META[this.card().card.faction].label);
 
   readonly strengthBadgeClass = computed(() => {
     const c = this.card();

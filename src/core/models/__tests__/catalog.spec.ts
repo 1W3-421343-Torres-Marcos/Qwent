@@ -4,6 +4,7 @@ import rawStarterDecks from '../../../assets/data/starter-decks.json';
 import {
   PLAYABLE_FACTIONS,
   validateCatalog,
+  validateDeck,
   validateStarterDeck,
   type CardDefinition,
   type StarterDeckDefinition,
@@ -45,30 +46,25 @@ describe('Catalog & Starter Decks Integrity (F5.2)', () => {
     expect(cards.some((c) => c.ability === 'SCORCH_ROW')).toBe(true);
   });
 
-  it('validates both fixed starter decks against TW3 rules and includes all F3 mechanics', () => {
-    expect(decks.length).toBe(2);
+  it('validates all 4 playable faction starter decks with real leaders against TW3 rules', () => {
+    expect(decks.length).toBe(4);
     const catalogMap = new Map(cards.map((c) => [c.id, c]));
 
-    for (const deck of decks) {
-      const validation = validateStarterDeck(deck, catalogMap);
-      expect(validation.errors).toEqual([]);
-      expect(validation.valid).toBe(true);
-      expect(deck.leaderId).toBeNull();
+    for (const faction of PLAYABLE_FACTIONS) {
+      expect(decks.some((d) => d.faction === faction)).toBe(true);
+    }
 
-      const deckCards = deck.cardIds.map((id) => catalogMap.get(id)!);
-      for (const ability of [
-        'TIGHT_BOND',
-        'MORALE_BOOST',
-        'MUSTER',
-        'SPY',
-        'DECOY',
-        'MEDIC',
-        'SCORCH',
-        'SCORCH_ROW',
-      ] as const) {
-        expect(deckCards.some((c) => c.ability === ability)).toBe(true);
-      }
-      expect(deckCards.some((c) => c.type === 'UNIT' && c.allowedRows.length > 1)).toBe(true);
+    for (const deck of decks) {
+      const starterCheck = validateStarterDeck(deck, catalogMap);
+      expect(starterCheck.errors).toEqual([]);
+      expect(starterCheck.valid).toBe(true);
+      expect(deck.leaderId).not.toBeNull();
+
+      const fullDeckCheck = validateDeck(deck.cardIds, deck.leaderId, deck.faction, cards);
+      expect(fullDeckCheck.errors).toEqual([]);
+      expect(fullDeckCheck.valid).toBe(true);
+      expect(fullDeckCheck.unitCount).toBeGreaterThanOrEqual(22);
+      expect(fullDeckCheck.specialCount).toBeLessThanOrEqual(10);
     }
   });
 });

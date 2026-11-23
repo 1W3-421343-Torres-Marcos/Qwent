@@ -1,6 +1,5 @@
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
 import rawCards from '../../assets/data/cards.json';
-import rawStarterDecks from '../../assets/data/starter-decks.json';
 import {
   QWENT_PHASE,
   canPlayCard,
@@ -16,8 +15,9 @@ import {
   type GameState,
   type PlayerId,
   type RowType,
-  type StarterDeckDefinition,
 } from '../../core';
+import { FACTION_META } from '../shared/constants/faction-meta';
+import { DeckStorageService } from './deck-storage.service';
 
 export type GameMode = 'VS_AI' | 'LOCAL_2P';
 
@@ -28,8 +28,8 @@ const AI_MULLIGAN_DELAY_MS = 250;
 @Injectable({ providedIn: 'root' })
 export class GameFacadeService {
   private readonly destroyRef = inject(DestroyRef);
+  private readonly deckStorage = inject(DeckStorageService);
   private readonly catalog = rawCards as readonly CardDefinition[];
-  private readonly starterDecks = rawStarterDecks as readonly StarterDeckDefinition[];
   private handoffTimerId: ReturnType<typeof setTimeout> | null = null;
   private aiTimerId: ReturnType<typeof setTimeout> | null = null;
 
@@ -583,23 +583,28 @@ export class GameFacadeService {
   }
 
   private buildNewMatchState(mode: GameMode): GameState {
-    const deck1 = this.starterDecks[0]!;
-    const deck2 = this.starterDecks[1]!;
-    const leader1 = deck1.leaderId ? (this.catalog.find((c) => c.id === deck1.leaderId) ?? null) : null;
-    const leader2 = deck2.leaderId ? (this.catalog.find((c) => c.id === deck2.leaderId) ?? null) : null;
+    const p1Faction = this.deckStorage.selectedPlayerFaction();
+    const p2Faction = this.deckStorage.selectedOpponentFaction();
+    const deck1 = this.deckStorage.getDeckForFaction(p1Faction);
+    const deck2 = this.deckStorage.getDeckForFaction(p2Faction);
+    const leader1 = this.deckStorage.getLeaderDefinition(deck1.leaderId);
+    const leader2 = this.deckStorage.getLeaderDefinition(deck2.leaderId);
+
+    const p1Label = FACTION_META[p1Faction].shortLabel;
+    const p2Label = FACTION_META[p2Faction].shortLabel;
 
     return createInitialGameState({
       rngSeed: (Date.now() ^ 0x5f3759df) | 0,
       catalog: this.catalog,
       player1: {
-        name: mode === 'VS_AI' ? 'Tú · Reinos del Norte' : 'Jugador 1 · Norte',
-        faction: deck1.faction,
+        name: mode === 'VS_AI' ? `Tú · ${p1Label}` : `Jugador 1 · ${p1Label}`,
+        faction: p1Faction,
         leader: leader1,
         deckCardIds: deck1.cardIds,
       },
       player2: {
-        name: mode === 'VS_AI' ? 'IA · Nilfgaard' : 'Jugador 2 · Nilfgaard',
-        faction: deck2.faction,
+        name: mode === 'VS_AI' ? `IA · ${p2Label}` : `Jugador 2 · ${p2Label}`,
+        faction: p2Faction,
         leader: leader2,
         deckCardIds: deck2.cardIds,
       },

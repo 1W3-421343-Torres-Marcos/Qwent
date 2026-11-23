@@ -36,36 +36,11 @@ function makeSimLeader(faction: PlayableFactionId, ability: LeaderAbilityType): 
   };
 }
 
-function simulateBotMatch(
+function runMatchToCompletion(
+  initialState: GameState,
   seed: number,
-  swapFactions = false,
-  p1FactionOverride?: PlayableFactionId,
-  p2FactionOverride?: PlayableFactionId,
-  p1Leader: CardDefinition | null = null,
-  p2Leader: CardDefinition | null = null,
 ): { readonly finalState: GameState; readonly steps: number } {
-  const deckA = swapFactions ? decks[1]! : decks[0]!;
-  const deckB = swapFactions ? decks[0]! : decks[1]!;
-  const f1 = p1FactionOverride ?? deckA.faction;
-  const f2 = p2FactionOverride ?? deckB.faction;
-
-  let state = createInitialGameState({
-    rngSeed: seed,
-    catalog,
-    player1: {
-      name: `Bot1_${f1}`,
-      faction: f1,
-      leader: p1Leader,
-      deckCardIds: deckA.cardIds,
-    },
-    player2: {
-      name: `Bot2_${f2}`,
-      faction: f2,
-      leader: p2Leader,
-      deckCardIds: deckB.cardIds,
-    },
-  });
-
+  let state = initialState;
   let steps = 0;
 
   while (state.phase !== 'MATCH_END') {
@@ -92,7 +67,68 @@ function simulateBotMatch(
   return { finalState: state, steps };
 }
 
-describe('Bot vs. Bot Stress Simulation (F4.3)', () => {
+function simulateBotMatch(
+  seed: number,
+  swapFactions = false,
+  p1FactionOverride?: PlayableFactionId,
+  p2FactionOverride?: PlayableFactionId,
+  p1Leader: CardDefinition | null = null,
+  p2Leader: CardDefinition | null = null,
+): { readonly finalState: GameState; readonly steps: number } {
+  const deckA = swapFactions ? decks[1]! : decks[0]!;
+  const deckB = swapFactions ? decks[0]! : decks[1]!;
+  const f1 = p1FactionOverride ?? deckA.faction;
+  const f2 = p2FactionOverride ?? deckB.faction;
+
+  const initialState = createInitialGameState({
+    rngSeed: seed,
+    catalog,
+    player1: {
+      name: `Bot1_${f1}`,
+      faction: f1,
+      leader: p1Leader,
+      deckCardIds: deckA.cardIds,
+    },
+    player2: {
+      name: `Bot2_${f2}`,
+      faction: f2,
+      leader: p2Leader,
+      deckCardIds: deckB.cardIds,
+    },
+  });
+
+  return runMatchToCompletion(initialState, seed);
+}
+
+function simulateRealStarterMatch(
+  seed: number,
+  deckA: StarterDeckDefinition,
+  deckB: StarterDeckDefinition,
+): { readonly finalState: GameState; readonly steps: number } {
+  const leaderA = deckA.leaderId ? (catalog.find((c) => c.id === deckA.leaderId) ?? null) : null;
+  const leaderB = deckB.leaderId ? (catalog.find((c) => c.id === deckB.leaderId) ?? null) : null;
+
+  const initialState = createInitialGameState({
+    rngSeed: seed,
+    catalog,
+    player1: {
+      name: `Bot1_${deckA.faction}`,
+      faction: deckA.faction,
+      leader: leaderA,
+      deckCardIds: deckA.cardIds,
+    },
+    player2: {
+      name: `Bot2_${deckB.faction}`,
+      faction: deckB.faction,
+      leader: leaderB,
+      deckCardIds: deckB.cardIds,
+    },
+  });
+
+  return runMatchToCompletion(initialState, seed);
+}
+
+describe('Bot vs. Bot Stress Simulation (F4.3 & F5.3)', () => {
   it('completes 120 full matches (including Mulligan and 2–3 rounds) with zero infinite loops or illegal actions', () => {
     let p1Wins = 0;
     let p2Wins = 0;
@@ -137,6 +173,17 @@ describe('Bot vs. Bot Stress Simulation (F4.3)', () => {
         makeSimLeader(f1, l1Ability),
         makeSimLeader(f2, l2Ability),
       );
+      expect(finalState.phase).toBe('MATCH_END');
+      expect(finalState.winner).not.toBeNull();
+      expect(steps).toBeLessThan(MAX_ACTIONS_PER_MATCH);
+    }
+  });
+
+  it('completes 120 matches using all 4 real starter decks and their real leaders', () => {
+    for (let i = 0; i < 120; i++) {
+      const deckA = decks[i % decks.length]!;
+      const deckB = decks[(i + 1 + (i % 3)) % decks.length]!;
+      const { finalState, steps } = simulateRealStarterMatch(5000 + i, deckA, deckB);
       expect(finalState.phase).toBe('MATCH_END');
       expect(finalState.winner).not.toBeNull();
       expect(steps).toBeLessThan(MAX_ACTIONS_PER_MATCH);

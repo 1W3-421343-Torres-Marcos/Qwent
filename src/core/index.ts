@@ -30,6 +30,13 @@ export type {
 export type { GameAction } from './models/actions';
 export { validateCatalog, validateStarterDeck } from './models/validate-catalog';
 export type { CatalogValidationResult } from './models/validate-catalog';
+export { validateDeck } from './deck/validate-deck';
+export type {
+  DeckValidationError,
+  DeckValidationErrorCode,
+  DeckValidationResult,
+  ValidateDeckOptions,
+} from './deck/validate-deck';
 export { nextRng, shuffleDeterministic } from './engine/prng';
 export type { RngStep, ShuffleResult } from './engine/prng';
 export {

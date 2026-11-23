@@ -1,3 +1,4 @@
+import { validateDeck } from '../deck/validate-deck';
 import {
   ABILITY_TYPES,
   LEADER_ABILITY_TYPES,
@@ -103,51 +104,16 @@ export function validateStarterDeck(
   deck: StarterDeckDefinition,
   catalogById: ReadonlyMap<string, CardDefinition>,
 ): CatalogValidationResult {
-  const errors: string[] = [];
-  const copyCounts = new Map<string, number>();
-  let unitCount = 0;
-  let specialCount = 0;
+  const result = validateDeck(
+    deck.cardIds,
+    deck.leaderId,
+    deck.faction,
+    [...catalogById.values()],
+    { allowMissingLeader: true },
+  );
 
-  if (deck.leaderId !== null) {
-    const leader = catalogById.get(deck.leaderId);
-    if (!leader || leader.type !== 'LEADER' || leader.faction !== deck.faction) {
-      errors.push(`Líder inválido (${deck.leaderId}) para facción ${deck.faction} en ${deck.id}`);
-    }
-  }
-
-  for (const cardId of deck.cardIds) {
-    const def = catalogById.get(cardId);
-    if (!def) {
-      errors.push(`Carta inexistente "${cardId}" en mazo ${deck.id}`);
-      continue;
-    }
-    if (def.type === 'LEADER') {
-      errors.push(`Un líder (${cardId}) no puede estar dentro de cardIds en ${deck.id}`);
-      continue;
-    }
-    if (def.faction !== deck.faction && def.faction !== 'NEUTRAL') {
-      errors.push(`Facción incompatible para ${cardId} (${def.faction}) en mazo ${deck.faction}`);
-    }
-
-    const nextCount = (copyCounts.get(cardId) ?? 0) + 1;
-    copyCounts.set(cardId, nextCount);
-    if (nextCount > def.maxCopies) {
-      errors.push(`Exceso de copias de ${cardId} (${nextCount}/${def.maxCopies}) en ${deck.id}`);
-    }
-
-    if (def.type === 'UNIT') {
-      unitCount++;
-    } else if (def.type === 'SPECIAL') {
-      specialCount++;
-    }
-  }
-
-  if (unitCount < 22) {
-    errors.push(`Mazo ${deck.id} tiene ${unitCount} unidades (mínimo 22).`);
-  }
-  if (specialCount > 10) {
-    errors.push(`Mazo ${deck.id} tiene ${specialCount} especiales (máximo 10).`);
-  }
-
-  return { valid: errors.length === 0, errors };
+  return {
+    valid: result.valid,
+    errors: result.errors.map((err) => err.message),
+  };
 }
