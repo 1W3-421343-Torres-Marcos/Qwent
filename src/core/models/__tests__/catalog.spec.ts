@@ -2,23 +2,28 @@ import { describe, expect, it } from 'vitest';
 import rawCards from '../../../assets/data/cards.json';
 import rawStarterDecks from '../../../assets/data/starter-decks.json';
 import {
+  PLAYABLE_FACTIONS,
   validateCatalog,
   validateStarterDeck,
   type CardDefinition,
   type StarterDeckDefinition,
 } from '../../index';
 
-describe('Test Catalog & Starter Decks Integrity (F2.1)', () => {
+describe('Catalog & Starter Decks Integrity (F5.2)', () => {
   const cards = rawCards as readonly CardDefinition[];
   const decks = rawStarterDecks as readonly StarterDeckDefinition[];
 
-  it('validates cards.json schema and covers 20–35 test cards', () => {
-    expect(cards.length).toBeGreaterThanOrEqual(20);
-    expect(cards.length).toBeLessThanOrEqual(35);
+  it('validates cards.json schema with all 4 playable factions and leaders', () => {
+    expect(cards.length).toBeGreaterThanOrEqual(60);
 
     const result = validateCatalog(cards);
     expect(result.errors).toEqual([]);
     expect(result.valid).toBe(true);
+
+    for (const faction of PLAYABLE_FACTIONS) {
+      expect(cards.some((c) => c.type === 'LEADER' && c.faction === faction)).toBe(true);
+      expect(cards.some((c) => c.type === 'UNIT' && c.faction === faction)).toBe(true);
+    }
   });
 
   it('includes Heroes, all 3 Weathers, Clear Weather, Horn, and all F3 abilities', () => {

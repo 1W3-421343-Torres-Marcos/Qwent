@@ -8,7 +8,7 @@
 | F2 | MVP Jugable — Motor Base + Tablero | [x] | 100% |
 | F3 | Habilidades Completas de The Witcher 3 | [x] | 100% |
 | F4 | Oponente IA + Mulligan | [x] | 100% |
-| F5 | Facciones, Líderes, Catálogo Real y Constructor de Mazos | [~] | 25% |
+| F5 | Facciones, Líderes, Catálogo Real y Constructor de Mazos | [~] | 50% |
 | F6 | Pulido Visual, UX Táctil y Release Offline | [ ] | 0% |
 
 **Estados:** `[ ]` pendiente | `[~]` en curso | `[x]` completada
@@ -43,7 +43,7 @@
 
 ## F5: Facciones, Líderes, Catálogo Real y Constructor de Mazos
 - [x] **F5.1**: Implementar las 4 pasivas de facción (Reinos del Norte, Nilfgaard, Monstruos, Scoia'tael) y habilidades de Líder (1 uso por partida), incluyendo UI e IA para Scoia'tael y Líderes. | *Módulos/Archivos*: `cards-and-abilities`, `core-engine`, `board-ui`, `ai-opponent`, `src/core/` | *Hecho*: Tests unitarios de pasivas de facción y activación de Líderes en verde, integrados en UI e IA.
-- [ ] **F5.2**: Crear script ETL determinista (`scripts/etl-cards.ts`) para importar y validar el catálogo real completo hacia `cards.json`. | *Módulos/Archivos*: `cards-and-abilities`, `scripts/etl-cards.ts`, `src/assets/data/cards.json` | *Hecho*: Catálogo completo generado y tests de integridad de esquema 100% en verde.
+- [x] **F5.2**: Crear script ETL determinista (`scripts/etl-cards.ts`) para importar y validar el catálogo real completo hacia `cards.json`. | *Módulos/Archivos*: `cards-and-abilities`, `scripts/etl-cards.ts`, `src/assets/data/cards.json` | *Hecho*: Catálogo completo generado y tests de integridad de esquema 100% en verde.
 - [ ] **F5.3**: Implementar validación de mazos (mín. 22 unidades, máx. 10 especiales, facción/neutrales) y pantalla de Deck Builder con persistencia offline. | *Módulos/Archivos*: `deck-builder`, `src/core/deck/`, `src/app/features/deck-builder/` | *Hecho*: Usuario puede armar, validar, guardar y jugar con mazos propios offline.
 - [ ] **F5.4**: Verificación integral F5, suite de tests en verde, sync Capacitor y generación de APK F5. | *Módulos/Archivos*: `android-packaging`, `android/` | *Hecho*: Tests 100% en verde y `gwent-f5-debug.apk` generado y funcional.
 
@@ -78,3 +78,4 @@
 | 2026-11-23 | **F4.3**: Simulación de 150 partidas Bot vs. Bot (0 bucles/errores, 37 tests en verde) + modo 1P vs. IA integrado en UI (`ng build` OK) | **F4.4**: Verificación integral F4, `gwent-f4-debug.apk` y tag `v0.4.0-f4` |
 | 2026-11-23 | **F4.4**: `npm run build:apk -- --phase=f4` completado (37 tests en verde, `builds/apks/gwent-f4-debug.apk` 3.97 MB) y tag `v0.4.0-f4` | Planificar e iniciar **F5** (Facciones, Líderes, Catálogo Real y Constructor de Mazos) con `/plan F5` |
 | 2026-11-23 | **F5.1**: Las 4 pasivas de facción y habilidades de Líder implementadas y probadas en Core (`factions.ts`, `leaders.ts`), IA (`ai-view.ts`, `heuristics.ts`) y UI (`BoardPage`, `BoardOverlays`), con 47 tests en verde (incluidas 270 simulaciones Bot vs. Bot) y `ng build` OK | **F5.2**: Crear script ETL determinista (`scripts/etl-cards.ts`) y catálogo de 4 facciones + Líderes |
+| 2026-11-23 | **F5.2**: Script ETL determinista `scripts/etl-cards.ts` (CSV/JSON), dataset curado base `scripts/data/base-cards.json` y catálogo `cards.json` (74 cartas con las 4 facciones y 16 Líderes) validado con `etl-cards.spec.ts` (50 tests en verde) | **F5.3**: Validador de mazos, 4 mazos prearmados y Deck Builder offline |

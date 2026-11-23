@@ -1,77 +1,55 @@
 [
   {
-    "id": "nr_blue_stripes_commando",
-    "name": "Comando de los Franjas Azules",
+    "id": "nr_leader_foltest_steel_forged",
+    "name": "Foltest: Forjado en Acero",
     "faction": "NORTHERN_REALMS",
-    "type": "UNIT",
-    "baseStrength": 4,
+    "type": "LEADER",
+    "baseStrength": 0,
     "isHero": false,
-    "allowedRows": ["CLOSE_COMBAT"],
-    "ability": "TIGHT_BOND",
-    "bondGroup": "blue_stripes",
-    "maxCopies": 3,
-    "description": "Vínculo estrecho: multiplica la fuerza de todas las unidades iguales en la fila."
-  },
-  {
-    "id": "nr_crinfrid_reavers",
-    "name": "Cazador de Crinfrid",
-    "faction": "NORTHERN_REALMS",
-    "type": "UNIT",
-    "baseStrength": 5,
-    "isHero": false,
-    "allowedRows": ["RANGED"],
-    "ability": "TIGHT_BOND",
-    "bondGroup": "crinfrid_reavers",
-    "maxCopies": 3,
-    "description": "Vínculo estrecho: multiplica su fuerza por cada copia igual en Distancia."
-  },
-  {
-    "id": "nr_kaedweni_siege_expert",
-    "name": "Experto en asedio kaedweni",
-    "faction": "NORTHERN_REALMS",
-    "type": "UNIT",
-    "baseStrength": 1,
-    "isHero": false,
-    "allowedRows": ["SIEGE"],
-    "ability": "MORALE_BOOST",
-    "maxCopies": 3,
-    "description": "Inyección de moral: suma +1 a todas las demás unidades normales de Asedio."
-  },
-  {
-    "id": "nr_prince_stennis",
-    "name": "Príncipe Stennis",
-    "faction": "NORTHERN_REALMS",
-    "type": "UNIT",
-    "baseStrength": 5,
-    "isHero": false,
-    "allowedRows": ["CLOSE_COMBAT"],
-    "ability": "SPY",
-    "maxCopies": 1,
-    "description": "Espía: se juega en Cuerpo a cuerpo del rival y robas 2 cartas de tu mazo."
-  },
-  {
-    "id": "nr_dun_banner_medic",
-    "name": "Médica de la Bandera Parda",
-    "faction": "NORTHERN_REALMS",
-    "type": "UNIT",
-    "baseStrength": 5,
-    "isHero": false,
-    "allowedRows": ["SIEGE"],
-    "ability": "MEDIC",
-    "maxCopies": 1,
-    "description": "Médico: elige una unidad no-Héroe de tu descarte y devuélvela al tablero."
-  },
-  {
-    "id": "nr_ves",
-    "name": "Ves",
-    "faction": "NORTHERN_REALMS",
-    "type": "UNIT",
-    "baseStrength": 5,
-    "isHero": false,
-    "allowedRows": ["CLOSE_COMBAT"],
+    "allowedRows": [],
     "ability": null,
+    "leaderAbility": "SCORCH_ENEMY_SIEGE_10",
     "maxCopies": 1,
-    "description": "Exploradora de élite de las Franjas Azules."
+    "description": "Líder: destruye la unidad no-Héroe más fuerte del Asedio rival si su fila suma >= 10."
+  },
+  {
+    "id": "nr_leader_foltest_siege_master",
+    "name": "Foltest: Maestro de Asedio",
+    "faction": "NORTHERN_REALMS",
+    "type": "LEADER",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [],
+    "ability": null,
+    "leaderAbility": "HORN_SIEGE_LEADER",
+    "maxCopies": 1,
+    "description": "Líder: duplica (x2) la fuerza de todas tus unidades normales en la fila de Asedio."
+  },
+  {
+    "id": "nr_leader_foltest_king_of_temeria",
+    "name": "Foltest: Rey de Temeria",
+    "faction": "NORTHERN_REALMS",
+    "type": "LEADER",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [],
+    "ability": null,
+    "leaderAbility": "PLAY_FOG_FROM_DECK",
+    "maxCopies": 1,
+    "description": "Líder: busca una carta de Niebla impenetrable en tu mazo y juégala inmediatamente."
+  },
+  {
+    "id": "nr_leader_foltest_lord_commander",
+    "name": "Foltest: Señor Comandante",
+    "faction": "NORTHERN_REALMS",
+    "type": "LEADER",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [],
+    "ability": null,
+    "leaderAbility": "CLEAR_WEATHER_LEADER",
+    "maxCopies": 1,
+    "description": "Líder: elimina todos los efectos de clima activos en el tablero."
   },
   {
     "id": "nr_ballista",
@@ -80,10 +58,98 @@
     "type": "UNIT",
     "baseStrength": 6,
     "isHero": false,
-    "allowedRows": ["SIEGE"],
+    "allowedRows": [
+      "SIEGE"
+    ],
     "ability": null,
     "maxCopies": 3,
     "description": "Arma de asedio pesada de largo alcance."
+  },
+  {
+    "id": "nr_crinfrid_reavers",
+    "name": "Cazador de Crinfrid",
+    "faction": "NORTHERN_REALMS",
+    "type": "UNIT",
+    "baseStrength": 5,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": "TIGHT_BOND",
+    "bondGroup": "crinfrid_reavers",
+    "maxCopies": 3,
+    "description": "Vínculo estrecho: multiplica su fuerza por cada copia igual en Distancia."
+  },
+  {
+    "id": "nr_blue_stripes_commando",
+    "name": "Comando de los Franjas Azules",
+    "faction": "NORTHERN_REALMS",
+    "type": "UNIT",
+    "baseStrength": 4,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "TIGHT_BOND",
+    "bondGroup": "blue_stripes",
+    "maxCopies": 3,
+    "description": "Vínculo estrecho: multiplica la fuerza de todas las unidades iguales en la fila."
+  },
+  {
+    "id": "nr_esterad_thyssen",
+    "name": "Esterad Thyssen",
+    "faction": "NORTHERN_REALMS",
+    "type": "UNIT",
+    "baseStrength": 10,
+    "isHero": true,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "Héroe. Monarca de Kovir, inmune a efectos y climas."
+  },
+  {
+    "id": "nr_kaedweni_siege_expert",
+    "name": "Experto en asedio kaedweni",
+    "faction": "NORTHERN_REALMS",
+    "type": "UNIT",
+    "baseStrength": 1,
+    "isHero": false,
+    "allowedRows": [
+      "SIEGE"
+    ],
+    "ability": "MORALE_BOOST",
+    "maxCopies": 3,
+    "description": "Inyección de moral: suma +1 a todas las demás unidades normales de Asedio."
+  },
+  {
+    "id": "nr_dun_banner_medic",
+    "name": "Médica de la Bandera Parda",
+    "faction": "NORTHERN_REALMS",
+    "type": "UNIT",
+    "baseStrength": 5,
+    "isHero": false,
+    "allowedRows": [
+      "SIEGE"
+    ],
+    "ability": "MEDIC",
+    "maxCopies": 1,
+    "description": "Médico: elige una unidad no-Héroe de tu descarte y devuélvela al tablero."
+  },
+  {
+    "id": "nr_prince_stennis",
+    "name": "Príncipe Stennis",
+    "faction": "NORTHERN_REALMS",
+    "type": "UNIT",
+    "baseStrength": 5,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "SPY",
+    "maxCopies": 1,
+    "description": "Espía: se juega en Cuerpo a cuerpo del rival y robas 2 cartas de tu mazo."
   },
   {
     "id": "nr_trebuchet",
@@ -92,7 +158,9 @@
     "type": "UNIT",
     "baseStrength": 6,
     "isHero": false,
-    "allowedRows": ["SIEGE"],
+    "allowedRows": [
+      "SIEGE"
+    ],
     "ability": null,
     "maxCopies": 3,
     "description": "Catapulta de contrapeso para demoler murallas."
@@ -104,22 +172,148 @@
     "type": "UNIT",
     "baseStrength": 10,
     "isHero": true,
-    "allowedRows": ["CLOSE_COMBAT"],
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
     "ability": null,
     "maxCopies": 1,
     "description": "Héroe. Comandante de las Franjas Azules, inmune a efectos y climas."
   },
   {
-    "id": "nr_esterad_thyssen",
-    "name": "Esterad Thyssen",
+    "id": "nr_ves",
+    "name": "Ves",
     "faction": "NORTHERN_REALMS",
     "type": "UNIT",
-    "baseStrength": 10,
-    "isHero": true,
-    "allowedRows": ["CLOSE_COMBAT"],
+    "baseStrength": 5,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
     "ability": null,
     "maxCopies": 1,
-    "description": "Héroe. Monarca de Kovir, inmune a efectos y climas."
+    "description": "Exploradora de élite de las Franjas Azules."
+  },
+  {
+    "id": "ng_leader_emhyr_relentless",
+    "name": "Emhyr: El Implacable",
+    "faction": "NILFGAARD",
+    "type": "LEADER",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [],
+    "ability": null,
+    "leaderAbility": "STEAL_ENEMY_DISCARD_TO_HAND",
+    "maxCopies": 1,
+    "description": "Líder: roba 1 unidad no-Héroe del descarte rival y añádela a tu mano."
+  },
+  {
+    "id": "ng_leader_emhyr_emperor",
+    "name": "Emhyr: Emperador de Nilfgaard",
+    "faction": "NILFGAARD",
+    "type": "LEADER",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [],
+    "ability": null,
+    "leaderAbility": "HORN_RANGED_LEADER",
+    "maxCopies": 1,
+    "description": "Líder: duplica (x2) la fuerza de todas tus unidades normales en Distancia."
+  },
+  {
+    "id": "ng_leader_emhyr_white_flame",
+    "name": "Emhyr: Llama Blanca",
+    "faction": "NILFGAARD",
+    "type": "LEADER",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [],
+    "ability": null,
+    "leaderAbility": "CANCEL_ENEMY_LEADER",
+    "maxCopies": 1,
+    "description": "Líder pasivo: anula la habilidad del Líder rival al inicio de la partida."
+  },
+  {
+    "id": "ng_leader_emhyr_imperial_majesty",
+    "name": "Emhyr: Su Majestad Imperial",
+    "faction": "NILFGAARD",
+    "type": "LEADER",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [],
+    "ability": null,
+    "leaderAbility": "PLAY_RAIN_FROM_DECK",
+    "maxCopies": 1,
+    "description": "Líder: busca una carta de Lluvia torrencial en tu mazo y juégala inmediatamente."
+  },
+  {
+    "id": "ng_etolian_auxiliary",
+    "name": "Arquero auxiliar etoliano",
+    "faction": "NILFGAARD",
+    "type": "UNIT",
+    "baseStrength": 1,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": "MEDIC",
+    "maxCopies": 2,
+    "description": "Médico: revive una unidad no-Héroe de tu descarte al entrar en Distancia."
+  },
+  {
+    "id": "ng_black_infantry_archer",
+    "name": "Arquero de infantería negra",
+    "faction": "NILFGAARD",
+    "type": "UNIT",
+    "baseStrength": 10,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 2,
+    "description": "Tirador de élite nilfgaardiano."
+  },
+  {
+    "id": "ng_cahir",
+    "name": "Cahir Mawr Dyffryn aep Ceallach",
+    "faction": "NILFGAARD",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "Caballero del yelmo alado."
+  },
+  {
+    "id": "ng_zerrikanian_fire_scorpion",
+    "name": "Escorpión de fuego zerrikano",
+    "faction": "NILFGAARD",
+    "type": "UNIT",
+    "baseStrength": 5,
+    "isHero": false,
+    "allowedRows": [
+      "SIEGE"
+    ],
+    "ability": null,
+    "maxCopies": 2,
+    "description": "Artillería incendiaria de asedio."
+  },
+  {
+    "id": "ng_heavy_zerrikanian_fire_scorpion",
+    "name": "Escorpión pesado zerrikano",
+    "faction": "NILFGAARD",
+    "type": "UNIT",
+    "baseStrength": 10,
+    "isHero": false,
+    "allowedRows": [
+      "SIEGE"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "Pieza pesada de artillería imperial."
   },
   {
     "id": "ng_impera_brigade",
@@ -128,7 +322,9 @@
     "type": "UNIT",
     "baseStrength": 3,
     "isHero": false,
-    "allowedRows": ["CLOSE_COMBAT"],
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
     "ability": "TIGHT_BOND",
     "bondGroup": "impera_brigade",
     "maxCopies": 3,
@@ -141,83 +337,13 @@
     "type": "UNIT",
     "baseStrength": 2,
     "isHero": false,
-    "allowedRows": ["CLOSE_COMBAT"],
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
     "ability": "TIGHT_BOND",
     "bondGroup": "nausicaa_cavalry",
     "maxCopies": 3,
     "description": "Vínculo estrecho: multiplica su fuerza por cada jinete igual en la fila."
-  },
-  {
-    "id": "ng_stefan_skellen",
-    "name": "Stefan Skellen",
-    "faction": "NILFGAARD",
-    "type": "UNIT",
-    "baseStrength": 9,
-    "isHero": false,
-    "allowedRows": ["CLOSE_COMBAT"],
-    "ability": "SPY",
-    "maxCopies": 1,
-    "description": "Espía: se coloca en Cuerpo a cuerpo del rival y robas 2 cartas."
-  },
-  {
-    "id": "ng_etolian_auxiliary",
-    "name": "Arquero auxiliar etoliano",
-    "faction": "NILFGAARD",
-    "type": "UNIT",
-    "baseStrength": 1,
-    "isHero": false,
-    "allowedRows": ["RANGED"],
-    "ability": "MEDIC",
-    "maxCopies": 2,
-    "description": "Médico: revive una unidad no-Héroe de tu descarte al entrar en Distancia."
-  },
-  {
-    "id": "ng_black_infantry_archer",
-    "name": "Arquero de infantería negra",
-    "faction": "NILFGAARD",
-    "type": "UNIT",
-    "baseStrength": 10,
-    "isHero": false,
-    "allowedRows": ["RANGED"],
-    "ability": null,
-    "maxCopies": 2,
-    "description": "Tirador de élite nilfgaardiano."
-  },
-  {
-    "id": "ng_cahir",
-    "name": "Cahir Mawr Dyffryn aep Ceallach",
-    "faction": "NILFGAARD",
-    "type": "UNIT",
-    "baseStrength": 6,
-    "isHero": false,
-    "allowedRows": ["CLOSE_COMBAT"],
-    "ability": null,
-    "maxCopies": 1,
-    "description": "Caballero del yelmo alado."
-  },
-  {
-    "id": "ng_zerrikanian_fire_scorpion",
-    "name": "Escorpión de fuego zerrikano",
-    "faction": "NILFGAARD",
-    "type": "UNIT",
-    "baseStrength": 5,
-    "isHero": false,
-    "allowedRows": ["SIEGE"],
-    "ability": null,
-    "maxCopies": 2,
-    "description": "Artillería incendiaria de asedio."
-  },
-  {
-    "id": "ng_heavy_zerrikanian_fire_scorpion",
-    "name": "Escorpión pesado zerrikano",
-    "faction": "NILFGAARD",
-    "type": "UNIT",
-    "baseStrength": 10,
-    "isHero": false,
-    "allowedRows": ["SIEGE"],
-    "ability": null,
-    "maxCopies": 1,
-    "description": "Pieza pesada de artillería imperial."
   },
   {
     "id": "ng_letho_of_gulet",
@@ -226,10 +352,26 @@
     "type": "UNIT",
     "baseStrength": 10,
     "isHero": true,
-    "allowedRows": ["CLOSE_COMBAT"],
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
     "ability": null,
     "maxCopies": 1,
     "description": "Héroe. Brujo de la Escuela de la Víbora."
+  },
+  {
+    "id": "ng_stefan_skellen",
+    "name": "Stefan Skellen",
+    "faction": "NILFGAARD",
+    "type": "UNIT",
+    "baseStrength": 9,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "SPY",
+    "maxCopies": 1,
+    "description": "Espía: se coloca en Cuerpo a cuerpo del rival y robas 2 cartas."
   },
   {
     "id": "ng_tibor_eggebracht",
@@ -238,10 +380,462 @@
     "type": "UNIT",
     "baseStrength": 10,
     "isHero": true,
-    "allowedRows": ["RANGED"],
+    "allowedRows": [
+      "RANGED"
+    ],
     "ability": null,
     "maxCopies": 1,
     "description": "Héroe. General del alba de Nilfgaard."
+  },
+  {
+    "id": "mo_leader_eredin_commander",
+    "name": "Eredin: Comandante de la Cacería",
+    "faction": "MONSTERS",
+    "type": "LEADER",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [],
+    "ability": null,
+    "leaderAbility": "HORN_CLOSE_LEADER",
+    "maxCopies": 1,
+    "description": "Líder: duplica (x2) la fuerza de todas tus unidades normales en Cuerpo a cuerpo."
+  },
+  {
+    "id": "mo_leader_eredin_destroyer",
+    "name": "Eredin: Destructor de Mundos",
+    "faction": "MONSTERS",
+    "type": "LEADER",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [],
+    "ability": null,
+    "leaderAbility": "SCORCH_ENEMY_CLOSE_10",
+    "maxCopies": 1,
+    "description": "Líder: destruye la unidad no-Héroe más fuerte de Cuerpo a cuerpo rival si suma >= 10."
+  },
+  {
+    "id": "mo_leader_eredin_bringer_of_death",
+    "name": "Eredin: Portador de Muerte",
+    "faction": "MONSTERS",
+    "type": "LEADER",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [],
+    "ability": null,
+    "leaderAbility": "REVIVE_OWN_DISCARD_TO_HAND",
+    "maxCopies": 1,
+    "description": "Líder: recupera 1 unidad no-Héroe de tu descarte y devuélvela a tu mano."
+  },
+  {
+    "id": "mo_leader_eredin_king",
+    "name": "Eredin: Rey de la Cacería Salvaje",
+    "faction": "MONSTERS",
+    "type": "LEADER",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [],
+    "ability": null,
+    "leaderAbility": "PLAY_FROST_FROM_DECK",
+    "maxCopies": 1,
+    "description": "Líder: busca una carta de Escarcha helada en tu mazo y juégala inmediatamente."
+  },
+  {
+    "id": "mo_arachas",
+    "name": "Arachas",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 4,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "MUSTER",
+    "musterGroup": "mo_arachas",
+    "maxCopies": 3,
+    "description": "Reunión: invoca todas las cartas del grupo Arachas desde tu mano y mazo."
+  },
+  {
+    "id": "mo_harpy",
+    "name": "Arpía",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 2,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT",
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 2,
+    "description": "Ágil: puede colocarse en Cuerpo a cuerpo o Distancia."
+  },
+  {
+    "id": "mo_arachas_behemoth",
+    "name": "Behemot arachas",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "SIEGE"
+    ],
+    "ability": "MUSTER",
+    "musterGroup": "mo_arachas",
+    "maxCopies": 1,
+    "description": "Reunión: invoca todas las Arachas desde tu mano y mazo."
+  },
+  {
+    "id": "mo_fiend",
+    "name": "Demonio",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "Bestia cornuda de fuerza brutal."
+  },
+  {
+    "id": "mo_earth_elemental",
+    "name": "Elemental de tierra",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "SIEGE"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "Gólem de piedra animada de asedio."
+  },
+  {
+    "id": "mo_ice_giant",
+    "name": "Gigante de hielo",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 5,
+    "isHero": false,
+    "allowedRows": [
+      "SIEGE"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "Coloso de Undvik."
+  },
+  {
+    "id": "mo_ghoul",
+    "name": "Gul",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 1,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "MUSTER",
+    "musterGroup": "mo_ghoul",
+    "maxCopies": 3,
+    "description": "Reunión: invoca todas las copias de Gul desde tu mano y mazo."
+  },
+  {
+    "id": "mo_imlerith",
+    "name": "Imlerith",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 10,
+    "isHero": true,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "Héroe. General de la Cacería Salvaje, inmune a efectos y climas."
+  },
+  {
+    "id": "mo_kayran",
+    "name": "Kayran",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 8,
+    "isHero": true,
+    "allowedRows": [
+      "CLOSE_COMBAT",
+      "RANGED"
+    ],
+    "ability": "MORALE_BOOST",
+    "maxCopies": 1,
+    "description": "Héroe Ágil con Inyección de moral: suma +1 a las demás unidades normales de su fila."
+  },
+  {
+    "id": "mo_leshen",
+    "name": "Leshen",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 10,
+    "isHero": true,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "Héroe. Espíritu ancestral del bosque, inmune a efectos y climas."
+  },
+  {
+    "id": "mo_nekker",
+    "name": "Nekker",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 2,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "MUSTER",
+    "musterGroup": "mo_nekker",
+    "maxCopies": 3,
+    "description": "Reunión: invoca todas las copias de Nekker desde tu mano y mazo."
+  },
+  {
+    "id": "mo_toad",
+    "name": "Príncipe Sapo",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 7,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": "SCORCH_ROW",
+    "maxCopies": 1,
+    "description": "Tierra quemada de fila: destruye la unidad no-Héroe más fuerte de Distancia rival si suma >= 10."
+  },
+  {
+    "id": "st_leader_francesca_pureblood",
+    "name": "Francesca: Elfa Pura",
+    "faction": "SCOIATAEL",
+    "type": "LEADER",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [],
+    "ability": null,
+    "leaderAbility": "PLAY_FROST_FROM_DECK",
+    "maxCopies": 1,
+    "description": "Líder: busca una carta de Escarcha helada en tu mazo y juégala inmediatamente."
+  },
+  {
+    "id": "st_leader_francesca_hope",
+    "name": "Francesca: Esperanza de Aen Seidhe",
+    "faction": "SCOIATAEL",
+    "type": "LEADER",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [],
+    "ability": null,
+    "leaderAbility": "SCORCH_ENEMY_CLOSE_10",
+    "maxCopies": 1,
+    "description": "Líder: destruye la unidad no-Héroe más fuerte de Cuerpo a cuerpo rival si suma >= 10."
+  },
+  {
+    "id": "st_leader_francesca_daisy",
+    "name": "Francesca: Margarita de los Valles",
+    "faction": "SCOIATAEL",
+    "type": "LEADER",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [],
+    "ability": null,
+    "leaderAbility": "DRAW_EXTRA_CARD_START",
+    "maxCopies": 1,
+    "description": "Líder pasivo: roba 1 carta adicional al comienzo de la partida."
+  },
+  {
+    "id": "st_leader_francesca_queen",
+    "name": "Francesca: Reina de Dol Blathanna",
+    "faction": "SCOIATAEL",
+    "type": "LEADER",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [],
+    "ability": null,
+    "leaderAbility": "HORN_RANGED_LEADER",
+    "maxCopies": 1,
+    "description": "Líder: duplica (x2) la fuerza de todas tus unidades normales en Distancia."
+  },
+  {
+    "id": "st_havekar_smuggler",
+    "name": "Contrabandista havekar",
+    "faction": "SCOIATAEL",
+    "type": "UNIT",
+    "baseStrength": 5,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "MUSTER",
+    "musterGroup": "st_havekar_smuggler",
+    "maxCopies": 3,
+    "description": "Reunión: invoca todas las copias de Contrabandista havekar desde tu mano y mazo."
+  },
+  {
+    "id": "st_mahakaman_defender",
+    "name": "Defensor de Mahakam",
+    "faction": "SCOIATAEL",
+    "type": "UNIT",
+    "baseStrength": 5,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 2,
+    "description": "Infantería enana blindada."
+  },
+  {
+    "id": "st_eithne",
+    "name": "Eithné",
+    "faction": "SCOIATAEL",
+    "type": "UNIT",
+    "baseStrength": 10,
+    "isHero": true,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "Héroe. Soberana de Brokilon, inmune a efectos y climas."
+  },
+  {
+    "id": "st_dol_blathanna_scout",
+    "name": "Explorador de Dol Blathanna",
+    "faction": "SCOIATAEL",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT",
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 3,
+    "description": "Ágil: puede colocarse en Cuerpo a cuerpo o Distancia."
+  },
+  {
+    "id": "st_elven_skirmisher",
+    "name": "Hostigador élfico",
+    "faction": "SCOIATAEL",
+    "type": "UNIT",
+    "baseStrength": 2,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": "MUSTER",
+    "musterGroup": "st_elven_skirmisher",
+    "maxCopies": 3,
+    "description": "Reunión: invoca todas las copias de Hostigador élfico desde tu mano y mazo."
+  },
+  {
+    "id": "st_iorveth",
+    "name": "Iorveth",
+    "faction": "SCOIATAEL",
+    "type": "UNIT",
+    "baseStrength": 10,
+    "isHero": true,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "Héroe. Comandante de las ardillas, inmune a efectos y climas."
+  },
+  {
+    "id": "st_milva",
+    "name": "Milva",
+    "faction": "SCOIATAEL",
+    "type": "UNIT",
+    "baseStrength": 10,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": "MORALE_BOOST",
+    "maxCopies": 1,
+    "description": "Inyección de moral: suma +1 a todas las demás unidades normales de Distancia."
+  },
+  {
+    "id": "st_saesenthessis",
+    "name": "Saesenthessis",
+    "faction": "SCOIATAEL",
+    "type": "UNIT",
+    "baseStrength": 10,
+    "isHero": true,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "Héroe. Saskia la Matadragones, inmune a efectos y climas."
+  },
+  {
+    "id": "st_havekar_healer",
+    "name": "Sanador havekar",
+    "faction": "SCOIATAEL",
+    "type": "UNIT",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": "MEDIC",
+    "maxCopies": 3,
+    "description": "Médico: revive una unidad no-Héroe de tu descarte al entrar en Distancia."
+  },
+  {
+    "id": "st_schirru",
+    "name": "Schirrú",
+    "faction": "SCOIATAEL",
+    "type": "UNIT",
+    "baseStrength": 8,
+    "isHero": false,
+    "allowedRows": [
+      "SIEGE"
+    ],
+    "ability": "SCORCH_ROW",
+    "maxCopies": 1,
+    "description": "Tierra quemada de fila: destruye la unidad no-Héroe más fuerte de Asedio rival si suma >= 10."
+  },
+  {
+    "id": "st_vrihedd_brigade",
+    "name": "Veterano de la brigada Vrihedd",
+    "faction": "SCOIATAEL",
+    "type": "UNIT",
+    "baseStrength": 5,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT",
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 2,
+    "description": "Ágil: puede colocarse en Cuerpo a cuerpo o Distancia."
+  },
+  {
+    "id": "nt_mysterious_elf",
+    "name": "Elfo misterioso (Avallac'h)",
+    "faction": "NEUTRAL",
+    "type": "UNIT",
+    "baseStrength": 0,
+    "isHero": true,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "SPY",
+    "maxCopies": 1,
+    "description": "Héroe Espía: se coloca en el campo rival sin darle puntos e inmune a Señuelo y Médico; robas 2 cartas."
   },
   {
     "id": "nt_gaunter_odimm",
@@ -250,7 +844,9 @@
     "type": "UNIT",
     "baseStrength": 2,
     "isHero": false,
-    "allowedRows": ["SIEGE"],
+    "allowedRows": [
+      "SIEGE"
+    ],
     "ability": "MUSTER",
     "musterGroup": "gaunter",
     "maxCopies": 1,
@@ -263,71 +859,13 @@
     "type": "UNIT",
     "baseStrength": 4,
     "isHero": false,
-    "allowedRows": ["RANGED"],
+    "allowedRows": [
+      "RANGED"
+    ],
     "ability": "MUSTER",
     "musterGroup": "gaunter",
     "maxCopies": 3,
     "description": "Reunión: invoca todas las copias de Gaunter desde tu mano y mazo."
-  },
-  {
-    "id": "nt_olgierd_von_everec",
-    "name": "Olgierd von Everec",
-    "faction": "NEUTRAL",
-    "type": "UNIT",
-    "baseStrength": 6,
-    "isHero": false,
-    "allowedRows": ["CLOSE_COMBAT", "RANGED"],
-    "ability": "MORALE_BOOST",
-    "maxCopies": 1,
-    "description": "Ágil (Cuerpo o Distancia). Inyección de moral: suma +1 a las demás unidades normales de su fila."
-  },
-  {
-    "id": "nt_dandelion",
-    "name": "Jaskier",
-    "faction": "NEUTRAL",
-    "type": "UNIT",
-    "baseStrength": 2,
-    "isHero": false,
-    "allowedRows": ["CLOSE_COMBAT"],
-    "ability": "COMMANDERS_HORN",
-    "maxCopies": 1,
-    "description": "Cuerno del comandante: duplica la fuerza de las demás unidades de esta fila."
-  },
-  {
-    "id": "nt_villentretenmerth",
-    "name": "Villentretenmerth",
-    "faction": "NEUTRAL",
-    "type": "UNIT",
-    "baseStrength": 7,
-    "isHero": false,
-    "allowedRows": ["CLOSE_COMBAT"],
-    "ability": "SCORCH_ROW",
-    "maxCopies": 1,
-    "description": "Tierra quemada de fila: si Cuerpo a cuerpo rival suma >= 10, destruye sus unidades no-Héroe más fuertes."
-  },
-  {
-    "id": "nt_mysterious_elf",
-    "name": "Elfo misterioso (Avallac'h)",
-    "faction": "NEUTRAL",
-    "type": "UNIT",
-    "baseStrength": 0,
-    "isHero": true,
-    "allowedRows": ["CLOSE_COMBAT"],
-    "ability": "SPY",
-    "maxCopies": 1,
-    "description": "Héroe Espía: se coloca en el campo rival sin darle puntos e inmune a Señuelo y Médico; robas 2 cartas."
-  },
-  {
-    "id": "nt_yennefer_of_vengerberg",
-    "name": "Yennefer de Vengerberg",
-    "faction": "NEUTRAL",
-    "type": "UNIT",
-    "baseStrength": 7,
-    "isHero": true,
-    "allowedRows": ["RANGED"],
-    "ability": "MEDIC",
-    "maxCopies": 1,
-    "description": "Héroe Médico: revive 1 unidad no-Héroe de tu descarte e inmune a climas y Scorch."
   },
   {
     "id": "nt_geralt_of_rivia",
@@ -336,10 +874,85 @@
     "type": "UNIT",
     "baseStrength": 15,
     "isHero": true,
-    "allowedRows": ["CLOSE_COMBAT"],
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
     "ability": null,
     "maxCopies": 1,
     "description": "Héroe. El Lobo Blanco, inmune a efectos y climas."
+  },
+  {
+    "id": "nt_dandelion",
+    "name": "Jaskier",
+    "faction": "NEUTRAL",
+    "type": "UNIT",
+    "baseStrength": 2,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "COMMANDERS_HORN",
+    "maxCopies": 1,
+    "description": "Cuerno del comandante: duplica la fuerza de las demás unidades de esta fila."
+  },
+  {
+    "id": "nt_olgierd_von_everec",
+    "name": "Olgierd von Everec",
+    "faction": "NEUTRAL",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT",
+      "RANGED"
+    ],
+    "ability": "MORALE_BOOST",
+    "maxCopies": 1,
+    "description": "Ágil (Cuerpo o Distancia). Inyección de moral: suma +1 a las demás unidades normales de su fila."
+  },
+  {
+    "id": "nt_villentretenmerth",
+    "name": "Villentretenmerth",
+    "faction": "NEUTRAL",
+    "type": "UNIT",
+    "baseStrength": 7,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "SCORCH_ROW",
+    "maxCopies": 1,
+    "description": "Tierra quemada de fila: si Cuerpo a cuerpo rival suma >= 10, destruye sus unidades no-Héroe más fuertes."
+  },
+  {
+    "id": "nt_yennefer_of_vengerberg",
+    "name": "Yennefer de Vengerberg",
+    "faction": "NEUTRAL",
+    "type": "UNIT",
+    "baseStrength": 7,
+    "isHero": true,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": "MEDIC",
+    "maxCopies": 1,
+    "description": "Héroe Médico: revive 1 unidad no-Héroe de tu descarte e inmune a climas y Scorch."
+  },
+  {
+    "id": "sp_commanders_horn",
+    "name": "Cuerno del comandante",
+    "faction": "NEUTRAL",
+    "type": "SPECIAL",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT",
+      "RANGED",
+      "SIEGE"
+    ],
+    "ability": "COMMANDERS_HORN",
+    "maxCopies": 3,
+    "description": "Duplica (x2) la fuerza de todas las unidades normales en una fila propia."
   },
   {
     "id": "sp_biting_frost",
@@ -348,22 +961,12 @@
     "type": "SPECIAL",
     "baseStrength": 0,
     "isHero": false,
-    "allowedRows": ["CLOSE_COMBAT"],
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
     "ability": "WEATHER_FROST",
     "maxCopies": 3,
     "description": "Fija en 1 la fuerza base de todas las unidades Cuerpo a cuerpo de ambos lados."
-  },
-  {
-    "id": "sp_impenetrable_fog",
-    "name": "Niebla impenetrable",
-    "faction": "NEUTRAL",
-    "type": "SPECIAL",
-    "baseStrength": 0,
-    "isHero": false,
-    "allowedRows": ["RANGED"],
-    "ability": "WEATHER_FOG",
-    "maxCopies": 3,
-    "description": "Fija en 1 la fuerza base de todas las unidades de Distancia de ambos lados."
   },
   {
     "id": "sp_torrential_rain",
@@ -372,10 +975,42 @@
     "type": "SPECIAL",
     "baseStrength": 0,
     "isHero": false,
-    "allowedRows": ["SIEGE"],
+    "allowedRows": [
+      "SIEGE"
+    ],
     "ability": "WEATHER_RAIN",
     "maxCopies": 3,
     "description": "Fija en 1 la fuerza base de todas las unidades de Asedio de ambos lados."
+  },
+  {
+    "id": "sp_impenetrable_fog",
+    "name": "Niebla impenetrable",
+    "faction": "NEUTRAL",
+    "type": "SPECIAL",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": "WEATHER_FOG",
+    "maxCopies": 3,
+    "description": "Fija en 1 la fuerza base de todas las unidades de Distancia de ambos lados."
+  },
+  {
+    "id": "sp_decoy",
+    "name": "Señuelo",
+    "faction": "NEUTRAL",
+    "type": "SPECIAL",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT",
+      "RANGED",
+      "SIEGE"
+    ],
+    "ability": "DECOY",
+    "maxCopies": 3,
+    "description": "Reemplaza una unidad no-Héroe de tu lado del tablero y devuélvela a tu mano."
   },
   {
     "id": "sp_clear_weather",
@@ -388,30 +1023,6 @@
     "ability": "WEATHER_CLEAR",
     "maxCopies": 3,
     "description": "Elimina todos los efectos de clima activos del tablero."
-  },
-  {
-    "id": "sp_commanders_horn",
-    "name": "Cuerno del comandante",
-    "faction": "NEUTRAL",
-    "type": "SPECIAL",
-    "baseStrength": 0,
-    "isHero": false,
-    "allowedRows": ["CLOSE_COMBAT", "RANGED", "SIEGE"],
-    "ability": "COMMANDERS_HORN",
-    "maxCopies": 3,
-    "description": "Duplica (x2) la fuerza de todas las unidades normales en una fila propia."
-  },
-  {
-    "id": "sp_decoy",
-    "name": "Señuelo",
-    "faction": "NEUTRAL",
-    "type": "SPECIAL",
-    "baseStrength": 0,
-    "isHero": false,
-    "allowedRows": ["CLOSE_COMBAT", "RANGED", "SIEGE"],
-    "ability": "DECOY",
-    "maxCopies": 3,
-    "description": "Reemplaza una unidad no-Héroe de tu lado del tablero y devuélvela a tu mano."
   },
   {
     "id": "sp_scorch",

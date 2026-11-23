@@ -7,6 +7,7 @@
     "build": "ng build",
     "test": "vitest run",
     "test:watch": "vitest",
+    "etl:cards": "node --experimental-strip-types scripts/etl-cards.ts",
     "cap:sync": "npx cap sync android",
     "build:apk": "node scripts/build-apk.mjs"
   },
