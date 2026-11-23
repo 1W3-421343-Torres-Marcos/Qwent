@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { nextRng, QWENT_PHASE, shuffleDeterministic } from '../../index';
 
-describe('Core Engine F5 Smoke & Deterministic PRNG', () => {
+describe('Core Engine F6 Smoke & Deterministic PRNG', () => {
   it('exposes the current phase constant without Angular dependencies', () => {
-    expect(QWENT_PHASE).toBe('F5');
+    expect(QWENT_PHASE).toBe('F6');
   });
 
   it('produces deterministic values in [0, 1) for a fixed seed', () => {

@@ -1,4 +1,4 @@
-export const QWENT_PHASE = 'F5' as const;
+export const QWENT_PHASE = 'F6' as const;
 
 export type PlayerId = 'PLAYER_1' | 'PLAYER_2';
 

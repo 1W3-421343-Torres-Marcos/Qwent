@@ -22,7 +22,7 @@ const ROW_WEATHER_CLASSES: Readonly<Record<RowType, string>> = {
     >
       <!-- 1. Left: Row Total Badge -->
       <div
-        class="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full border border-bronze bg-tavern-dark/95 font-serif text-[clamp(0.95rem,3vh,1.35rem)] font-extrabold tabular-nums text-parchment shadow"
+        class="qwent-num-shadow flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full border border-bronze bg-tavern-dark/95 font-serif text-[clamp(0.95rem,3.2vh,1.4rem)] font-extrabold text-parchment shadow"
       >
         {{ row().totalStrength }}
       </div>
@@ -82,7 +82,7 @@ export class BoardRowComponent {
   readonly rowContainerClasses = computed(() => {
     const base = this.weatherActive()
       ? ROW_WEATHER_CLASSES[this.rowType()]
-      : 'bg-row-leather/90 border-bronze/50';
+      : 'qwent-leather-row border-bronze/50';
 
     if (this.isSelectable()) {
       return `${base} cursor-pointer border-gold-bright ring-2 ring-gold-bright/70 bg-gold/10`;

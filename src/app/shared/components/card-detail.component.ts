@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, input, output } from '@an
 import type { CardInstance, RowType } from '../../../core';
 import { FACTION_META } from '../constants/faction-meta';
 import { AbilityIconComponent, RowIconComponent } from './card-icons.component';
+import { FactionEmblemComponent } from './faction-emblem.component';
 
 const ROW_LABEL: Readonly<Record<RowType, string>> = {
   CLOSE_COMBAT: 'Cuerpo a cuerpo',
@@ -12,17 +13,18 @@ const ROW_LABEL: Readonly<Record<RowType, string>> = {
 @Component({
   selector: 'app-card-detail',
   standalone: true,
-  imports: [RowIconComponent, AbilityIconComponent],
+  imports: [RowIconComponent, AbilityIconComponent, FactionEmblemComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <aside
-      class="fixed right-3 top-1/2 z-40 w-60 -translate-y-1/2 rounded-xl border-2 border-bronze bg-board-wood/95 p-3 text-parchment shadow-2xl backdrop-blur-sm"
+      class="qwent-wood-surface fixed right-3 top-1/2 z-40 w-60 -translate-y-1/2 rounded-xl border-2 border-bronze p-3 text-parchment shadow-2xl backdrop-blur-sm"
       [class.border-gold-bright]="card().card.isHero"
+      [class.qwent-hero-frame]="card().card.isHero"
     >
       <div class="flex items-start justify-between gap-2">
         <div class="flex items-center gap-2">
           <span
-            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-base font-extrabold"
+            class="qwent-num-shadow flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-base font-extrabold"
             [class]="strengthBadgeClass()"
           >
             {{
@@ -54,20 +56,25 @@ const ROW_LABEL: Readonly<Record<RowType, string>> = {
         </button>
       </div>
 
-      <!-- Offline visual slot ready for future local sprites -->
+      <!-- Offline SVG emblem graphic slot ready for future local sprites -->
       <div
-        class="mt-2 flex h-16 items-center justify-center gap-3 rounded-lg border border-bronze/60 bg-tavern-dark/80 px-3"
+        class="mt-2 flex h-16 items-center justify-between gap-2 rounded-lg border border-bronze/60 bg-tavern-dark/85 px-3"
       >
-        @for (row of card().card.allowedRows; track row) {
-          <div class="flex items-center gap-1 text-xs text-parchment/85">
-            <span class="h-4 w-4 text-gold"><app-row-icon [row]="row" /></span>
-            <span>{{ rowLabel(row) }}</span>
-          </div>
-        } @empty {
-          <span class="text-xs text-parchment/75">
-            {{ card().card.type === 'LEADER' ? 'Carta de Líder' : 'Carta especial global' }}
-          </span>
-        }
+        <span class="h-9 w-9 shrink-0 opacity-85" [class]="factionAccentClass()">
+          <app-faction-emblem [faction]="card().card.faction" />
+        </span>
+        <div class="flex flex-wrap items-center justify-end gap-2">
+          @for (row of card().card.allowedRows; track row) {
+            <div class="flex items-center gap-1 text-xs text-parchment/85">
+              <span class="h-4 w-4 text-gold"><app-row-icon [row]="row" /></span>
+              <span>{{ rowLabel(row) }}</span>
+            </div>
+          } @empty {
+            <span class="text-xs text-parchment/75">
+              {{ card().card.type === 'LEADER' ? 'Carta de Líder' : 'Carta especial global' }}
+            </span>
+          }
+        </div>
       </div>
 
       @if (card().card.type === 'LEADER' && card().card.leaderAbility; as leaderAbility) {
@@ -113,6 +120,7 @@ export class CardDetailComponent {
   readonly playRequested = output<CardInstance>();
 
   readonly factionName = computed(() => FACTION_META[this.card().card.faction].label);
+  readonly factionAccentClass = computed(() => FACTION_META[this.card().card.faction].accentClass);
 
   readonly strengthBadgeClass = computed(() => {
     const c = this.card();

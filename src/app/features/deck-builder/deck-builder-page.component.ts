@@ -7,6 +7,7 @@ import {
 } from '../../../core';
 import { DeckStorageService } from '../../services/deck-storage.service';
 import { AbilityIconComponent, RowIconComponent } from '../../shared/components/card-icons.component';
+import { FactionEmblemComponent } from '../../shared/components/faction-emblem.component';
 import { FACTION_META } from '../../shared/constants/faction-meta';
 
 type CollectionFilter = 'ALL' | 'CLOSE_COMBAT' | 'RANGED' | 'SIEGE' | 'SPECIAL';
@@ -27,27 +28,30 @@ const FILTER_OPTIONS: ReadonlyArray<{ readonly id: CollectionFilter; readonly la
 @Component({
   selector: 'app-deck-builder-page',
   standalone: true,
-  imports: [AbilityIconComponent, RowIconComponent],
+  imports: [AbilityIconComponent, RowIconComponent, FactionEmblemComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main
       class="flex h-dvh w-screen flex-col overflow-hidden bg-tavern-dark text-parchment p-[env(safe-area-inset-top)_env(safe-area-inset-right)_env(safe-area-inset-bottom)_env(safe-area-inset-left)]"
     >
       <!-- Top Bar: Factions + Actions -->
-      <header class="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-bronze/70 bg-board-wood px-3 py-1.5">
+      <header class="qwent-wood-surface flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-bronze/70 px-3 py-1.5">
         <div class="flex items-center gap-1.5 overflow-x-auto">
           @for (faction of factions; track faction) {
             <button
               type="button"
               (click)="selectFaction(faction)"
-              class="min-h-[38px] shrink-0 rounded-lg border px-2.5 py-1 text-xs font-bold uppercase tracking-wide transition active:scale-95"
+              class="flex min-h-[38px] shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-bold uppercase tracking-wide transition active:scale-95"
               [class]="
                 activeFaction() === faction
                   ? 'border-gold-bright bg-gold/25 text-gold-bright'
                   : 'border-bronze/60 bg-tavern-dark/80 text-parchment/80 hover:border-gold/70'
               "
             >
-              {{ factionLabel(faction) }}
+              <span class="h-3.5 w-3.5" [class]="factionAccent(faction)">
+                <app-faction-emblem [faction]="faction" />
+              </span>
+              <span>{{ factionLabel(faction) }}</span>
             </button>
           }
         </div>
@@ -361,6 +365,10 @@ export class DeckBuilderPageComponent {
 
   factionLabel(faction: PlayableFactionId): string {
     return FACTION_META[faction].shortLabel;
+  }
+
+  factionAccent(faction: PlayableFactionId): string {
+    return FACTION_META[faction].accentClass;
   }
 
   selectFaction(faction: PlayableFactionId): void {

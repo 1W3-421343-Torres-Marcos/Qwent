@@ -1,7 +1,10 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, output, signal } from '@angular/core';
+import type { FactionId } from '../../../core';
 import { GameFacadeService } from '../../services/game-facade.service';
 import { AbilityIconComponent } from '../../shared/components/card-icons.component';
 import { CardDetailComponent } from '../../shared/components/card-detail.component';
+import { FactionEmblemComponent } from '../../shared/components/faction-emblem.component';
+import { FACTION_META } from '../../shared/constants/faction-meta';
 import { BoardOverlaysComponent } from './components/board-overlays.component';
 import { BoardRowComponent } from './components/board-row.component';
 import { HandBarComponent } from './components/hand-bar.component';
@@ -17,6 +20,7 @@ const HOLD_TO_PASS_MS = 600;
     BoardOverlaysComponent,
     CardDetailComponent,
     AbilityIconComponent,
+    FactionEmblemComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -27,21 +31,36 @@ const HOLD_TO_PASS_MS = 600;
       <div class="grid h-full w-full grid-cols-[18%_68%_14%] gap-1 p-1">
         <!-- LEFT ZONE (18%): Profiles, Gems, Global Scores, Hand Counts & Shared Weather Box -->
         <aside
-          class="flex h-full min-h-0 flex-col justify-between rounded-lg border border-bronze/70 bg-board-wood p-1.5"
+          class="qwent-wood-surface flex h-full min-h-0 flex-col justify-between rounded-lg border border-bronze/70 p-1.5"
         >
           <!-- Opponent Status (Top) -->
-          <section class="rounded border border-bronze/60 bg-tavern-dark/80 p-1.5">
+          <section
+            class="rounded border bg-tavern-dark/85 p-1.5 transition"
+            [class]="
+              facade.state().activePlayer === facade.topPlayer().id
+                ? 'border-gold-bright ring-1 ring-gold-bright/50'
+                : 'border-bronze/60'
+            "
+          >
             <div class="flex items-center justify-between gap-1">
               <div class="min-w-0">
-                <p class="truncate text-[10px] font-bold uppercase tracking-wider text-parchment/70">
-                  {{ facade.topPlayer().name }}
-                </p>
+                <div class="flex items-center gap-1">
+                  <span class="h-3.5 w-3.5 shrink-0" [class]="factionAccent(facade.topPlayer().faction)">
+                    <app-faction-emblem [faction]="facade.topPlayer().faction" />
+                  </span>
+                  <p class="truncate text-[10px] font-bold uppercase tracking-wider text-parchment/80">
+                    {{ facade.topPlayer().name }}
+                  </p>
+                </div>
                 <div class="mt-0.5 flex items-center gap-1">
                   @for (gemIdx of [0, 1]; track gemIdx) {
                     <span
                       class="h-2.5 w-2.5 rounded-full border border-black/60"
-                      [class.bg-gem-ruby]="gemIdx < facade.topPlayer().gems"
-                      [class.bg-gem-ash]="gemIdx >= facade.topPlayer().gems"
+                      [class]="
+                        gemIdx < facade.topPlayer().gems
+                          ? 'bg-gem-ruby shadow-[0_0_6px_rgba(220,38,38,0.85)]'
+                          : 'bg-gem-ash'
+                      "
                     ></span>
                   }
                   @if (facade.topPlayer().passed) {
@@ -52,7 +71,7 @@ const HOLD_TO_PASS_MS = 600;
                 </div>
               </div>
               <span
-                class="font-serif text-[clamp(1.2rem,4vh,1.9rem)] font-extrabold tabular-nums text-parchment"
+                class="qwent-num-shadow font-serif text-[clamp(1.25rem,4.2vh,2rem)] font-extrabold text-parchment"
               >
                 {{ facade.topPlayer().totalScore }}
               </span>
@@ -120,18 +139,33 @@ const HOLD_TO_PASS_MS = 600;
           </section>
 
           <!-- Bottom Player Status -->
-          <section class="rounded border border-gold/60 bg-tavern-dark/90 p-1.5">
+          <section
+            class="rounded border bg-tavern-dark/90 p-1.5 transition"
+            [class]="
+              facade.state().activePlayer === facade.bottomPlayer().id
+                ? 'border-gold-bright ring-1 ring-gold-bright/50'
+                : 'border-gold/60'
+            "
+          >
             <div class="flex items-center justify-between gap-1">
               <div class="min-w-0">
-                <p class="truncate text-[10px] font-bold uppercase tracking-wider text-gold">
-                  {{ facade.bottomPlayer().name }}
-                </p>
+                <div class="flex items-center gap-1">
+                  <span class="h-3.5 w-3.5 shrink-0" [class]="factionAccent(facade.bottomPlayer().faction)">
+                    <app-faction-emblem [faction]="facade.bottomPlayer().faction" />
+                  </span>
+                  <p class="truncate text-[10px] font-bold uppercase tracking-wider text-gold">
+                    {{ facade.bottomPlayer().name }}
+                  </p>
+                </div>
                 <div class="mt-0.5 flex items-center gap-1">
                   @for (gemIdx of [0, 1]; track gemIdx) {
                     <span
                       class="h-2.5 w-2.5 rounded-full border border-black/60"
-                      [class.bg-gem-ruby]="gemIdx < facade.bottomPlayer().gems"
-                      [class.bg-gem-ash]="gemIdx >= facade.bottomPlayer().gems"
+                      [class]="
+                        gemIdx < facade.bottomPlayer().gems
+                          ? 'bg-gem-ruby shadow-[0_0_6px_rgba(220,38,38,0.85)]'
+                          : 'bg-gem-ash'
+                      "
                     ></span>
                   }
                   @if (facade.bottomPlayer().passed) {
@@ -142,7 +176,7 @@ const HOLD_TO_PASS_MS = 600;
                 </div>
               </div>
               <span
-                class="font-serif text-[clamp(1.2rem,4vh,1.9rem)] font-extrabold tabular-nums text-gold-bright"
+                class="qwent-num-shadow font-serif text-[clamp(1.25rem,4.2vh,2rem)] font-extrabold text-gold-bright"
               >
                 {{ facade.bottomPlayer().totalScore }}
               </span>
@@ -254,7 +288,7 @@ const HOLD_TO_PASS_MS = 600;
 
         <!-- RIGHT ZONE (14%): Discard/Deck Stacks & Hold-to-Pass Button -->
         <aside
-          class="flex h-full min-h-0 flex-col justify-between rounded-lg border border-bronze/70 bg-board-wood p-1.5"
+          class="qwent-wood-surface flex h-full min-h-0 flex-col justify-between rounded-lg border border-bronze/70 p-1.5"
           (click)="$event.stopPropagation()"
         >
           <!-- Opponent Piles (Top) -->
@@ -413,6 +447,10 @@ export class BoardPageComponent {
 
   onBackdropClick(): void {
     this.facade.clearSelection();
+  }
+
+  factionAccent(faction: FactionId): string {
+    return FACTION_META[faction].accentClass;
   }
 
   onOwnRowSelected(rowType: Parameters<GameFacadeService['onOwnRowTap']>[0]): void {

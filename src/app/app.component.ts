@@ -4,6 +4,7 @@ import { BoardPageComponent } from './features/board/board-page.component';
 import { DeckBuilderPageComponent } from './features/deck-builder/deck-builder-page.component';
 import { DeckStorageService } from './services/deck-storage.service';
 import { GameFacadeService, type GameMode } from './services/game-facade.service';
+import { FactionEmblemComponent } from './shared/components/faction-emblem.component';
 import { FACTION_META } from './shared/constants/faction-meta';
 
 type ScreenView = 'MENU' | 'DECK_BUILDER' | 'BOARD';
@@ -11,7 +12,7 @@ type ScreenView = 'MENU' | 'DECK_BUILDER' | 'BOARD';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [BoardPageComponent, DeckBuilderPageComponent],
+  imports: [BoardPageComponent, DeckBuilderPageComponent, FactionEmblemComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (screen() === 'BOARD') {
@@ -23,13 +24,13 @@ type ScreenView = 'MENU' | 'DECK_BUILDER' | 'BOARD';
         class="flex h-dvh w-screen items-center justify-center overflow-hidden bg-tavern-dark text-parchment p-[env(safe-area-inset-top)_env(safe-area-inset-right)_env(safe-area-inset-bottom)_env(safe-area-inset-left)]"
       >
         <section
-          class="mx-4 flex w-full max-w-2xl flex-col items-center gap-3 rounded-xl border-2 border-bronze bg-board-wood px-6 py-4 text-center shadow-2xl"
+          class="qwent-wood-surface mx-4 flex w-full max-w-2xl flex-col items-center gap-3 rounded-xl border-2 border-bronze px-6 py-4 text-center shadow-2xl"
         >
           <div class="flex flex-wrap items-center justify-center gap-2">
             <span
               class="rounded border border-gold/60 bg-row-leather px-3 py-0.5 text-[11px] font-bold uppercase tracking-widest text-gold"
             >
-              Fase {{ phase }} — Facciones, Líderes y Mazos
+              Fase {{ phase }} — Release Offline
             </span>
             <span
               class="rounded border border-bronze bg-tavern-dark/80 px-3 py-0.5 text-[11px] font-medium text-parchment/80"
@@ -48,7 +49,12 @@ type ScreenView = 'MENU' | 'DECK_BUILDER' | 'BOARD';
           <div class="grid w-full grid-cols-1 gap-2 sm:grid-cols-2">
             <div class="rounded-lg border border-gold/60 bg-tavern-dark/85 p-2.5 text-left">
               <div class="flex items-center justify-between gap-2">
-                <span class="text-[10px] font-bold uppercase tracking-wider text-gold">Tu Facción (J1)</span>
+                <span class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-gold">
+                  <span class="h-3.5 w-3.5" [class]="factionAccent(deckStorage.selectedPlayerFaction())">
+                    <app-faction-emblem [faction]="deckStorage.selectedPlayerFaction()" />
+                  </span>
+                  <span>Tu Facción (J1)</span>
+                </span>
                 <select
                   [value]="deckStorage.selectedPlayerFaction()"
                   (change)="onPlayerFactionChange($event)"
@@ -70,7 +76,12 @@ type ScreenView = 'MENU' | 'DECK_BUILDER' | 'BOARD';
 
             <div class="rounded-lg border border-bronze/70 bg-tavern-dark/85 p-2.5 text-left">
               <div class="flex items-center justify-between gap-2">
-                <span class="text-[10px] font-bold uppercase tracking-wider text-parchment/75">Rival / IA (J2)</span>
+                <span class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-parchment/75">
+                  <span class="h-3.5 w-3.5" [class]="factionAccent(deckStorage.selectedOpponentFaction())">
+                    <app-faction-emblem [faction]="deckStorage.selectedOpponentFaction()" />
+                  </span>
+                  <span>Rival / IA (J2)</span>
+                </span>
                 <select
                   [value]="deckStorage.selectedOpponentFaction()"
                   (change)="onOpponentFactionChange($event)"
@@ -155,6 +166,10 @@ export class AppComponent {
 
   factionLabel(faction: PlayableFactionId): string {
     return FACTION_META[faction].label;
+  }
+
+  factionAccent(faction: PlayableFactionId): string {
+    return FACTION_META[faction].accentClass;
   }
 
   onPlayerFactionChange(event: Event): void {
