@@ -1,19 +1,19 @@
 # AGENTS.md — Reglas Persistentes del Proyecto Qwent
 
 ## Propósito y Alcance
-App Android (`.apk`) 100% offline que replica el minijuego **Gwent** original de *The Witcher 3: Wild Hunt* (no es el standalone: sin provisiones, sin daño/armadura entre unidades, sin robo automático entre rondas y tablero de 3 filas por jugador).
+App Android (`.apk`) 100% offline que replica el minijuego **Gwent** de *The Witcher 3* (sin provisiones, daño/armadura entre unidades ni robo automático entre rondas; tablero de 3 filas por jugador).
 
 ## Stack Técnico
 - **Core (`src/core/`)**: TypeScript `strict: true`, 100% puro (cero imports de Angular, DOM o Capacitor).
 - **UI (`src/app/`)**: Angular (Standalone Components + Signals + `OnPush`) + Tailwind CSS.
 - **Móvil (`android/`)**: Capacitor + Android Gradle (`assembleDebug`).
 - **Testing**: Vitest puro (motor `src/core/`, catálogo y simulaciones IA corren sin `TestBed` de Angular).
-- **Datos**: 100% offline vía JSON embebido (`src/assets/data/cards.json`, mazos base) y almacenamiento local para mazos propios. Sin APIs externas.
+- **Datos**: JSON local embebido (`src/assets/data/cards.json`, mazos base) y almacenamiento local. Sin APIs externas.
 
 ## Arquitectura y Reglas Innegociables
 1. **Separación estricta Core vs. UI (Clean Core funcional)**:
-   - `src/core/` es máquina de estados pura `(state: GameState, action: GameAction) => GameState` con estado inmutable (`GameState`), acciones tipadas (`PLAY_CARD`, `PASS_TURN`, `USE_LEADER`, `SELECT_TARGET`, `MULLIGAN_SWAP`) y PRNG determinista con semilla (`rngSeed` en `GameState`) para barajado, mulligan, moneda y pasiva de Monstruos (prohibido `Math.random()` en el reducer).
-   - *Por qué*: permite testear el 100% de reglas/casos borde y correr simulaciones IA vs. IA en Vitest en milisegundos sin Angular ni Android.
+   - `src/core/` es máquina de estados pura `(state: GameState, action: GameAction) => GameState` con estado inmutable, acciones tipadas (`PLAY_CARD`, `PASS_TURN`, `USE_LEADER`, `SELECT_TARGET`, `MULLIGAN_SWAP`) y PRNG determinista (`rngSeed` en `GameState`) para azar (prohibido `Math.random()`).
+   - *Por qué*: permite testear reglas/casos borde y simulaciones IA vs. IA en Vitest en milisegundos sin Angular ni Android.
 2. **Cálculo dinámico de puntajes (NUNCA mutar `baseStrength`)**:
    - Ante cualquier cambio en mesa, cada unidad y fila se recalculan desde `baseStrength` en este orden estricto para unidades normales (los **Héroes** son inmunes a todo y conservan `baseStrength`):
      a) `baseStrength`.
@@ -38,6 +38,7 @@ App Android (`.apk`) 100% offline que replica el minijuego **Gwent** original de
 - TypeScript `strict: true`, prohibido `any` y mutaciones directas de estado.
 - Código en inglés (`PascalCase` tipos, `camelCase` funciones/campos, `UPPER_SNAKE_CASE` enums/acciones); UI y docs en español.
 - Angular Standalone + `OnPush` + Signals (`signal`, `computed`) + Tailwind CSS.
+- **Versionado Git**: Commit (Conventional Commits) tras cada paso/cambio relevante con tests en verde, y tag `v0.<N>.0-f<N>` al cerrar fase.
 
 ## Lo que el Agente NUNCA Debe Hacer
 - Nunca mezclar reglas dentro de componentes Angular.
@@ -46,7 +47,7 @@ App Android (`.apk`) 100% offline que replica el minijuego **Gwent** original de
 - Nunca buscar cartas/reglas en internet por su cuenta ni inventar de memoria el catálogo de ~200 cartas.
 - Nunca permitir que la IA lea la mano oculta ni el orden del mazo del jugador humano.
 - Nunca avanzar de fase sin tests en verde y sin el `.apk` de la fase generado.
-- Nunca rediseñar el área jugable al estilo de otros juegos de cartas ni ocultar/colapsar filas tras scroll o pestañas; el tablero debe replicar fielmente la distribución espacial clásica del minijuego de *The Witcher 3* definida en `docs/design.md`.
+- Nunca rediseñar el área jugable ni ocultar/colapsar filas tras scroll o pestañas; replicar fielmente el tablero clásico de *The Witcher 3* definido en `docs/design.md`.
 
 ## Protocolo de trabajo
 1. Cuando el usuario use `/plan` o pida planificar una fase o paso (ej: "/plan F1"), el agente DEBE:
