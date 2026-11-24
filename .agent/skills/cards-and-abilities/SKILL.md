@@ -14,7 +14,7 @@ description: Usar al trabajar en el esquema cards.json, resolución de habilidad
   - Metadatos opcionales: `bondGroup?: string`, `musterGroup?: string`, `leaderAbility?: LeaderAbilityType` (para `type === 'LEADER'`), `maxCopies: number`, `description: string`.
 - **Estrategia de catálogo por fases**:
   - **F2–F4**: `src/assets/data/cards.json` reducido de prueba (20 a 35 cartas) cubriendo todas las habilidades y casos borde.
-  - **F5**: Script determinista `scripts/etl-cards.ts` que transforma un dataset local curado (CSV/JSON provisto por el usuario) en `cards.json` y valida integridad (sin IDs duplicados, campos válidos, enums válidos). Prohibido inventar de memoria o raspar internet.
+  - **F5**: Script determinista `scripts/etl-cards.ts` que transforma un dataset local curado (CSV/JSON aportado por el usuario o importado desde una fuente pública verificada) en `cards.json` y valida integridad (sin IDs duplicados, campos válidos, enums válidos). Prohibido inventar cartas de memoria o consumir APIs externas en tiempo de ejecución.
 
 ## Reglas de Negocio (Casos Borde Obligatorios TW3)
 - **Tierra quemada global (`SCORCH` especial)**: Evalúa la fuerza **efectiva actual** (post clima/vínculo/moral/cuerno) de todas las unidades **NO-Héroe** en **AMBOS lados** del tablero. Destruye la más alta; si hay empate, destruye **todas** las empatadas (incluyendo propias). Héroes y Señuelos (fuerza 0) se ignoran. Puede jugarse incluso si no hay objetivos NO-Héroe en mesa (se descarta sin destruir nada).

@@ -24,7 +24,7 @@ App Android (`.apk`) 100% offline que replica el minijuego **Gwent** de *The Wit
 3. **Esquema normalizado y estrategia de datos**:
    - `allowedRows` siempre es array (`["CLOSE_COMBAT"]`, `["CLOSE_COMBAT", "RANGED"]`, etc.), resolviendo Ágiles sin lógica especial.
    - Habilidades tipadas: `TIGHT_BOND`, `MORALE_BOOST`, `SPY`, `MEDIC`, `MUSTER`, `SCORCH`, `SCORCH_ROW`, `DECOY`, `COMMANDERS_HORN`, `WEATHER_FROST`, `WEATHER_FOG`, `WEATHER_RAIN`, `WEATHER_CLEAR`.
-   - F2–F4 usan un `cards.json` de prueba (20–35 cartas) cubriendo casos borde. En F5 un script ETL determinista genera el catálogo completo desde un dataset local curado (CSV/JSON) del usuario, validado por tests.
+   - F2–F4 usan un `cards.json` de prueba (20–35 cartas) cubriendo casos borde. En F5 un script ETL determinista genera el catálogo completo desde un dataset local curado (CSV/JSON aportado por el usuario o importado desde una fuente pública verificada), validado por tests.
 4. **Entregable APK obligatorio en CADA fase (Walking Skeleton)**:
    - F1 configura Capacitor, orientación `sensorLandscape`, modo inmersivo y `npm run build:apk`.
    - Toda fase (F1–F6) cierra ejecutando tests en verde, sync de Capacitor, compilación de `gwent-f<N>-debug.apk` y verificación de arranque.
@@ -44,17 +44,17 @@ App Android (`.apk`) 100% offline que replica el minijuego **Gwent** de *The Wit
 - Nunca mezclar reglas dentro de componentes Angular.
 - Nunca mutar `baseStrength` ni "deshacer clima" restando valores a mano.
 - Nunca depender de APIs externas ni imágenes por URL (usar CSS/SVG desacoplado para sprites locales futuros).
-- Nunca buscar cartas/reglas en internet por su cuenta ni inventar de memoria el catálogo de ~200 cartas.
+- Nunca inventar de memoria el catálogo completo de ~200 cartas ni consumir APIs externas en tiempo de ejecución (se permite importar datasets públicos verificados a `scripts/data/` y procesarlos offline mediante `scripts/etl-cards.ts`).
 - Nunca permitir que la IA lea la mano oculta ni el orden del mazo del jugador humano.
 - Nunca avanzar de fase sin tests en verde y sin el `.apk` de la fase generado.
 - Nunca rediseñar el área jugable ni ocultar/colapsar filas tras scroll o pestañas; replicar fielmente el tablero clásico de *The Witcher 3* definido en `docs/design.md`.
 
 ## Protocolo de trabajo
-1. Cuando el usuario use `/plan` o pida planificar una fase o paso (ej: "/plan F1"), el agente DEBE:
-   a. Leer esa fase en `docs/plan.md` y las skills de los módulos involucrados (solo esas).
+1. Cuando el usuario use `/plan` o pida planificar un cambio, actualización o paso (ej: "/plan U1"):
+   a. Leer el alcance actual en `docs/update-plan.md` (`docs/plan.md` quedó cerrado en `v1.0.0`) y las skills de los módulos involucrados (solo esas).
    b. Generar el artefacto nativo de Antigravity: Implementation Plan + Task List, con diagramas cuando aporten (arquitectura, flujos, modelo de datos). No responder con un plan en texto plano en el chat.
    c. Detenerse y esperar la aprobación del usuario. No escribir código antes.
 2. Al ejecutar, trabajar paso por paso siguiendo la Task List aprobada.
-3. Al terminar CADA paso, y antes de continuar con el siguiente, actualizar en `docs/plan.md`: los checkboxes, la tabla de resumen (estado y %) y el Registro de avance.
-4. Al terminar una fase, marcar los criterios de aceptación en los SKILL.md de los módulos involucrados y resumir qué quedó usable.
+3. Al terminar CADA paso, y antes de continuar con el siguiente, actualizar en `docs/update-plan.md`: los checkboxes, la tabla de resumen (estado y %) y el Registro de avance.
+4. Al terminar una actualización o versión, marcar los criterios de aceptación en los SKILL.md de los módulos involucrados y resumir qué quedó usable.
 5. Leer solo la skill del módulo que se está tocando. No cargar documentación de otros módulos.

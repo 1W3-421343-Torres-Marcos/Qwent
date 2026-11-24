@@ -66,6 +66,21 @@
     "description": "Arma de asedio pesada de largo alcance."
   },
   {
+    "id": "nr_catapult",
+    "name": "Catapult",
+    "faction": "NORTHERN_REALMS",
+    "type": "UNIT",
+    "baseStrength": 8,
+    "isHero": false,
+    "allowedRows": [
+      "SIEGE"
+    ],
+    "ability": "TIGHT_BOND",
+    "bondGroup": "catapult",
+    "maxCopies": 2,
+    "description": "Vínculo estrecho: multiplica su fuerza por cada copia igual en la fila."
+  },
+  {
     "id": "nr_crinfrid_reavers",
     "name": "Cazador de Crinfrid",
     "faction": "NORTHERN_REALMS",
@@ -96,6 +111,20 @@
     "description": "Vínculo estrecho: multiplica la fuerza de todas las unidades iguales en la fila."
   },
   {
+    "id": "nr_dethmold",
+    "name": "Dethmold",
+    "faction": "NORTHERN_REALMS",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"I once made a prisoner vomit his own entrails... Ah, good times…\""
+  },
+  {
     "id": "nr_esterad_thyssen",
     "name": "Esterad Thyssen",
     "faction": "NORTHERN_REALMS",
@@ -124,6 +153,34 @@
     "description": "Inyección de moral: suma +1 a todas las demás unidades normales de Asedio."
   },
   {
+    "id": "nr_john_natalis",
+    "name": "John Natalis",
+    "faction": "NORTHERN_REALMS",
+    "type": "UNIT",
+    "baseStrength": 10,
+    "isHero": true,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "Héroe (inmune a climas y efectos)."
+  },
+  {
+    "id": "nr_keira_metz",
+    "name": "Keira Metz",
+    "faction": "NORTHERN_REALMS",
+    "type": "UNIT",
+    "baseStrength": 5,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"If I'm to die today, I wish to look smashing for the occasion.\""
+  },
+  {
     "id": "nr_dun_banner_medic",
     "name": "Médica de la Bandera Parda",
     "faction": "NORTHERN_REALMS",
@@ -138,6 +195,35 @@
     "description": "Médico: elige una unidad no-Héroe de tu descarte y devuélvela al tablero."
   },
   {
+    "id": "nr_philippa_eilhart",
+    "name": "Philippa Eilhart",
+    "faction": "NORTHERN_REALMS",
+    "type": "UNIT",
+    "baseStrength": 10,
+    "isHero": true,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "Héroe (inmune a climas y efectos)."
+  },
+  {
+    "id": "nr_poor_fucking_infantry",
+    "name": "Poor Fucking Infantry",
+    "faction": "NORTHERN_REALMS",
+    "type": "UNIT",
+    "baseStrength": 1,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "TIGHT_BOND",
+    "bondGroup": "poor_fucking_infantry",
+    "maxCopies": 3,
+    "description": "Vínculo estrecho: multiplica su fuerza por cada copia igual en la fila."
+  },
+  {
     "id": "nr_prince_stennis",
     "name": "Príncipe Stennis",
     "faction": "NORTHERN_REALMS",
@@ -150,6 +236,118 @@
     "ability": "SPY",
     "maxCopies": 1,
     "description": "Espía: se juega en Cuerpo a cuerpo del rival y robas 2 cartas de tu mazo."
+  },
+  {
+    "id": "nr_redanian_foot_soldier",
+    "name": "Redanian Foot Soldier",
+    "faction": "NORTHERN_REALMS",
+    "type": "UNIT",
+    "baseStrength": 1,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 2,
+    "description": "\"I've bled for Redania! I've killed for Redania.. Dammit, I've even raped for Redania!\""
+  },
+  {
+    "id": "nr_sabrina_glevissig",
+    "name": "Sabrina Glevissig",
+    "faction": "NORTHERN_REALMS",
+    "type": "UNIT",
+    "baseStrength": 4,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"Daughter of the Kaedweni Wilderness.\""
+  },
+  {
+    "id": "nr_sheldon_skaggs",
+    "name": "Sheldon Skaggs",
+    "faction": "NORTHERN_REALMS",
+    "type": "UNIT",
+    "baseStrength": 4,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"I was there, on the front lines! Right where the fightin' was thickest!\""
+  },
+  {
+    "id": "nr_siege_tower",
+    "name": "Siege Tower",
+    "faction": "NORTHERN_REALMS",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "SIEGE"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"I love the clamor of siege towers in the morning. Sounds like victory.\""
+  },
+  {
+    "id": "nr_siegfried_of_denesle",
+    "name": "Siegfried of Denesle",
+    "faction": "NORTHERN_REALMS",
+    "type": "UNIT",
+    "baseStrength": 5,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"We're on the same side, witcher. You'll realize this one day.\""
+  },
+  {
+    "id": "nr_sigismund_dijkstra",
+    "name": "Sigismund Dijkstra",
+    "faction": "NORTHERN_REALMS",
+    "type": "UNIT",
+    "baseStrength": 4,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "SPY",
+    "maxCopies": 1,
+    "description": "Espía: se coloca en el campo rival y robas 2 cartas."
+  },
+  {
+    "id": "nr_sile_de_tansarville",
+    "name": "Sile de Tansarville",
+    "faction": "NORTHERN_REALMS",
+    "type": "UNIT",
+    "baseStrength": 4,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"The Lodge lacks humility. Our lust for power may yet be our undoing.\""
+  },
+  {
+    "id": "nr_thaler",
+    "name": "Thaler",
+    "faction": "NORTHERN_REALMS",
+    "type": "UNIT",
+    "baseStrength": 1,
+    "isHero": false,
+    "allowedRows": [
+      "SIEGE"
+    ],
+    "ability": "SPY",
+    "maxCopies": 1,
+    "description": "Espía: se coloca en el campo rival y robas 2 cartas."
   },
   {
     "id": "nr_trebuchet",
@@ -192,6 +390,20 @@
     "ability": null,
     "maxCopies": 1,
     "description": "Exploradora de élite de las Franjas Azules."
+  },
+  {
+    "id": "nr_yarpen_zigrin",
+    "name": "Yarpen Zigrin",
+    "faction": "NORTHERN_REALMS",
+    "type": "UNIT",
+    "baseStrength": 2,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"The world belongs to whoever's best at crackin' skulls and impregnatin' lasses.\""
   },
   {
     "id": "ng_leader_emhyr_relentless",
@@ -246,6 +458,20 @@
     "description": "Líder: busca una carta de Lluvia torrencial en tu mazo y juégala inmediatamente."
   },
   {
+    "id": "ng_albrich",
+    "name": "Albrich",
+    "faction": "NILFGAARD",
+    "type": "UNIT",
+    "baseStrength": 2,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"A fireball? Of course. Whatever Your Imperial Majesty wishes.\""
+  },
+  {
     "id": "ng_etolian_auxiliary",
     "name": "Arquero auxiliar etoliano",
     "faction": "NILFGAARD",
@@ -274,6 +500,20 @@
     "description": "Tirador de élite nilfgaardiano."
   },
   {
+    "id": "ng_assire_var_anahid",
+    "name": "Assire var Anahid",
+    "faction": "NILFGAARD",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"Nilfgaardian mages do have a choice: servile submission, or the gallows.\""
+  },
+  {
     "id": "ng_cahir",
     "name": "Cahir Mawr Dyffryn aep Ceallach",
     "faction": "NILFGAARD",
@@ -286,6 +526,20 @@
     "ability": null,
     "maxCopies": 1,
     "description": "Caballero del yelmo alado."
+  },
+  {
+    "id": "ng_cynthia",
+    "name": "Cynthia",
+    "faction": "NILFGAARD",
+    "type": "UNIT",
+    "baseStrength": 4,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"Cynthia's talents can be deadly. She needs a tight leash.\""
   },
   {
     "id": "ng_zerrikanian_fire_scorpion",
@@ -314,6 +568,20 @@
     "ability": null,
     "maxCopies": 1,
     "description": "Pieza pesada de artillería imperial."
+  },
+  {
+    "id": "ng_fringilla_vigo",
+    "name": "Fringilla Vigo",
+    "faction": "NILFGAARD",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"Magic is the highest good. It transcends all borders and divisions.\""
   },
   {
     "id": "ng_impera_brigade",
@@ -360,6 +628,146 @@
     "description": "Héroe. Brujo de la Escuela de la Víbora."
   },
   {
+    "id": "ng_menno_coehoorn",
+    "name": "Menno Coehoorn",
+    "faction": "NILFGAARD",
+    "type": "UNIT",
+    "baseStrength": 10,
+    "isHero": true,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "MEDIC",
+    "maxCopies": 1,
+    "description": "Héroe (inmune a climas y efectos). Médico: revive una unidad no-Héroe de tu descarte."
+  },
+  {
+    "id": "ng_morteisen",
+    "name": "Morteisen",
+    "faction": "NILFGAARD",
+    "type": "UNIT",
+    "baseStrength": 3,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"No Nordling pikemen or dwarven spearbearers can hope to best trained cavalry.\""
+  },
+  {
+    "id": "ng_morvran_voorhis",
+    "name": "Morvran Voorhis",
+    "faction": "NILFGAARD",
+    "type": "UNIT",
+    "baseStrength": 10,
+    "isHero": true,
+    "allowedRows": [
+      "SIEGE"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "Héroe (inmune a climas y efectos)."
+  },
+  {
+    "id": "ng_puttkammer",
+    "name": "Puttkammer",
+    "faction": "NILFGAARD",
+    "type": "UNIT",
+    "baseStrength": 3,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"Learned a lot at Braibant Military Academy. How to scrub potatoes, for instance.\""
+  },
+  {
+    "id": "ng_rainfarn",
+    "name": "Rainfarn",
+    "faction": "NILFGAARD",
+    "type": "UNIT",
+    "baseStrength": 4,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"You'll die as painfully as that pathetic traitor Windhalm did.\""
+  },
+  {
+    "id": "ng_renuald_aep_matsen",
+    "name": "Renuald aep Matsen",
+    "faction": "NILFGAARD",
+    "type": "UNIT",
+    "baseStrength": 5,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"They say the Impera fear nothing. Untrue. Renuald scares them shitless.\""
+  },
+  {
+    "id": "ng_rotten_mangonel",
+    "name": "Rotten Mangonel",
+    "faction": "NILFGAARD",
+    "type": "UNIT",
+    "baseStrength": 3,
+    "isHero": false,
+    "allowedRows": [
+      "SIEGE"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"The rotten smell brings back childhood memories\""
+  },
+  {
+    "id": "ng_shilard_fitz_oesterlen",
+    "name": "Shilard Fitz-Oesterlen",
+    "faction": "NILFGAARD",
+    "type": "UNIT",
+    "baseStrength": 7,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "SPY",
+    "maxCopies": 1,
+    "description": "Espía: se coloca en el campo rival y robas 2 cartas."
+  },
+  {
+    "id": "ng_siege_engineer",
+    "name": "Siege Engineer",
+    "faction": "NILFGAARD",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "SIEGE"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"Wielded correctly, a protractor can be a deadly weapon.\""
+  },
+  {
+    "id": "ng_siege_technician",
+    "name": "Siege Technician",
+    "faction": "NILFGAARD",
+    "type": "UNIT",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [
+      "SIEGE"
+    ],
+    "ability": "MEDIC",
+    "maxCopies": 1,
+    "description": "Médico: revive una unidad no-Héroe de tu descarte."
+  },
+  {
     "id": "ng_stefan_skellen",
     "name": "Stefan Skellen",
     "faction": "NILFGAARD",
@@ -374,6 +782,20 @@
     "description": "Espía: se coloca en Cuerpo a cuerpo del rival y robas 2 cartas."
   },
   {
+    "id": "ng_sweers",
+    "name": "Sweers",
+    "faction": "NILFGAARD",
+    "type": "UNIT",
+    "baseStrength": 2,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"And hands off the girl! Whatever we may be, we're not savages.\""
+  },
+  {
     "id": "ng_tibor_eggebracht",
     "name": "Tibor Eggebracht",
     "faction": "NILFGAARD",
@@ -386,6 +808,63 @@
     "ability": null,
     "maxCopies": 1,
     "description": "Héroe. General del alba de Nilfgaard."
+  },
+  {
+    "id": "ng_vanhemar",
+    "name": "Vanhemar",
+    "faction": "NILFGAARD",
+    "type": "UNIT",
+    "baseStrength": 4,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"For a fire mage, he's not very... flamboyant.\""
+  },
+  {
+    "id": "ng_vattier_de_rideaux",
+    "name": "Vattier de Rideaux",
+    "faction": "NILFGAARD",
+    "type": "UNIT",
+    "baseStrength": 4,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "SPY",
+    "maxCopies": 1,
+    "description": "Espía: se coloca en el campo rival y robas 2 cartas."
+  },
+  {
+    "id": "ng_vreemde",
+    "name": "Vreemde",
+    "faction": "NILFGAARD",
+    "type": "UNIT",
+    "baseStrength": 2,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"Discipline is the Empire's deadliest weapon.\""
+  },
+  {
+    "id": "ng_young_emissary",
+    "name": "Young Emissary",
+    "faction": "NILFGAARD",
+    "type": "UNIT",
+    "baseStrength": 5,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "TIGHT_BOND",
+    "bondGroup": "young_emissary",
+    "maxCopies": 2,
+    "description": "Vínculo estrecho: multiplica su fuerza por cada copia igual en la fila."
   },
   {
     "id": "mo_leader_eredin_commander",
@@ -485,6 +964,94 @@
     "description": "Reunión: invoca todas las Arachas desde tu mano y mazo."
   },
   {
+    "id": "mo_botchling",
+    "name": "Botchling",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 4,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"Admit your mistakes and bury them proper - else they'll come back to haunt you.\""
+  },
+  {
+    "id": "mo_celaeno_harpy",
+    "name": "Celaeno Harpy",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 2,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT",
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "Ágil (Cuerpo o Distancia)."
+  },
+  {
+    "id": "mo_cockatrice",
+    "name": "Cockatrice",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 2,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"Born of an egg laid by a cockerel... if you believe such peasant drivel.\""
+  },
+  {
+    "id": "mo_crone_brewess",
+    "name": "Crone Brewess",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "MUSTER",
+    "musterGroup": "crone",
+    "maxCopies": 1,
+    "description": "Reunión: invoca todas las cartas iguales o del mismo grupo desde mano y mazo."
+  },
+  {
+    "id": "mo_crone_weavess",
+    "name": "Crone Weavess",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "MUSTER",
+    "musterGroup": "crone",
+    "maxCopies": 1,
+    "description": "Reunión: invoca todas las cartas iguales o del mismo grupo desde mano y mazo."
+  },
+  {
+    "id": "mo_crone_whispess",
+    "name": "Crone Whispess",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "MUSTER",
+    "musterGroup": "crone",
+    "maxCopies": 1,
+    "description": "Reunión: invoca todas las cartas iguales o del mismo grupo desde mano y mazo."
+  },
+  {
     "id": "mo_fiend",
     "name": "Demonio",
     "faction": "MONSTERS",
@@ -497,6 +1064,20 @@
     "ability": null,
     "maxCopies": 1,
     "description": "Bestia cornuda de fuerza brutal."
+  },
+  {
+    "id": "mo_draug",
+    "name": "Draug",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 10,
+    "isHero": true,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "Héroe (inmune a climas y efectos)."
   },
   {
     "id": "mo_earth_elemental",
@@ -513,6 +1094,90 @@
     "description": "Gólem de piedra animada de asedio."
   },
   {
+    "id": "mo_endrega",
+    "name": "Endrega",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 2,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"The nest! Take out the nest, or the bastards'll just keep coming!\""
+  },
+  {
+    "id": "mo_fire_elemental",
+    "name": "Fire Elemental",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "SIEGE"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"Fire is so delightful.\""
+  },
+  {
+    "id": "mo_foglet",
+    "name": "Foglet",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 2,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"Fog creeps on little cat feet. Foglets creep over the bodies of their victims.\""
+  },
+  {
+    "id": "mo_forktail",
+    "name": "Forktail",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 5,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"Fork tails... Bah! Fuckers' tails're more like cleavers.\""
+  },
+  {
+    "id": "mo_frightener",
+    "name": "Frightener",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 5,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"What have I done?\" the mage cried out, frightened of his own creation."
+  },
+  {
+    "id": "mo_gargoyle",
+    "name": "Gargoyle",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 2,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"Ancient sculptors' nightmarish fantasies, brought to life by bored mages.\""
+  },
+  {
     "id": "mo_ice_giant",
     "name": "Gigante de hielo",
     "faction": "MONSTERS",
@@ -525,6 +1190,34 @@
     "ability": null,
     "maxCopies": 1,
     "description": "Coloso de Undvik."
+  },
+  {
+    "id": "mo_grave_hag",
+    "name": "Grave Hag",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 5,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"Their long tongues're for slurping marrow - and whipping prep.\""
+  },
+  {
+    "id": "mo_griffin",
+    "name": "Griffin",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 5,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"Griffins like to toy with their prey. Eat 'em alive, piece by piece.\""
   },
   {
     "id": "mo_ghoul",
@@ -600,6 +1293,20 @@
     "description": "Reunión: invoca todas las copias de Nekker desde tu mano y mazo."
   },
   {
+    "id": "mo_plague_maiden",
+    "name": "Plague Maiden",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 5,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"The sick rave about a boil-pocked woman surrounded by herds of rabid rats…\""
+  },
+  {
     "id": "mo_toad",
     "name": "Príncipe Sapo",
     "faction": "MONSTERS",
@@ -612,6 +1319,109 @@
     "ability": "SCORCH_ROW",
     "maxCopies": 1,
     "description": "Tierra quemada de fila: destruye la unidad no-Héroe más fuerte de Distancia rival si suma >= 10."
+  },
+  {
+    "id": "mo_vampire_bruxa",
+    "name": "Vampire: Bruxa",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 4,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "MUSTER",
+    "musterGroup": "vampire",
+    "maxCopies": 1,
+    "description": "Reunión: invoca todas las cartas iguales o del mismo grupo desde mano y mazo."
+  },
+  {
+    "id": "mo_vampire_ekimmara",
+    "name": "Vampire: Ekimmara",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 4,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "MUSTER",
+    "musterGroup": "vampire",
+    "maxCopies": 1,
+    "description": "Reunión: invoca todas las cartas iguales o del mismo grupo desde mano y mazo."
+  },
+  {
+    "id": "mo_vampire_fleder",
+    "name": "Vampire: Fleder",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 4,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "MUSTER",
+    "musterGroup": "vampire",
+    "maxCopies": 1,
+    "description": "Reunión: invoca todas las cartas iguales o del mismo grupo desde mano y mazo."
+  },
+  {
+    "id": "mo_vampire_garkain",
+    "name": "Vampire: Garkain",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 4,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "MUSTER",
+    "musterGroup": "vampire",
+    "maxCopies": 1,
+    "description": "Reunión: invoca todas las cartas iguales o del mismo grupo desde mano y mazo."
+  },
+  {
+    "id": "mo_vampire_katakan",
+    "name": "Vampire: Katakan",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 5,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "MUSTER",
+    "musterGroup": "vampire",
+    "maxCopies": 1,
+    "description": "Reunión: invoca todas las cartas iguales o del mismo grupo desde mano y mazo."
+  },
+  {
+    "id": "mo_werewolf",
+    "name": "Werewolf",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 5,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"Wolves aren't as bad as they say. Werewolves, though – they're worse.\""
+  },
+  {
+    "id": "mo_wyvern",
+    "name": "Wyvern",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 2,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"Imagine a cross between a winged snake and a nightmare. Wyverns are worse.\""
   },
   {
     "id": "st_leader_francesca_pureblood",
@@ -666,6 +1476,36 @@
     "description": "Líder: duplica (x2) la fuerza de todas tus unidades normales en Distancia."
   },
   {
+    "id": "st_barclay_els",
+    "name": "Barclay Els",
+    "faction": "SCOIATAEL",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT",
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "Ágil (Cuerpo o Distancia)."
+  },
+  {
+    "id": "st_ciaran_aep_easnillien",
+    "name": "Ciaran aep Easnillien",
+    "faction": "SCOIATAEL",
+    "type": "UNIT",
+    "baseStrength": 3,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT",
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "Ágil (Cuerpo o Distancia)."
+  },
+  {
     "id": "st_havekar_smuggler",
     "name": "Contrabandista havekar",
     "faction": "SCOIATAEL",
@@ -693,6 +1533,49 @@
     "ability": null,
     "maxCopies": 2,
     "description": "Infantería enana blindada."
+  },
+  {
+    "id": "st_dennis_cranmer",
+    "name": "Dennis Cranmer",
+    "faction": "SCOIATAEL",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"I know how to carry out orders, so you can shove your advice up your coal chute.\""
+  },
+  {
+    "id": "st_dol_blathanna_archer",
+    "name": "Dol Blathanna Archer",
+    "faction": "SCOIATAEL",
+    "type": "UNIT",
+    "baseStrength": 4,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"Take another step, dh'oine. You'd look better with an arrow between your eyes.\""
+  },
+  {
+    "id": "st_dwarven_skirmisher",
+    "name": "Dwarven Skirmisher",
+    "faction": "SCOIATAEL",
+    "type": "UNIT",
+    "baseStrength": 3,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "MUSTER",
+    "musterGroup": "dwarven_skirmisher",
+    "maxCopies": 3,
+    "description": "Reunión: invoca todas las cartas iguales o del mismo grupo desde mano y mazo."
   },
   {
     "id": "st_eithne",
@@ -724,6 +1607,21 @@
     "description": "Ágil: puede colocarse en Cuerpo a cuerpo o Distancia."
   },
   {
+    "id": "st_filavandrel_aen_fidhail",
+    "name": "Filavandrel aen Fidhail",
+    "faction": "SCOIATAEL",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT",
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "Ágil (Cuerpo o Distancia)."
+  },
+  {
     "id": "st_elven_skirmisher",
     "name": "Hostigador élfico",
     "faction": "SCOIATAEL",
@@ -737,6 +1635,20 @@
     "musterGroup": "st_elven_skirmisher",
     "maxCopies": 3,
     "description": "Reunión: invoca todas las copias de Hostigador élfico desde tu mano y mazo."
+  },
+  {
+    "id": "st_ida_emean_aep_sivney",
+    "name": "Ida Emean aep Sivney",
+    "faction": "SCOIATAEL",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"I am a Sage. My power lies in possessing knowledge. Not sharing it.\""
   },
   {
     "id": "st_iorveth",
@@ -753,6 +1665,20 @@
     "description": "Héroe. Comandante de las ardillas, inmune a efectos y climas."
   },
   {
+    "id": "st_isengrim_faoiltiarna",
+    "name": "Isengrim Faoiltiarna",
+    "faction": "SCOIATAEL",
+    "type": "UNIT",
+    "baseStrength": 10,
+    "isHero": true,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "MORALE_BOOST",
+    "maxCopies": 1,
+    "description": "Héroe (inmune a climas y efectos). Inyección de moral: suma +1 a las demás unidades normales de su fila."
+  },
+  {
     "id": "st_milva",
     "name": "Milva",
     "faction": "SCOIATAEL",
@@ -765,6 +1691,20 @@
     "ability": "MORALE_BOOST",
     "maxCopies": 1,
     "description": "Inyección de moral: suma +1 a todas las demás unidades normales de Distancia."
+  },
+  {
+    "id": "st_riordain",
+    "name": "Riordain",
+    "faction": "SCOIATAEL",
+    "type": "UNIT",
+    "baseStrength": 1,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"Stare into their eyes, feast on their terror. Then go in for the kill.\""
   },
   {
     "id": "st_saesenthessis",
@@ -809,6 +1749,20 @@
     "description": "Tierra quemada de fila: destruye la unidad no-Héroe más fuerte de Asedio rival si suma >= 10."
   },
   {
+    "id": "st_toruviel",
+    "name": "Toruviel",
+    "faction": "SCOIATAEL",
+    "type": "UNIT",
+    "baseStrength": 2,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"I'd gladly kill you from up close, stare in your eyes... But you reek, human.\""
+  },
+  {
     "id": "st_vrihedd_brigade",
     "name": "Veterano de la brigada Vrihedd",
     "faction": "SCOIATAEL",
@@ -824,6 +1778,63 @@
     "description": "Ágil: puede colocarse en Cuerpo a cuerpo o Distancia."
   },
   {
+    "id": "st_vrihedd_brigade_recruit",
+    "name": "Vrihedd Brigade Recruit",
+    "faction": "SCOIATAEL",
+    "type": "UNIT",
+    "baseStrength": 4,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"Hatred burns brighter than any fire, and cuts deeper than any blade.\""
+  },
+  {
+    "id": "st_yaevinn",
+    "name": "Yaevinn",
+    "faction": "SCOIATAEL",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT",
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "Ágil (Cuerpo o Distancia)."
+  },
+  {
+    "id": "nt_cirilla_fiona_elen_riannon",
+    "name": "Cirilla Fiona Elen Riannon",
+    "faction": "NEUTRAL",
+    "type": "UNIT",
+    "baseStrength": 15,
+    "isHero": true,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "Héroe (inmune a climas y efectos)."
+  },
+  {
+    "id": "nt_cow",
+    "name": "Cow",
+    "faction": "NEUTRAL",
+    "type": "UNIT",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"Mooo!\""
+  },
+  {
     "id": "nt_mysterious_elf",
     "name": "Elfo misterioso (Avallac'h)",
     "faction": "NEUTRAL",
@@ -836,6 +1847,20 @@
     "ability": "SPY",
     "maxCopies": 1,
     "description": "Héroe Espía: se coloca en el campo rival sin darle puntos e inmune a Señuelo y Médico; robas 2 cartas."
+  },
+  {
+    "id": "nt_emiel_regis_rohellec_terzieff",
+    "name": "Emiel Regis Rohellec Terzieff",
+    "faction": "NEUTRAL",
+    "type": "UNIT",
+    "baseStrength": 5,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"Men, the polite ones, at least, call me a monster. A blood-drinking freak.\""
   },
   {
     "id": "nt_gaunter_odimm",
@@ -911,6 +1936,48 @@
     "description": "Ágil (Cuerpo o Distancia). Inyección de moral: suma +1 a las demás unidades normales de su fila."
   },
   {
+    "id": "nt_roach",
+    "name": "Roach",
+    "faction": "NEUTRAL",
+    "type": "UNIT",
+    "baseStrength": 3,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"Come on, Roach! Faster!\""
+  },
+  {
+    "id": "nt_triss_merigold",
+    "name": "Triss Merigold",
+    "faction": "NEUTRAL",
+    "type": "UNIT",
+    "baseStrength": 7,
+    "isHero": true,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "Héroe (inmune a climas y efectos)."
+  },
+  {
+    "id": "nt_vesemir",
+    "name": "Vesemir",
+    "faction": "NEUTRAL",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"If you're to be hanged, ask for water. Anything can happen before they fetch it.\""
+  },
+  {
     "id": "nt_villentretenmerth",
     "name": "Villentretenmerth",
     "faction": "NEUTRAL",
@@ -937,6 +2004,20 @@
     "ability": "MEDIC",
     "maxCopies": 1,
     "description": "Héroe Médico: revive 1 unidad no-Héroe de tu descarte e inmune a climas y Scorch."
+  },
+  {
+    "id": "nt_zoltan_chivay",
+    "name": "Zoltan Chivay",
+    "faction": "NEUTRAL",
+    "type": "UNIT",
+    "baseStrength": 5,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "\"Life without old mates and booze is like a woman without a rump.\""
   },
   {
     "id": "sp_commanders_horn",
