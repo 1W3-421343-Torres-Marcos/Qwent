@@ -7,6 +7,7 @@ import {
   type PlayableFactionId,
 } from '../../../core';
 import { DeckStorageService } from '../../services/deck-storage.service';
+import { FeedbackService } from '../../services/feedback.service';
 import { AbilityIconComponent, RowIconComponent } from '../../shared/components/card-icons.component';
 import { FactionEmblemComponent } from '../../shared/components/faction-emblem.component';
 import { createSpriteFallbackTracker } from '../../shared/constants/card-art';
@@ -344,6 +345,7 @@ const FILTER_OPTIONS: ReadonlyArray<{ readonly id: CollectionFilter; readonly la
 })
 export class DeckBuilderPageComponent {
   private readonly storage = inject(DeckStorageService);
+  private readonly feedback = inject(FeedbackService);
 
   readonly closed = output<void>();
   readonly art = createSpriteFallbackTracker();
@@ -435,12 +437,14 @@ export class DeckBuilderPageComponent {
     this.draftLeaderId.set(saved.leaderId);
     this.draftCardIds.set([...saved.cardIds]);
     this.saveMessage.set('');
+    this.feedback.play('tap');
   }
 
   onLeaderSelect(event: Event): void {
     const select = event.target as HTMLSelectElement;
     this.draftLeaderId.set(select.value);
     this.saveMessage.set('');
+    this.feedback.play('tap');
   }
 
   addCard(card: CardDefinition): void {
@@ -448,6 +452,7 @@ export class DeckBuilderPageComponent {
     if (currentCount >= card.maxCopies) return;
     this.draftCardIds.set([...this.draftCardIds(), card.id]);
     this.saveMessage.set('');
+    this.feedback.play('deckTap');
   }
 
   removeCard(cardId: string): void {
@@ -457,6 +462,7 @@ export class DeckBuilderPageComponent {
     ids.splice(idx, 1);
     this.draftCardIds.set(ids);
     this.saveMessage.set('');
+    this.feedback.play('deckTap');
   }
 
   resetStarter(): void {
@@ -464,6 +470,7 @@ export class DeckBuilderPageComponent {
     this.draftLeaderId.set(starter.leaderId);
     this.draftCardIds.set([...starter.cardIds]);
     this.saveMessage.set('Restaurado');
+    this.feedback.play('redraw');
   }
 
   saveCurrentDeck(): void {
@@ -475,6 +482,7 @@ export class DeckBuilderPageComponent {
     if (saved) {
       this.storage.setPlayerFaction(this.activeFaction());
       this.saveMessage.set('¡Guardado!');
+      this.feedback.play('cardClose');
     }
   }
 }

@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, output, signal } from '@angular/core';
 import type { FactionId } from '../../../core';
 import { FeedbackService } from '../../services/feedback.service';
-import { GameFacadeService } from '../../services/game-facade.service';
+import { GameFacadeService, type VisualEffectType } from '../../services/game-facade.service';
 import { AbilityIconComponent } from '../../shared/components/card-icons.component';
 import { CardDetailComponent } from '../../shared/components/card-detail.component';
 import { FactionEmblemComponent } from '../../shared/components/faction-emblem.component';
@@ -12,6 +12,18 @@ import { BoardRowComponent } from './components/board-row.component';
 import { HandBarComponent } from './components/hand-bar.component';
 
 const HOLD_TO_PASS_MS = 600;
+
+const VISUAL_FX_CLASS_MAP: Readonly<Partial<Record<VisualEffectType, string>>> = {
+  SCORCH: 'qwent-scorch-overlay',
+  HORN: 'qwent-horn-overlay',
+  WEATHER_FROST: 'qwent-frost-overlay',
+  WEATHER_FOG: 'qwent-fog-overlay',
+  WEATHER_RAIN: 'qwent-rain-overlay',
+  WEATHER_CLEAR: 'qwent-clear-overlay',
+  HERO: 'qwent-hero-overlay',
+  MEDIC: 'qwent-medic-overlay',
+  MUSTER: 'qwent-muster-overlay',
+};
 
 @Component({
   selector: 'app-board-page',
@@ -342,15 +354,15 @@ const HOLD_TO_PASS_MS = 600;
             <span
               class="inline-block rounded border border-bronze/60 bg-tavern-dark/80 px-1.5 py-0.5 text-[9px] font-bold uppercase text-gold"
             >
-              {{ facade.phaseLabel }}
+              v1.2.0
             </span>
-            <div class="flex items-center justify-center gap-1">
+            <div class="grid grid-cols-2 gap-1">
               <button
                 type="button"
                 (click)="feedback.toggleSound()"
-                [attr.aria-label]="feedback.soundEnabled() ? 'Silenciar sonido' : 'Activar sonido'"
-                title="Sonido"
-                class="flex h-8 w-8 items-center justify-center rounded border text-xs transition active:scale-95"
+                [attr.aria-label]="feedback.soundEnabled() ? 'Silenciar efectos' : 'Activar efectos'"
+                title="Efectos (SFX)"
+                class="flex h-7 w-7 items-center justify-center rounded border text-xs transition active:scale-95"
                 [class]="
                   feedback.soundEnabled()
                     ? 'border-gold/70 bg-tavern-dark/90 text-gold-bright'
@@ -361,10 +373,34 @@ const HOLD_TO_PASS_MS = 600;
               </button>
               <button
                 type="button"
+                (click)="feedback.toggleMusic()"
+                [attr.aria-label]="feedback.musicEnabled() ? 'Silenciar música' : 'Activar música'"
+                title="Música de taberna"
+                class="flex h-7 w-7 items-center justify-center rounded border text-xs transition active:scale-95"
+                [class]="
+                  feedback.musicEnabled()
+                    ? 'border-gold/70 bg-tavern-dark/90 text-gold-bright'
+                    : 'border-bronze/40 bg-tavern-dark/60 text-parchment/45'
+                "
+              >
+                {{ feedback.musicEnabled() ? '♫' : '—' }}
+              </button>
+              <button
+                type="button"
+                (click)="feedback.nextTrack()"
+                [disabled]="!feedback.musicEnabled()"
+                aria-label="Cambiar pista musical"
+                title="Siguiente tema"
+                class="flex h-7 w-7 items-center justify-center rounded border border-bronze/50 bg-tavern-dark/90 text-[10px] text-parchment/90 transition hover:border-gold active:scale-95 disabled:opacity-40"
+              >
+                ⏭
+              </button>
+              <button
+                type="button"
                 (click)="feedback.toggleHaptics()"
                 [attr.aria-label]="feedback.hapticsEnabled() ? 'Desactivar vibración' : 'Activar vibración'"
                 title="Vibración"
-                class="flex h-8 w-8 items-center justify-center rounded border text-xs transition active:scale-95"
+                class="flex h-7 w-7 items-center justify-center rounded border text-xs transition active:scale-95"
                 [class]="
                   feedback.hapticsEnabled()
                     ? 'border-gold/70 bg-tavern-dark/90 text-gold-bright'
@@ -421,11 +457,9 @@ const HOLD_TO_PASS_MS = 600;
         </aside>
       </div>
 
-      <!-- Non-blocking GPU Visual Effects Overlay (Scorch / Horn) -->
-      @if (facade.visualEffect() === 'SCORCH') {
-        <div class="qwent-scorch-overlay pointer-events-none fixed inset-0 z-20"></div>
-      } @else if (facade.visualEffect() === 'HORN') {
-        <div class="qwent-horn-overlay pointer-events-none fixed inset-0 z-20"></div>
+      <!-- Non-blocking GPU Visual Effects Overlay -->
+      @if (visualEffectClass(); as fxClass) {
+        <div class="pointer-events-none fixed inset-0 z-20" [class]="fxClass"></div>
       }
 
       <!-- AI Thinking Indicator -->
@@ -501,6 +535,10 @@ export class BoardPageComponent {
   readonly exitToMenu = output<void>();
   readonly holdProgress = signal(0);
   readonly art = createSpriteFallbackTracker();
+  readonly visualEffectClass = computed(() => {
+    const fx = this.facade.visualEffect();
+    return fx ? (VISUAL_FX_CLASS_MAP[fx] ?? null) : null;
+  });
   private holdIntervalId: ReturnType<typeof setInterval> | null = null;
   private holdStartTimestamp = 0;
 

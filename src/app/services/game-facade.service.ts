@@ -18,10 +18,20 @@ import {
 } from '../../core';
 import { FACTION_META } from '../shared/constants/faction-meta';
 import { DeckStorageService } from './deck-storage.service';
-import { FeedbackService } from './feedback.service';
+import { FeedbackService, type FeedbackCue } from './feedback.service';
 
 export type GameMode = 'VS_AI' | 'LOCAL_2P';
-export type VisualEffectType = 'SCORCH' | 'WEATHER' | 'HORN' | 'ROUND_END';
+export type VisualEffectType =
+  | 'SCORCH'
+  | 'WEATHER_FROST'
+  | 'WEATHER_FOG'
+  | 'WEATHER_RAIN'
+  | 'WEATHER_CLEAR'
+  | 'HORN'
+  | 'HERO'
+  | 'MEDIC'
+  | 'MUSTER'
+  | 'ROUND_END';
 
 const TURN_BREATHER_MS = 450;
 const AI_PLAY_DELAY_MS = 550;
@@ -201,6 +211,7 @@ export class GameFacadeService {
     this.discardModalPlayerId.set(null);
     this.isTransitioningTurn.set(false);
     this.isAiThinking.set(false);
+    this.feedback.play('gameStart');
 
     if (resolvedMode === 'VS_AI') {
       this.perspectivePlayerId.set('PLAYER_1');
@@ -214,6 +225,7 @@ export class GameFacadeService {
 
   confirmTurnHandoff(): void {
     this.turnHandoffPending.set(false);
+    this.feedback.play('turnMe');
   }
 
   clearSelection(): void {
@@ -277,6 +289,7 @@ export class GameFacadeService {
     }
     if (!this.canPlayFromHand(card.instanceId)) {
       this.inspectedCard.set(card);
+      this.feedback.play('tap');
       return;
     }
 
@@ -303,6 +316,7 @@ export class GameFacadeService {
 
     this.selectedInstanceId.set(card.instanceId);
     this.inspectedCard.set(card);
+    this.feedback.play('tap');
   }
 
   onOwnRowTap(rowType: RowType): void {
@@ -456,7 +470,7 @@ export class GameFacadeService {
     this.inspectedCard.set(null);
     this.discardModalPlayerId.set(null);
     this.state.set(next);
-    this.feedback.play('tap');
+    this.feedback.play('roundStart');
 
     if (this.gameMode() === 'VS_AI') {
       this.perspectivePlayerId.set('PLAYER_1');
@@ -650,40 +664,45 @@ export class GameFacadeService {
   }
 
   private emitVisualAndFeedback(prev: GameState, next: GameState, action: GameAction): void {
-    const weatherChanged =
-      prev.weather.frost !== next.weather.frost ||
-      prev.weather.fog !== next.weather.fog ||
-      prev.weather.rain !== next.weather.rain;
+    if (next.phase === 'MATCH_END') {
+      this.triggerVisualEffect('ROUND_END');
+      this.feedback.play(next.winner === this.perspectivePlayerId() ? 'gameWin' : 'gameLose');
+      return;
+    }
+
+    if (next.phase === 'ROUND_END') {
+      this.triggerVisualEffect('ROUND_END');
+      const lastRound = next.roundHistory[next.roundHistory.length - 1];
+      this.feedback.play(lastRound?.winner === this.perspectivePlayerId() ? 'roundWin' : 'roundLose');
+      return;
+    }
+
+    if (action.type === 'MULLIGAN_SWAP') {
+      this.feedback.play('redraw');
+      return;
+    }
+
+    if (this.didScorchOccur(prev, next, action)) {
+      this.triggerVisualEffect('SCORCH');
+      this.feedback.play('scorch');
+      return;
+    }
+
+    const weatherOutcome = this.resolveWeatherTransition(prev, next);
+    if (weatherOutcome) {
+      this.triggerVisualEffect(weatherOutcome.fx);
+      this.feedback.play(weatherOutcome.cue);
+      return;
+    }
 
     const hornAdded = (['PLAYER_1', 'PLAYER_2'] as const).some((p) =>
       (['CLOSE_COMBAT', 'RANGED', 'SIEGE'] as const).some(
         (r) => prev.players[p].rows[r].hornCard === null && next.players[p].rows[r].hornCard !== null,
       ),
     );
-
-    const scorchTriggered = this.didScorchOccur(prev, next, action);
-
-    if (scorchTriggered) {
-      this.triggerVisualEffect('SCORCH');
-      this.feedback.play('scorch');
-      return;
-    }
-
-    if (weatherChanged) {
-      this.triggerVisualEffect('WEATHER');
-      this.feedback.play('weather');
-      return;
-    }
-
     if (hornAdded) {
       this.triggerVisualEffect('HORN');
       this.feedback.play('horn');
-      return;
-    }
-
-    if (next.phase === 'ROUND_END' || next.phase === 'MATCH_END') {
-      this.triggerVisualEffect('ROUND_END');
-      this.feedback.play('roundEnd');
       return;
     }
 
@@ -692,7 +711,85 @@ export class GameFacadeService {
       return;
     }
 
+    if (action.type === 'SELECT_TARGET' && prev.pendingSelection?.type === 'MEDIC_DISCARD') {
+      this.triggerVisualEffect('MEDIC');
+      this.feedback.play('medic');
+      return;
+    }
+
+    if (action.type === 'PLAY_CARD') {
+      const played = prev.players[action.playerId].hand.find(
+        (c) => c.instanceId === action.instanceId,
+      );
+      if (played) {
+        const outcome = this.resolvePlayedCardOutcome(played, action.targetRow);
+        if (outcome.fx) {
+          this.triggerVisualEffect(outcome.fx);
+        }
+        this.feedback.play(outcome.cue);
+        return;
+      }
+    }
+
+    if (action.type === 'USE_LEADER') {
+      this.triggerVisualEffect('HERO');
+      this.feedback.play('hero');
+      return;
+    }
+
     this.feedback.play('cardPlay');
+  }
+
+  private resolveWeatherTransition(
+    prev: GameState,
+    next: GameState,
+  ): { readonly fx: VisualEffectType; readonly cue: FeedbackCue } | null {
+    if (prev.weather.frost === null && next.weather.frost !== null) {
+      return { fx: 'WEATHER_FROST', cue: 'frost' };
+    }
+    if (prev.weather.fog === null && next.weather.fog !== null) {
+      return { fx: 'WEATHER_FOG', cue: 'fog' };
+    }
+    if (prev.weather.rain === null && next.weather.rain !== null) {
+      return { fx: 'WEATHER_RAIN', cue: 'rain' };
+    }
+    const hadWeather = prev.weather.frost !== null || prev.weather.fog !== null || prev.weather.rain !== null;
+    const hasWeather = next.weather.frost !== null || next.weather.fog !== null || next.weather.rain !== null;
+    if (hadWeather && !hasWeather) {
+      return { fx: 'WEATHER_CLEAR', cue: 'clearWeather' };
+    }
+    return null;
+  }
+
+  private resolvePlayedCardOutcome(
+    played: CardInstance,
+    targetRow?: RowType,
+  ): { readonly fx: VisualEffectType | null; readonly cue: FeedbackCue } {
+    if (played.card.isHero) {
+      return { fx: 'HERO', cue: 'hero' };
+    }
+    switch (played.card.ability) {
+      case 'SPY':
+        return { fx: null, cue: 'spy' };
+      case 'MEDIC':
+        return { fx: 'MEDIC', cue: 'medic' };
+      case 'MUSTER':
+        return { fx: 'MUSTER', cue: 'muster' };
+      case 'TIGHT_BOND':
+        return { fx: null, cue: 'bond' };
+      case 'MORALE_BOOST':
+        return { fx: null, cue: 'morale' };
+      case 'DECOY':
+        return { fx: null, cue: 'decoy' };
+      case 'COMMANDERS_HORN':
+        return { fx: 'HORN', cue: 'horn' };
+      default: {
+        const resolvedRow = targetRow ?? played.card.allowedRows[0];
+        if (resolvedRow === 'SIEGE') return { fx: null, cue: 'cardSiege' };
+        if (resolvedRow === 'RANGED') return { fx: null, cue: 'cardRanged' };
+        return { fx: null, cue: 'cardClose' };
+      }
+    }
   }
 
   private didScorchOccur(prev: GameState, next: GameState, action: GameAction): boolean {

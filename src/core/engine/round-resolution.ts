@@ -1,4 +1,4 @@
-import { ROW_TYPES, type CardInstance, type PlayerId, type RowType } from '../models/types';
+import { ROW_TYPES, type CardDefinition, type CardInstance, type PlayerId, type RowType } from '../models/types';
 import type { GameState, PlayerState, RoundResult, WeatherSlot } from '../models/game-state';
 import {
   applyNorthernRealmsWinDraw,
@@ -9,6 +9,40 @@ import { LEADER_HORN_DEFINITION_ID } from '../abilities/leaders';
 import { recalculateBoard } from '../scoring/calculate-strength';
 import { nextRng } from './prng';
 import { createEmptyRows, createEmptyWeather } from './setup';
+
+const COW_CARD_ID = 'nt_cow';
+
+const BOVINE_DEFENSE_FORCE_CARD: CardDefinition = {
+  id: 'nt_bovine_defense_force',
+  name: 'Fuerza de Defensa Bovina',
+  faction: 'NEUTRAL',
+  type: 'UNIT',
+  baseStrength: 8,
+  isHero: false,
+  allowedRows: ['CLOSE_COMBAT'],
+  ability: null,
+  maxCopies: 1,
+  description: 'Invocada por La Vaca al ser descartada al final de la ronda (Fuerza 8).',
+};
+
+function spawnAvengerTokens(
+  discardedCards: readonly CardInstance[],
+  playerId: PlayerId,
+  nextRoundNumber: number,
+): readonly CardInstance[] {
+  const tokens: CardInstance[] = [];
+  for (const card of discardedCards) {
+    if (card.definitionId === COW_CARD_ID) {
+      tokens.push({
+        instanceId: `avenger_bovine_${playerId}_r${nextRoundNumber}_${tokens.length}`,
+        definitionId: BOVINE_DEFENSE_FORCE_CARD.id,
+        card: BOVINE_DEFENSE_FORCE_CARD,
+        effectiveStrength: BOVINE_DEFENSE_FORCE_CARD.baseStrength,
+      });
+    }
+  }
+  return tokens;
+}
 
 /**
  * Returns the opponent PlayerId for a given player.
@@ -121,49 +155,67 @@ export function advanceToNextRound(state: GameState): GameState {
 
   const p1Monsters = selectMonstersCarryover(p1, state.rngSeed);
   const p2Monsters = selectMonstersCarryover(p2, p1Monsters.nextSeed);
+  const nextRoundNumber = (state.roundNumber + 1) as 1 | 2 | 3;
 
-  const buildCarryoverRows = (
+  const preparePlayerForNextRound = (
+    player: PlayerState,
     kept: { readonly rowType: RowType; readonly card: CardInstance } | null,
-  ) => {
+    playerWeatherDiscards: readonly CardInstance[],
+    wonPreviousRound: boolean,
+  ): PlayerState => {
+    const discardedFromBoard = collectPlayerBoardCardsToDiscard(
+      player,
+      kept?.card.instanceId ?? null,
+    );
+    const avengerTokens = spawnAvengerTokens(discardedFromBoard, player.id, nextRoundNumber);
+
     const rows = createEmptyRows();
-    if (!kept) {
-      return rows;
+    const closeCombatCards: CardInstance[] = [];
+    if (kept?.rowType === 'CLOSE_COMBAT') {
+      closeCombatCards.push(kept.card);
     }
-    return {
+    closeCombatCards.push(...avengerTokens);
+
+    const nextRows = {
       ...rows,
-      [kept.rowType]: {
-        ...rows[kept.rowType],
-        cards: [kept.card],
+      ...(kept && kept.rowType !== 'CLOSE_COMBAT'
+        ? {
+            [kept.rowType]: {
+              ...rows[kept.rowType],
+              cards: [kept.card],
+            },
+          }
+        : {}),
+      CLOSE_COMBAT: {
+        ...rows.CLOSE_COMBAT,
+        cards: closeCombatCards,
       },
     };
+
+    return applyNorthernRealmsWinDraw(
+      {
+        ...player,
+        passed: false,
+        rows: nextRows,
+        totalScore: 0,
+        discard: [...player.discard, ...discardedFromBoard, ...playerWeatherDiscards],
+      },
+      wonPreviousRound,
+    );
   };
 
-  const p1BaseNext: PlayerState = {
-    ...p1,
-    passed: false,
-    rows: buildCarryoverRows(p1Monsters.kept),
-    totalScore: 0,
-    discard: [
-      ...p1.discard,
-      ...collectPlayerBoardCardsToDiscard(p1, p1Monsters.kept?.card.instanceId ?? null),
-      ...weatherDiscards.PLAYER_1,
-    ],
-  };
-
-  const p2BaseNext: PlayerState = {
-    ...p2,
-    passed: false,
-    rows: buildCarryoverRows(p2Monsters.kept),
-    totalScore: 0,
-    discard: [
-      ...p2.discard,
-      ...collectPlayerBoardCardsToDiscard(p2, p2Monsters.kept?.card.instanceId ?? null),
-      ...weatherDiscards.PLAYER_2,
-    ],
-  };
-
-  const p1Next = applyNorthernRealmsWinDraw(p1BaseNext, lastRound?.winner === 'PLAYER_1');
-  const p2Next = applyNorthernRealmsWinDraw(p2BaseNext, lastRound?.winner === 'PLAYER_2');
+  const p1Next = preparePlayerForNextRound(
+    p1,
+    p1Monsters.kept,
+    weatherDiscards.PLAYER_1,
+    lastRound?.winner === 'PLAYER_1',
+  );
+  const p2Next = preparePlayerForNextRound(
+    p2,
+    p2Monsters.kept,
+    weatherDiscards.PLAYER_2,
+    lastRound?.winner === 'PLAYER_2',
+  );
 
   let nextSeed = p2Monsters.nextSeed;
   let startingPlayer: PlayerId;
@@ -175,8 +227,6 @@ export function advanceToNextRound(state: GameState): GameState {
     nextSeed = coinFlip.nextSeed;
     startingPlayer = coinFlip.value < 0.5 ? 'PLAYER_1' : 'PLAYER_2';
   }
-
-  const nextRoundNumber = (state.roundNumber + 1) as 1 | 2 | 3;
 
   return recalculateBoard({
     ...state,

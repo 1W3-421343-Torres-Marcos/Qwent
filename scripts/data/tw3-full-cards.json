@@ -1178,7 +1178,7 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"Mooo!\""
+    "description": "Vengador: al ser descartada al final de la ronda, invoca una Fuerza de Defensa Bovina (8) en Cuerpo a cuerpo para la siguiente ronda."
   },
   {
     "id": "mo_crone_brewess",

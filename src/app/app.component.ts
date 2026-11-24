@@ -31,7 +31,7 @@ type ScreenView = 'MENU' | 'DECK_BUILDER' | 'BOARD';
             <span
               class="rounded border border-gold/60 bg-row-leather px-3 py-0.5 text-[11px] font-bold uppercase tracking-widest text-gold"
             >
-              Fase {{ phase }} — Release Offline
+              v1.2.0 — Release Offline
             </span>
             <span
               class="rounded border border-bronze bg-tavern-dark/80 px-3 py-0.5 text-[11px] font-medium text-parchment/80"
@@ -138,7 +138,28 @@ type ScreenView = 'MENU' | 'DECK_BUILDER' | 'BOARD';
                   : 'border-bronze/50 bg-tavern-dark/60 text-parchment/60'
               "
             >
-              Sonido: {{ feedback.soundEnabled() ? 'Activo' : 'Silencio' }}
+              SFX: {{ feedback.soundEnabled() ? 'Activo' : 'Silencio' }}
+            </button>
+            <button
+              type="button"
+              (click)="feedback.toggleMusic()"
+              class="min-h-[36px] rounded-full border px-3 py-1 font-semibold transition active:scale-95"
+              [class]="
+                feedback.musicEnabled()
+                  ? 'border-gold/70 bg-tavern-dark/90 text-gold-bright'
+                  : 'border-bronze/50 bg-tavern-dark/60 text-parchment/60'
+              "
+            >
+              Música: {{ feedback.musicEnabled() ? 'Activa' : 'Silencio' }}
+            </button>
+            <button
+              type="button"
+              (click)="feedback.nextTrack()"
+              [disabled]="!feedback.musicEnabled()"
+              title="Cambiar tema musical"
+              class="min-h-[36px] rounded-full border border-bronze/60 bg-tavern-dark/90 px-3 py-1 font-semibold text-parchment/90 transition hover:border-gold active:scale-95 disabled:opacity-45"
+            >
+              ⏭ Tema {{ feedback.currentTrackIndex() + 1 }}/4
             </button>
             <button
               type="button"

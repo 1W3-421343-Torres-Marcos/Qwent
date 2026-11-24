@@ -174,6 +174,9 @@ function buildDescription(raw: AboeUnitRecord, ability: AbilityType | null, isAg
   if (parts.length > 0) {
     return parts.join(' ');
   }
+  if (raw.Name === 'Cow') {
+    return 'Vengador: al ser descartada al final de la ronda, invoca una Fuerza de Defensa Bovina (8) en Cuerpo a cuerpo para la siguiente ronda.';
+  }
   return raw.Quote ? raw.Quote.replace(/https?:\/\/\S+/g, '').trim() : `Unidad de ${raw.Faction}.`;
 }
 

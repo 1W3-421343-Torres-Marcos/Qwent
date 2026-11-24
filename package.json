@@ -1,6 +1,6 @@
 {
   "name": "qwent",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "scripts": {
     "start": "ng serve",
@@ -9,6 +9,7 @@
     "test:watch": "vitest",
     "etl:cards": "node --experimental-strip-types scripts/etl-cards.ts",
     "import:sprites": "node --experimental-strip-types scripts/import-tw3-sprites.ts",
+    "import:audio": "node --experimental-strip-types scripts/import-tw3-audio.ts",
     "cap:sync": "npx cap sync android",
     "build:apk": "node scripts/build-apk.mjs"
   },

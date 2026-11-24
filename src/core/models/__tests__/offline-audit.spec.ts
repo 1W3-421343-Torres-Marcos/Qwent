@@ -80,11 +80,12 @@ describe('Offline Audit & Android Packaging Compliance (F6.3)', () => {
     expect(styles).toContain('@drawable/qwent_splash');
   });
 
-  it('embeds valid offline JPEG portraits in src/assets/cards/ covering all 150 cards without orphans', () => {
+  it('embeds valid offline JPEG portraits in src/assets/cards/ covering all 150 cards plus token sprites without orphans', () => {
     const cardsJson = JSON.parse(
       readFileSync(path.join(SRC_DIR, 'assets', 'data', 'cards.json'), 'utf8'),
     ) as ReadonlyArray<{ readonly id: string }>;
     const validIds = new Set(cardsJson.map((card) => card.id));
+    validIds.add('nt_bovine_defense_force');
 
     const spritesDir = path.join(SRC_DIR, 'assets', 'cards');
     expect(existsSync(spritesDir)).toBe(true);
@@ -102,5 +103,60 @@ describe('Offline Audit & Android Packaging Compliance (F6.3)', () => {
       expect(bytes[1]).toBe(0xd8);
       expect(bytes[2]).toBe(0xff);
     }
+  });
+
+  it('embeds all 29 offline SFX and 4 tavern BGM MP3 files with valid audio headers', () => {
+    const expectedSfx = [
+      'common_close.mp3',
+      'common_ranged.mp3',
+      'common_siege.mp3',
+      'hero.mp3',
+      'bond.mp3',
+      'morale.mp3',
+      'horn.mp3',
+      'medic.mp3',
+      'muster.mp3',
+      'spy.mp3',
+      'decoy.mp3',
+      'scorch.mp3',
+      'frost.mp3',
+      'fog.mp3',
+      'rain.mp3',
+      'clear.mp3',
+      'ui_card.mp3',
+      'ui_card_bank.mp3',
+      'draw.mp3',
+      'redraw.mp3',
+      'pass.mp3',
+      'turn_me.mp3',
+      'turn_op.mp3',
+      'round1_start.mp3',
+      'round_win.mp3',
+      'round_lose.mp3',
+      'game_start.mp3',
+      'game_win.mp3',
+      'game_lose.mp3',
+    ] as const;
+
+    const expectedMusic = ['tavern_1.mp3', 'tavern_2.mp3', 'tavern_3.mp3', 'tavern_4.mp3'] as const;
+
+    const assertValidMp3Dir = (dir: string, files: readonly string[], minBytes: number): void => {
+      expect(existsSync(dir)).toBe(true);
+      const actual = readdirSync(dir)
+        .filter((name) => name.endsWith('.mp3'))
+        .sort();
+      expect(actual).toEqual([...files].sort());
+
+      for (const file of files) {
+        const bytes = readFileSync(path.join(dir, file));
+        expect(bytes.byteLength).toBeGreaterThan(minBytes);
+        const hasId3 = bytes[0] === 0x49 && bytes[1] === 0x44 && bytes[2] === 0x33;
+        const hasMpegSync = bytes[0] === 0xff && ((bytes[1] ?? 0) & 0xe0) === 0xe0;
+        expect(hasId3 || hasMpegSync).toBe(true);
+      }
+    };
+
+    assertValidMp3Dir(path.join(SRC_DIR, 'assets', 'audio', 'sfx'), expectedSfx, 1000);
+    assertValidMp3Dir(path.join(SRC_DIR, 'assets', 'audio', 'music'), expectedMusic, 10000);
   });
 });

@@ -15,8 +15,8 @@ import { FactionEmblemComponent } from './faction-emblem.component';
       type="button"
       (click)="cardClicked.emit(card())"
       [title]="card().card.name"
-      class="qwent-card-enter relative flex h-full aspect-[3/4] shrink-0 flex-col justify-between overflow-hidden rounded border p-0.5 transition active:scale-95"
-      [class]="containerClasses()"
+      class="relative flex h-full aspect-[3/4] shrink-0 flex-col justify-between overflow-hidden rounded border p-0.5 transition active:scale-95"
+      [class]="tokenClasses()"
     >
       <!-- Bundled local TW3 portrait with transparent SVG faction emblem fallback -->
       @if (hasSprite()) {
@@ -88,6 +88,23 @@ export class CardTokenComponent {
   }
 
   readonly emblemAccentClass = computed(() => FACTION_META[this.card().card.faction].accentClass);
+
+  readonly enterAnimationClass = computed(() => {
+    const def = this.card().card;
+    if (def.isHero) return 'qwent-hero-enter';
+    if (def.ability === 'SPY') return 'qwent-spy-enter';
+    if (
+      def.ability === 'TIGHT_BOND' ||
+      def.ability === 'MORALE_BOOST' ||
+      def.ability === 'MUSTER' ||
+      def.ability === 'MEDIC'
+    ) {
+      return 'qwent-synergy-enter';
+    }
+    return 'qwent-card-enter';
+  });
+
+  readonly tokenClasses = computed(() => `${this.enterAnimationClass()} ${this.containerClasses()}`);
 
   readonly containerClasses = computed(() => {
     if (this.isSelectableTarget()) {
