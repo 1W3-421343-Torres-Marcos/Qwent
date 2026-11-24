@@ -17,6 +17,15 @@ import {
   type RowType,
 } from '../../core';
 import { FACTION_META } from '../shared/constants/faction-meta';
+import {
+  buildAiPlayLabel,
+  detectLostGemPlayers,
+  detectNilfgaardTieBanner,
+  detectRoundAdvanceBanners,
+  type AiPlayPreview,
+  type BoardBannerData,
+  type BoardBannerPayload,
+} from './board-events.utils';
 import { DeckStorageService } from './deck-storage.service';
 import { FeedbackService, type FeedbackCue } from './feedback.service';
 import { MatchHistoryService } from './match-history.service';
@@ -38,6 +47,9 @@ const TURN_BREATHER_MS = 450;
 const AI_PLAY_DELAY_MS = 1350;
 const AI_MULLIGAN_DELAY_MS = 650;
 const VISUAL_FX_DURATION_MS = 480;
+const BANNER_DURATION_MS = 1200;
+const AI_PREVIEW_DURATION_MS = 1200;
+const GEM_BREAK_DURATION_MS = 650;
 
 @Injectable({ providedIn: 'root' })
 export class GameFacadeService {
@@ -49,6 +61,12 @@ export class GameFacadeService {
   private handoffTimerId: ReturnType<typeof setTimeout> | null = null;
   private aiTimerId: ReturnType<typeof setTimeout> | null = null;
   private fxTimerId: ReturnType<typeof setTimeout> | null = null;
+  private bannerTimerId: ReturnType<typeof setTimeout> | null = null;
+  private bannerQueue: BoardBannerPayload[] = [];
+  private bannerSeq = 0;
+  private aiPreviewTimerId: ReturnType<typeof setTimeout> | null = null;
+  private aiPreviewSeq = 0;
+  private gemBreakTimerId: ReturnType<typeof setTimeout> | null = null;
 
   readonly phaseLabel = QWENT_PHASE;
   readonly gameMode = signal<GameMode>('VS_AI');
@@ -61,6 +79,9 @@ export class GameFacadeService {
   readonly turnHandoffPending = signal(false);
   readonly isAiThinking = signal(false);
   readonly visualEffect = signal<VisualEffectType | null>(null);
+  readonly activeBanner = signal<BoardBannerData | null>(null);
+  readonly aiPlayPreview = signal<AiPlayPreview | null>(null);
+  readonly lostGemPlayers = signal<readonly PlayerId[]>([]);
 
   readonly isHumanTurn = computed(
     () => this.gameMode() === 'LOCAL_2P' || this.state().activePlayer === 'PLAYER_1',
@@ -196,12 +217,18 @@ export class GameFacadeService {
     this.destroyRef.onDestroy(() => {
       this.clearTimers();
       this.clearFxTimer();
+      this.clearBanners();
+      this.clearAiPreview();
+      this.clearGemBreak();
     });
   }
 
   startNewMatch(mode?: GameMode): void {
     this.clearTimers();
     this.clearFxTimer();
+    this.clearBanners();
+    this.clearAiPreview();
+    this.clearGemBreak();
     this.visualEffect.set(null);
     const resolvedMode = mode ?? this.gameMode();
     this.gameMode.set(resolvedMode);
@@ -233,6 +260,9 @@ export class GameFacadeService {
   abandonMatch(): void {
     this.clearTimers();
     this.clearFxTimer();
+    this.clearBanners();
+    this.clearAiPreview();
+    this.clearGemBreak();
     this.isAiThinking.set(false);
     this.isTransitioningTurn.set(false);
     this.turnHandoffPending.set(false);
@@ -486,6 +516,10 @@ export class GameFacadeService {
     this.discardModalPlayerId.set(null);
     this.state.set(next);
     this.feedback.play('roundStart');
+    const roundBanners = detectRoundAdvanceBanners(prev, next, this.perspectivePlayerId());
+    for (const banner of roundBanners) {
+      this.enqueueBanner(banner);
+    }
 
     if (this.gameMode() === 'VS_AI') {
       this.perspectivePlayerId.set('PLAYER_1');
@@ -528,8 +562,18 @@ export class GameFacadeService {
     this.discardModalPlayerId.set(null);
     this.state.set(next);
     this.emitVisualAndFeedback(prev, next, action);
+    this.emitTurnAndCoinBanners(prev, next, action);
+    this.triggerAiPlayPreview(prev, action);
+    const lostGems = detectLostGemPlayers(prev, next);
+    if (lostGems.length > 0) {
+      this.triggerGemBreak(lostGems);
+    }
 
     if (next.phase === 'ROUND_END' || next.phase === 'MATCH_END') {
+      const nilfTieBanner = detectNilfgaardTieBanner(next);
+      if (nilfTieBanner) {
+        this.enqueueBanner(nilfTieBanner);
+      }
       if (prev.phase !== 'MATCH_END' && next.phase === 'MATCH_END') {
         this.matchHistory.recordCompletedMatch(next, this.gameMode());
       }
@@ -663,12 +707,142 @@ export class GameFacadeService {
       clearTimeout(this.aiTimerId);
       this.aiTimerId = null;
     }
+    this.clearAiPreview();
+  }
+
+  private clearAiPreview(): void {
+    if (this.aiPreviewTimerId !== null) {
+      clearTimeout(this.aiPreviewTimerId);
+      this.aiPreviewTimerId = null;
+    }
+    this.aiPlayPreview.set(null);
+  }
+
+  private clearGemBreak(): void {
+    if (this.gemBreakTimerId !== null) {
+      clearTimeout(this.gemBreakTimerId);
+      this.gemBreakTimerId = null;
+    }
+    this.lostGemPlayers.set([]);
+  }
+
+  private triggerGemBreak(players: readonly PlayerId[]): void {
+    this.clearGemBreak();
+    this.lostGemPlayers.set(players);
+    this.gemBreakTimerId = setTimeout(() => {
+      this.gemBreakTimerId = null;
+      this.lostGemPlayers.set([]);
+    }, GEM_BREAK_DURATION_MS);
+  }
+
+  private triggerAiPlayPreview(prev: GameState, action: GameAction): void {
+    if (this.gameMode() !== 'VS_AI') return;
+    if (action.type !== 'PLAY_CARD' && action.type !== 'USE_LEADER') return;
+    if (action.playerId !== 'PLAYER_2') return;
+
+    const card =
+      action.type === 'PLAY_CARD'
+        ? prev.players.PLAYER_2.hand.find((c) => c.instanceId === action.instanceId)?.card ?? null
+        : prev.players.PLAYER_2.leader;
+
+    if (!card) return;
+
+    this.clearAiPreview();
+    this.aiPlayPreview.set({
+      id: ++this.aiPreviewSeq,
+      card,
+      label: buildAiPlayLabel(card),
+    });
+    this.aiPreviewTimerId = setTimeout(() => {
+      this.aiPreviewTimerId = null;
+      this.aiPlayPreview.set(null);
+    }, AI_PREVIEW_DURATION_MS);
   }
 
   private clearFxTimer(): void {
     if (this.fxTimerId !== null) {
       clearTimeout(this.fxTimerId);
       this.fxTimerId = null;
+    }
+  }
+
+  private clearBanners(): void {
+    if (this.bannerTimerId !== null) {
+      clearTimeout(this.bannerTimerId);
+      this.bannerTimerId = null;
+    }
+    this.bannerQueue = [];
+    this.activeBanner.set(null);
+  }
+
+  private enqueueBanner(payload: BoardBannerPayload): void {
+    this.bannerQueue.push(payload);
+    if (this.activeBanner() === null && this.bannerTimerId === null) {
+      this.pumpBannerQueue();
+    }
+  }
+
+  private pumpBannerQueue(): void {
+    const next = this.bannerQueue.shift();
+    if (!next) {
+      this.activeBanner.set(null);
+      this.bannerTimerId = null;
+      return;
+    }
+
+    this.activeBanner.set({ ...next, id: ++this.bannerSeq });
+    this.bannerTimerId = setTimeout(() => {
+      this.bannerTimerId = null;
+      this.activeBanner.set(null);
+      this.pumpBannerQueue();
+    }, BANNER_DURATION_MS);
+  }
+
+  private emitTurnAndCoinBanners(prev: GameState, next: GameState, action: GameAction): void {
+    const startedRoundOneFromCoin =
+      (prev.phase === 'MULLIGAN' ||
+        (prev.phase === 'PENDING_SELECTION' &&
+          prev.pendingSelection?.type === 'SCOIATAEL_START_CHOICE')) &&
+      next.phase === 'PLAYING';
+
+    if (startedRoundOneFromCoin) {
+      const iStart = next.activePlayer === this.perspectivePlayerId();
+      this.enqueueBanner({
+        title: iStart ? 'Moneda: Empiezas tú' : 'Moneda: Empieza el rival',
+        subtitle: 'Ronda 1',
+        tone: 'GOLD',
+        icon: 'COIN',
+      });
+      return;
+    }
+
+    if (action.type === 'PASS_TURN' && next.phase === 'PLAYING') {
+      const iPassed = action.playerId === this.perspectivePlayerId();
+      this.enqueueBanner({
+        title: iPassed ? 'Has pasado' : 'El rival ha pasado',
+        tone: iPassed ? 'NEUTRAL' : 'CRIMSON',
+        icon: 'PASS',
+      });
+      return;
+    }
+
+    if (
+      this.gameMode() === 'VS_AI' &&
+      prev.phase === 'PLAYING' &&
+      next.phase === 'PLAYING' &&
+      prev.activePlayer === 'PLAYER_2' &&
+      next.activePlayer === 'PLAYER_1'
+    ) {
+      this.enqueueBanner({ title: 'Tu turno', tone: 'GOLD', icon: 'TURN' });
+      this.feedback.play('turnMe');
+    } else if (
+      this.gameMode() === 'VS_AI' &&
+      prev.phase === 'PLAYING' &&
+      next.phase === 'PLAYING' &&
+      prev.activePlayer === 'PLAYER_1' &&
+      next.activePlayer === 'PLAYER_2'
+    ) {
+      this.feedback.play('turnOp');
     }
   }
 

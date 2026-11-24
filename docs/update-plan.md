@@ -11,7 +11,7 @@
 | U1 | Arte local de cartas TW3 (100% offline) | [x] | 100% |
 | U2 | Audio de taberna offline, FX de cartas y regla Vaca → Chort | [x] | 100% |
 | U3 | Salir de partida en juego, historial offline y ritmo de IA | [x] | 100% |
-| U4 | Sensación en vivo de partida TW3 (banners, preview IA, corona y gemas) | [ ] | 0% |
+| U4 | Sensación en vivo de partida TW3 (banners, preview IA, corona y gemas) | [x] | 100% |
 | U5 | Fidelidad visual del tablero, artes alternativos, dorsos y climas | [ ] | 0% |
 | U6 | 5.º Líder por facción (*Hearts of Stone*) y localización completa al español | [ ] | 0% |
 | U7 | Expansión *Blood and Wine* (Skellige) y niveles de dificultad de IA | [ ] | 0% |
@@ -25,10 +25,10 @@
 ### Pendientes (Hoja de Ruta TW3)
 
 ## U4: Sensación en vivo de partida TW3 (`v1.4.0`)
-- [ ] **U4.1**: Banners centrales no bloqueantes (`BoardBannerComponent`, ~`1200 ms`, animación GPU) y cola en `GameFacadeService` para moneda inicial, cambio de turno (*"Tu turno"* / *"Turno del rival"* con `turn_me.mp3` / `turn_op.mp3`), pase, inicio de Ronda 2/3 y activación de pasivas de facción / Vengador
-- [ ] **U4.2**: Preview flotante breve (~`1100 ms`) de la última carta o habilidad de Líder jugada por la IA antes de resolverse o ir al descarte
-- [ ] **U4.3**: Corona dorada en el marcador del jugador que lidera la ronda actual y animación GPU al perder/quebrarse una gema de vida
-- [ ] **U4.4**: Tests en verde, versión `1.4.0`, compilación de `gwent-u4-debug.apk` (`--phase=u4`) y tag `v1.4.0`
+- [x] **U4.1**: Banners centrales no bloqueantes (`BoardBannerComponent`, ~`1200 ms`, animación GPU) y cola en `GameFacadeService` para moneda inicial, cambio de turno (*"Tu turno"* / *"Turno del rival"* con `turn_me.mp3` / `turn_op.mp3`), pase, inicio de Ronda 2/3 y activación de pasivas de facción / Vengador
+- [x] **U4.2**: Preview flotante breve (~`1100 ms`) de la última carta o habilidad de Líder jugada por la IA antes de resolverse o ir al descarte
+- [x] **U4.3**: Corona dorada en el marcador del jugador que lidera la ronda actual y animación GPU al perder/quebrarse una gema de vida
+- [x] **U4.4**: Tests en verde, versión `1.4.0`, compilación de `gwent-u4-debug.apk` (`--phase=u4`) y tag `v1.4.0`
 
 ## U5: Fidelidad visual del tablero, artes alternativos, dorsos y climas (`v1.5.0`)
 - [ ] **U5.1**: Importación offline de las variantes de arte originales (`_1`..`_4` en `asundr/gwent-classic/img/sm/`) en `scripts/import-tw3-sprites.ts` y resolución determinista por instancia en `card-art.ts` para unidades multi-copia (*Nekker*, *Arachas*, *Gul*, *Defensor de Mahakam*, *Experto en asedio kaedweni*, *Hostigador élfico*, etc.)
@@ -89,3 +89,7 @@
 | 2026-11-24 | **U3.3**: Creada pantalla `MatchHistoryPageComponent` (filtros, stats, puntajes ronda a ronda y borrado con confirmación) e integrado acceso `Historial (N)` en `AppComponent` | U3.4: Versión `1.3.0`, verificación completa, APK `gwent-u3-debug.apk`, tag `v1.3.0` y push |
 | 2026-11-24 | **U3.4 (`v1.3.0`)**: Incluido `src/app/**/*.spec.ts` en `vitest.config.ts` (**16** archivos / **65** tests en verde), build Angular `387.43 kB` iniciales y APK **`gwent-u3-debug.apk`** (`16.77 MB`) compilado en verde | Completada **U3**; listo para instalar en Android o planificar **U4** |
 | 2026-11-24 | Planificación integral de la hoja de ruta **U4–U7** (`v1.4.0`–`v1.7.0`) registrada en `docs/update-plan.md` | Ejecutar **U4** cuando el usuario lo indique |
+| 2026-11-24 | **U4.1**: Creados `board-events.utils.ts` y `BoardBannerComponent`, conectada cola secuencial de banners en `GameFacadeService` (moneda, turnos, pases, pasivas, rondas) y montado en `BoardPageComponent` | U4.2: Preview flotante breve de la última carta/líder jugada por la IA |
+| 2026-11-24 | **U4.2**: Implementado preview flotante breve (`aiPlayPreview`, `1200 ms`) de la última carta o Líder jugada por la IA en `GameFacadeService` y `BoardPageComponent` | U4.3: Corona dorada de ventaja en marcador y animación GPU al romperse gemas |
+| 2026-11-24 | **U4.3**: Añadidas corona dorada animada al líder de ronda (`topIsLeading`/`bottomIsLeading`) y animación `qwent-gem-break` en `styles.css`, `GameFacadeService` y `BoardPageComponent` | U4.4: Tests unitarios, versión `1.4.0`, APK `gwent-u4-debug.apk`, tag `v1.4.0` y push |
+| 2026-11-24 | **U4.4 (`v1.4.0`)**: Añadidos tests en `board-events.spec.ts` (**17** archivos / **69** tests en verde), build Angular `399.59 kB` iniciales y APK **`gwent-u4-debug.apk`** (`16.78 MB`) compilado en verde | Completada **U4**; siguiente etapa planificada: **U5** |

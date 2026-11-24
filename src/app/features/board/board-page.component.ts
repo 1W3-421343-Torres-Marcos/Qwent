@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, output, signal } from '@angular/core';
-import type { FactionId } from '../../../core';
+import type { FactionId, PlayerState } from '../../../core';
 import { FeedbackService } from '../../services/feedback.service';
 import { GameFacadeService, type VisualEffectType } from '../../services/game-facade.service';
 import { AbilityIconComponent } from '../../shared/components/card-icons.component';
@@ -7,6 +7,7 @@ import { CardDetailComponent } from '../../shared/components/card-detail.compone
 import { FactionEmblemComponent } from '../../shared/components/faction-emblem.component';
 import { createSpriteFallbackTracker } from '../../shared/constants/card-art';
 import { FACTION_META } from '../../shared/constants/faction-meta';
+import { BoardBannerComponent } from './components/board-banner.component';
 import { BoardOverlaysComponent } from './components/board-overlays.component';
 import { BoardRowComponent } from './components/board-row.component';
 import { HandBarComponent } from './components/hand-bar.component';
@@ -29,6 +30,7 @@ const VISUAL_FX_CLASS_MAP: Readonly<Partial<Record<VisualEffectType, string>>> =
   selector: 'app-board-page',
   standalone: true,
   imports: [
+    BoardBannerComponent,
     BoardRowComponent,
     HandBarComponent,
     BoardOverlaysComponent,
@@ -70,11 +72,7 @@ const VISUAL_FX_CLASS_MAP: Readonly<Partial<Record<VisualEffectType, string>>> =
                   @for (gemIdx of [0, 1]; track gemIdx) {
                     <span
                       class="h-2.5 w-2.5 rounded-full border border-black/60"
-                      [class]="
-                        gemIdx < facade.topPlayer().gems
-                          ? 'bg-gem-ruby shadow-[0_0_6px_rgba(220,38,38,0.85)]'
-                          : 'bg-gem-ash'
-                      "
+                      [class]="gemClass(facade.topPlayer(), gemIdx)"
                     ></span>
                   }
                   @if (facade.topPlayer().passed) {
@@ -84,11 +82,21 @@ const VISUAL_FX_CLASS_MAP: Readonly<Partial<Record<VisualEffectType, string>>> =
                   }
                 </div>
               </div>
-              <span
-                class="qwent-num-shadow font-serif text-[clamp(1.25rem,4.2vh,2rem)] font-extrabold text-parchment"
-              >
-                {{ facade.topPlayer().totalScore }}
-              </span>
+              <div class="flex items-center gap-1">
+                @if (topIsLeading()) {
+                  <span
+                    title="Ganando la ronda"
+                    class="qwent-crown-pulse text-sm leading-none text-gold-bright drop-shadow"
+                  >
+                    ♛
+                  </span>
+                }
+                <span
+                  class="qwent-num-shadow font-serif text-[clamp(1.25rem,4.2vh,2rem)] font-extrabold text-parchment"
+                >
+                  {{ facade.topPlayer().totalScore }}
+                </span>
+              </div>
             </div>
             <p class="mt-0.5 text-[10px] text-parchment/70">
               Mano rival: <span class="font-bold text-parchment">{{ facade.topPlayer().hand.length }}</span>
@@ -188,11 +196,7 @@ const VISUAL_FX_CLASS_MAP: Readonly<Partial<Record<VisualEffectType, string>>> =
                   @for (gemIdx of [0, 1]; track gemIdx) {
                     <span
                       class="h-2.5 w-2.5 rounded-full border border-black/60"
-                      [class]="
-                        gemIdx < facade.bottomPlayer().gems
-                          ? 'bg-gem-ruby shadow-[0_0_6px_rgba(220,38,38,0.85)]'
-                          : 'bg-gem-ash'
-                      "
+                      [class]="gemClass(facade.bottomPlayer(), gemIdx)"
                     ></span>
                   }
                   @if (facade.bottomPlayer().passed) {
@@ -202,11 +206,21 @@ const VISUAL_FX_CLASS_MAP: Readonly<Partial<Record<VisualEffectType, string>>> =
                   }
                 </div>
               </div>
-              <span
-                class="qwent-num-shadow font-serif text-[clamp(1.25rem,4.2vh,2rem)] font-extrabold text-gold-bright"
-              >
-                {{ facade.bottomPlayer().totalScore }}
-              </span>
+              <div class="flex items-center gap-1">
+                @if (bottomIsLeading()) {
+                  <span
+                    title="Ganando la ronda"
+                    class="qwent-crown-pulse text-sm leading-none text-gold-bright drop-shadow"
+                  >
+                    ♛
+                  </span>
+                }
+                <span
+                  class="qwent-num-shadow font-serif text-[clamp(1.25rem,4.2vh,2rem)] font-extrabold text-gold-bright"
+                >
+                  {{ facade.bottomPlayer().totalScore }}
+                </span>
+              </div>
             </div>
             <p class="mt-0.5 text-[10px] text-parchment/75">
               Tu mano: <span class="font-bold text-parchment">{{ facade.bottomPlayer().hand.length }}</span>
@@ -354,7 +368,7 @@ const VISUAL_FX_CLASS_MAP: Readonly<Partial<Record<VisualEffectType, string>>> =
             <span
               class="inline-block rounded border border-bronze/60 bg-tavern-dark/80 px-1.5 py-0.5 text-[9px] font-bold uppercase text-gold"
             >
-              v1.3.0
+              v1.4.0
             </span>
             <div class="grid grid-cols-2 gap-1">
               <button
@@ -464,6 +478,55 @@ const VISUAL_FX_CLASS_MAP: Readonly<Partial<Record<VisualEffectType, string>>> =
           </div>
         </aside>
       </div>
+
+      <!-- Non-blocking TW3 Center Banners -->
+      <app-board-banner [banner]="facade.activeBanner()" />
+
+      <!-- Floating Brief Preview of AI's Last Card / Leader Play -->
+      @if (facade.aiPlayPreview(); as preview) {
+        @for (item of [preview]; track item.id) {
+          <div
+            class="qwent-ai-preview-enter pointer-events-none fixed left-[19%] top-3 z-30 flex w-52 items-center gap-2 overflow-hidden rounded-lg border-2 bg-board-wood/95 p-1.5 shadow-2xl backdrop-blur-sm"
+            [class]="item.card.isHero ? 'border-gold-bright qwent-hero-frame' : 'border-bronze'"
+          >
+            <span
+              class="relative flex h-12 w-9 shrink-0 items-center justify-center overflow-hidden rounded border border-gold/50 bg-tavern-dark"
+            >
+              @if (art.hasSprite(item.card.id)) {
+                <img
+                  [src]="art.spritePath(item.card.id)"
+                  [alt]="item.card.name"
+                  decoding="async"
+                  (error)="art.markFailed(item.card.id)"
+                  class="h-full w-full object-cover object-top"
+                />
+              } @else {
+                <span class="h-5 w-5" [class]="factionAccent(item.card.faction)">
+                  <app-faction-emblem [faction]="item.card.faction" />
+                </span>
+              }
+              <span
+                class="qwent-num-shadow absolute left-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full border border-bronze bg-tavern-dark/95 text-[9px] font-extrabold text-parchment"
+              >
+                {{
+                  item.card.type === 'LEADER'
+                    ? '♛'
+                    : item.card.type === 'SPECIAL'
+                      ? '★'
+                      : item.card.baseStrength
+                }}
+              </span>
+            </span>
+            <div class="min-w-0 flex-1 text-left">
+              <p class="text-[9px] font-bold uppercase tracking-wider text-gold">{{ item.label }}</p>
+              <p class="truncate text-xs font-extrabold text-parchment">{{ item.card.name }}</p>
+              <p class="line-clamp-1 text-[9px] text-parchment/75">
+                {{ item.card.ability ?? item.card.leaderAbility ?? item.card.description }}
+              </p>
+            </div>
+          </div>
+        }
+      }
 
       <!-- Non-blocking GPU Visual Effects Overlay -->
       @if (visualEffectClass(); as fxClass) {
@@ -580,6 +643,12 @@ export class BoardPageComponent {
   readonly holdProgress = signal(0);
   readonly exitConfirmOpen = signal(false);
   readonly art = createSpriteFallbackTracker();
+  readonly topIsLeading = computed(
+    () => this.facade.topPlayer().totalScore > this.facade.bottomPlayer().totalScore,
+  );
+  readonly bottomIsLeading = computed(
+    () => this.facade.bottomPlayer().totalScore > this.facade.topPlayer().totalScore,
+  );
   readonly visualEffectClass = computed(() => {
     const fx = this.facade.visualEffect();
     return fx ? (VISUAL_FX_CLASS_MAP[fx] ?? null) : null;
@@ -621,6 +690,16 @@ export class BoardPageComponent {
 
   factionAccent(faction: FactionId): string {
     return FACTION_META[faction].accentClass;
+  }
+
+  gemClass(player: PlayerState, gemIdx: number): string {
+    if (gemIdx < player.gems) {
+      return 'bg-gem-ruby shadow-[0_0_6px_rgba(220,38,38,0.85)]';
+    }
+    if (gemIdx === player.gems && this.facade.lostGemPlayers().includes(player.id)) {
+      return 'qwent-gem-break bg-gem-ash';
+    }
+    return 'bg-gem-ash';
   }
 
   onOwnRowSelected(rowType: Parameters<GameFacadeService['onOwnRowTap']>[0]): void {
