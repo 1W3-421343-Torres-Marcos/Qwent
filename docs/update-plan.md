@@ -12,7 +12,7 @@
 | U2 | Audio de taberna offline, FX de cartas y regla Vaca → Chort | [x] | 100% |
 | U3 | Salir de partida en juego, historial offline y ritmo de IA | [x] | 100% |
 | U4 | Sensación en vivo de partida TW3 (banners, preview IA, corona y gemas) | [x] | 100% |
-| U5 | Fidelidad visual del tablero, artes alternativos, dorsos y climas | [ ] | 0% |
+| U5 | Fidelidad visual del tablero, artes alternativos, dorsos y climas | [x] | 100% |
 | U6 | 5.º Líder por facción (*Hearts of Stone*) y localización completa al español | [ ] | 0% |
 | U7 | Expansión *Blood and Wine* (Skellige) y niveles de dificultad de IA | [ ] | 0% |
 
@@ -31,10 +31,10 @@
 - [x] **U4.4**: Tests en verde, versión `1.4.0`, compilación de `gwent-u4-debug.apk` (`--phase=u4`) y tag `v1.4.0`
 
 ## U5: Fidelidad visual del tablero, artes alternativos, dorsos y climas (`v1.5.0`)
-- [ ] **U5.1**: Importación offline de las variantes de arte originales (`_1`..`_4` en `asundr/gwent-classic/img/sm/`) en `scripts/import-tw3-sprites.ts` y resolución determinista por instancia en `card-art.ts` para unidades multi-copia (*Nekker*, *Arachas*, *Gul*, *Defensor de Mahakam*, *Experto en asedio kaedweni*, *Hostigador élfico*, etc.)
-- [ ] **U5.2**: Miniaturas reales de cartas activas en la caja de Clima (`sp_biting_frost`, `sp_impenetrable_fog`, `sp_torrential_rain`) y en la ranura de Cuerno (`sp_commanders_horn`), más dorsos ilustrados SVG/CSS por facción en las pilas de Mazo
-- [ ] **U5.3**: Capas atmosféricas CSS GPU sobre las filas afectadas por clima (escarcha en Cuerpo a cuerpo, niebla en Distancia y lluvia en Asedio, respetando `prefers-reduced-motion`)
-- [ ] **U5.4**: Auditoría offline actualizada en `offline-audit.spec.ts`, versión `1.5.0`, `gwent-u5-debug.apk` (`--phase=u5`) y tag `v1.5.0`
+- [x] **U5.1**: Importación offline de las variantes de arte originales (`_1`..`_4` en `asundr/gwent-classic/img/sm/`) en `scripts/import-tw3-sprites.ts` y resolución determinista por instancia en `card-art.ts` para unidades multi-copia (*Nekker*, *Arachas*, *Gul*, *Defensor de Mahakam*, *Experto en asedio kaedweni*, *Hostigador élfico*, etc.)
+- [x] **U5.2**: Miniaturas reales de cartas activas en la caja de Clima (`sp_biting_frost`, `sp_impenetrable_fog`, `sp_torrential_rain`) y en la ranura de Cuerno (`sp_commanders_horn`), más dorsos ilustrados SVG/CSS por facción en las pilas de Mazo
+- [x] **U5.3**: Capas atmosféricas CSS GPU sobre las filas afectadas por clima (escarcha en Cuerpo a cuerpo, niebla en Distancia y lluvia en Asedio, respetando `prefers-reduced-motion`)
+- [x] **U5.4**: Auditoría offline actualizada en `offline-audit.spec.ts`, versión `1.5.0`, `gwent-u5-debug.apk` (`--phase=u5`) y tag `v1.5.0`
 
 ## U6: 5.º Líder por facción (*Hearts of Stone*) y localización completa al español (`v1.6.0`)
 - [ ] **U6.1**: Implementar en Clean Core (`types.ts`, `leaders.ts`, `calculate-strength.ts`), catálogo, IA y sprites los 4 quintos líderes de *Hearts of Stone*: *Foltest: Hijo de Medell* (`SCORCH_ENEMY_RANGED_10`), *Emhyr: Invasor del Norte* (`RANDOMIZE_REVIVES`), *Eredin: El Traidor* (`DOUBLE_SPY_STRENGTH`) y completar los 5 líderes de Scoia'tael (*Francesca: La Hermosa* + habilidad `OPTIMIZE_AGILE_ROWS` en *Esperanza de Aen Seidhe*), cubierto por tests en `leaders.spec.ts`
@@ -93,3 +93,7 @@
 | 2026-11-24 | **U4.2**: Implementado preview flotante breve (`aiPlayPreview`, `1200 ms`) de la última carta o Líder jugada por la IA en `GameFacadeService` y `BoardPageComponent` | U4.3: Corona dorada de ventaja en marcador y animación GPU al romperse gemas |
 | 2026-11-24 | **U4.3**: Añadidas corona dorada animada al líder de ronda (`topIsLeading`/`bottomIsLeading`) y animación `qwent-gem-break` en `styles.css`, `GameFacadeService` y `BoardPageComponent` | U4.4: Tests unitarios, versión `1.4.0`, APK `gwent-u4-debug.apk`, tag `v1.4.0` y push |
 | 2026-11-24 | **U4.4 (`v1.4.0`)**: Añadidos tests en `board-events.spec.ts` (**17** archivos / **69** tests en verde), build Angular `399.59 kB` iniciales y APK **`gwent-u4-debug.apk`** (`16.78 MB`) compilado en verde | Completada **U4**; siguiente etapa planificada: **U5** |
+| 2026-11-24 | **U5.1**: Descargadas **29 variantes** de arte alternativo (`179/179` en `import:sprites`, `180` total con Chort), creado `card-art.utils.ts` y cableado `instanceId` en tablero, mano, inspector y overlays | U5.2: Miniaturas reales en Clima/Cuerno y dorsos ilustrados por facción |
+| 2026-11-24 | **U5.2**: Creado `DeckBackComponent` con dorsos de facción para pilas de Mazo y añadidas miniaturas reales en caja de Clima (`BoardPageComponent`) y ranura de Cuerno (`BoardRowComponent`) | U5.3: Capas atmosféricas CSS GPU en filas afectadas por clima |
+| 2026-11-24 | **U5.3**: Añadidas capas climáticas animadas GPU (`.qwent-row-frost`, `.qwent-row-fog`, `.qwent-row-rain`) en `styles.css` y `BoardRowComponent` | U5.4: Tests unitarios, auditoría offline (180 sprites), versión `1.5.0`, APK y tag `v1.5.0` |
+| 2026-11-24 | **U5.4 (`v1.5.0`)**: Tests de variantes (`card-art.spec.ts`), auditoría offline de **180** sprites JPEG válidos (**18** archivos / **73** tests en verde), build Angular `407.89 kB` iniciales y APK **`gwent-u5-debug.apk`** (`17.95 MB`) compilado en verde | Completada **U5**; siguiente etapa planificada: **U6** |

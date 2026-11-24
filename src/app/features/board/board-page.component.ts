@@ -4,6 +4,7 @@ import { FeedbackService } from '../../services/feedback.service';
 import { GameFacadeService, type VisualEffectType } from '../../services/game-facade.service';
 import { AbilityIconComponent } from '../../shared/components/card-icons.component';
 import { CardDetailComponent } from '../../shared/components/card-detail.component';
+import { DeckBackComponent } from '../../shared/components/deck-back.component';
 import { FactionEmblemComponent } from '../../shared/components/faction-emblem.component';
 import { createSpriteFallbackTracker } from '../../shared/constants/card-art';
 import { FACTION_META } from '../../shared/constants/faction-meta';
@@ -26,6 +27,33 @@ const VISUAL_FX_CLASS_MAP: Readonly<Partial<Record<VisualEffectType, string>>> =
   MUSTER: 'qwent-muster-overlay',
 };
 
+const WEATHER_BOX_SLOTS = [
+  {
+    key: 'frost',
+    ability: 'WEATHER_FROST',
+    cardId: 'sp_biting_frost',
+    label: 'Escarcha helada',
+    activeClass:
+      'border-weather-frost bg-weather-frost/20 text-weather-frost shadow-[0_0_8px_rgba(56,189,248,0.4)]',
+  },
+  {
+    key: 'fog',
+    ability: 'WEATHER_FOG',
+    cardId: 'sp_impenetrable_fog',
+    label: 'Niebla impenetrable',
+    activeClass:
+      'border-weather-fog bg-weather-fog/20 text-weather-fog shadow-[0_0_8px_rgba(203,213,225,0.35)]',
+  },
+  {
+    key: 'rain',
+    ability: 'WEATHER_RAIN',
+    cardId: 'sp_torrential_rain',
+    label: 'Lluvia torrencial',
+    activeClass:
+      'border-weather-rain bg-weather-rain/20 text-weather-rain shadow-[0_0_8px_rgba(96,165,250,0.4)]',
+  },
+] as const;
+
 @Component({
   selector: 'app-board-page',
   standalone: true,
@@ -35,6 +63,7 @@ const VISUAL_FX_CLASS_MAP: Readonly<Partial<Record<VisualEffectType, string>>> =
     HandBarComponent,
     BoardOverlaysComponent,
     CardDetailComponent,
+    DeckBackComponent,
     AbilityIconComponent,
     FactionEmblemComponent,
   ],
@@ -137,39 +166,31 @@ const VISUAL_FX_CLASS_MAP: Readonly<Partial<Record<VisualEffectType, string>>> =
               Clima activo
             </p>
             <div class="grid grid-cols-3 gap-1">
-              <div
-                class="flex h-9 items-center justify-center rounded border"
-                [class]="
-                  facade.state().weather.frost !== null
-                    ? 'border-weather-frost bg-weather-frost/20 text-weather-frost'
-                    : 'border-bronze/40 text-parchment/25'
-                "
-                title="Escarcha helada"
-              >
-                <span class="h-5 w-5"><app-ability-icon ability="WEATHER_FROST" /></span>
-              </div>
-              <div
-                class="flex h-9 items-center justify-center rounded border"
-                [class]="
-                  facade.state().weather.fog !== null
-                    ? 'border-weather-fog bg-weather-fog/20 text-weather-fog'
-                    : 'border-bronze/40 text-parchment/25'
-                "
-                title="Niebla impenetrable"
-              >
-                <span class="h-5 w-5"><app-ability-icon ability="WEATHER_FOG" /></span>
-              </div>
-              <div
-                class="flex h-9 items-center justify-center rounded border"
-                [class]="
-                  facade.state().weather.rain !== null
-                    ? 'border-weather-rain bg-weather-rain/20 text-weather-rain'
-                    : 'border-bronze/40 text-parchment/25'
-                "
-                title="Lluvia torrencial"
-              >
-                <span class="h-5 w-5"><app-ability-icon ability="WEATHER_RAIN" /></span>
-              </div>
+              @for (slot of weatherSlots; track slot.key) {
+                @let isActive = facade.state().weather[slot.key] !== null;
+                <div
+                  class="relative flex h-10 items-center justify-center overflow-hidden rounded border transition"
+                  [class]="isActive ? slot.activeClass : 'border-bronze/40 text-parchment/25'"
+                  [title]="slot.label"
+                >
+                  @if (isActive && art.hasSprite(slot.cardId)) {
+                    <img
+                      [src]="art.spritePath(slot.cardId)"
+                      [alt]="slot.label"
+                      decoding="async"
+                      (error)="art.markFailed(slot.cardId)"
+                      class="pointer-events-none absolute inset-0 h-full w-full object-cover object-top"
+                    />
+                    <span
+                      class="relative z-10 flex h-4 w-4 items-center justify-center rounded-full bg-tavern-dark/80 p-0.5 shadow"
+                    >
+                      <app-ability-icon [ability]="slot.ability" />
+                    </span>
+                  } @else {
+                    <span class="h-5 w-5"><app-ability-icon [ability]="slot.ability" /></span>
+                  }
+                </div>
+              }
             </div>
           </section>
 
@@ -355,12 +376,10 @@ const VISUAL_FX_CLASS_MAP: Readonly<Partial<Record<VisualEffectType, string>>> =
               <span class="text-parchment/70">Descarte</span>
               <span class="font-bold text-parchment">{{ facade.topPlayer().discard.length }}</span>
             </button>
-            <div
-              class="flex h-9 flex-col items-center justify-center rounded border border-bronze/40 bg-row-leather/80 px-1 text-[10px]"
-            >
-              <span class="text-parchment/70">Mazo</span>
-              <span class="font-bold text-parchment">{{ facade.topPlayer().deck.length }}</span>
-            </div>
+            <app-deck-back
+              [faction]="facade.topPlayer().faction"
+              [count]="facade.topPlayer().deck.length"
+            />
           </div>
 
           <!-- Center Badge & Feedback Toggles -->
@@ -368,7 +387,7 @@ const VISUAL_FX_CLASS_MAP: Readonly<Partial<Record<VisualEffectType, string>>> =
             <span
               class="inline-block rounded border border-bronze/60 bg-tavern-dark/80 px-1.5 py-0.5 text-[9px] font-bold uppercase text-gold"
             >
-              v1.4.0
+              v1.5.0
             </span>
             <div class="grid grid-cols-2 gap-1">
               <button
@@ -444,12 +463,10 @@ const VISUAL_FX_CLASS_MAP: Readonly<Partial<Record<VisualEffectType, string>>> =
               <span class="text-parchment/70">Descarte</span>
               <span class="font-bold text-parchment">{{ facade.bottomPlayer().discard.length }}</span>
             </button>
-            <div
-              class="flex h-9 flex-col items-center justify-center rounded border border-bronze/40 bg-row-leather/80 px-1 text-[10px]"
-            >
-              <span class="text-parchment/70">Mazo</span>
-              <span class="font-bold text-parchment">{{ facade.bottomPlayer().deck.length }}</span>
-            </div>
+            <app-deck-back
+              [faction]="facade.bottomPlayer().faction"
+              [count]="facade.bottomPlayer().deck.length"
+            />
 
             <!-- Hold-to-Pass (600ms) Ergonomic Thumb Button -->
             <button
@@ -642,6 +659,7 @@ export class BoardPageComponent {
   readonly exitToMenu = output<void>();
   readonly holdProgress = signal(0);
   readonly exitConfirmOpen = signal(false);
+  readonly weatherSlots = WEATHER_BOX_SLOTS;
   readonly art = createSpriteFallbackTracker();
   readonly topIsLeading = computed(
     () => this.facade.topPlayer().totalScore > this.facade.bottomPlayer().totalScore,

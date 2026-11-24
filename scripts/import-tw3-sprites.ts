@@ -180,6 +180,37 @@ const CARD_ID_TO_SPRITE_FILE: Readonly<Record<string, string>> = {
   sp_scorch: 'special_scorch.jpg',
 };
 
+const ALT_SPRITE_FILES: Readonly<Record<string, readonly string[]>> = {
+  mo_arachas: ['monsters_arachas_1.jpg', 'monsters_arachas_2.jpg'],
+  mo_ghoul: ['monsters_ghoul_1.jpg', 'monsters_ghoul_2.jpg'],
+  mo_nekker: ['monsters_nekker_1.jpg', 'monsters_nekker_2.jpg'],
+  ng_etolian_auxiliary: ['nilfgaard_archer_support_1.jpg'],
+  ng_black_infantry_archer: ['nilfgaard_black_archer_1.jpg'],
+  ng_young_emissary: ['nilfgaard_young_emissary_1.jpg'],
+  nr_ballista: ['realms_ballista_1.jpg'],
+  nr_kaedweni_siege_expert: ['realms_kaedwen_siege_1.jpg', 'realms_kaedwen_siege_2.jpg'],
+  nr_redanian_foot_soldier: ['realms_redania_1.jpg'],
+  nr_trebuchet: ['realms_trebuchet_1.jpg'],
+  st_dol_blathanna_scout: ['scoiatael_dol_infantry_1.jpg', 'scoiatael_dol_infantry_2.jpg'],
+  st_dwarven_skirmisher: ['scoiatael_dwarf_1.jpg', 'scoiatael_dwarf_2.jpg'],
+  st_elven_skirmisher: ['scoiatael_elf_skirmisher_1.jpg', 'scoiatael_elf_skirmisher_2.jpg'],
+  st_havekar_healer: ['scoiatael_havekar_nurse_1.jpg', 'scoiatael_havekar_nurse_2.jpg'],
+  st_havekar_smuggler: ['scoiatael_havekar_support_1.jpg', 'scoiatael_havekar_support_2.jpg'],
+  st_mahakaman_defender: [
+    'scoiatael_mahakam_1.jpg',
+    'scoiatael_mahakam_2.jpg',
+    'scoiatael_mahakam_3.jpg',
+    'scoiatael_mahakam_4.jpg',
+  ],
+  st_vrihedd_brigade: ['scoiatael_vrihedd_brigade_1.jpg'],
+};
+
+interface SpriteJob {
+  readonly key: string;
+  readonly targetFileName: string;
+  readonly sourceFileName: string;
+}
+
 function isValidJpeg(buffer: Uint8Array): boolean {
   return (
     buffer.byteLength > 1000 &&
@@ -200,19 +231,36 @@ async function importSprites(): Promise<void> {
 
   mkdirSync(OUTPUT_DIR, { recursive: true });
 
+  const jobs: SpriteJob[] = cards.map((card) => ({
+    key: card.id,
+    targetFileName: `${card.id}.jpg`,
+    sourceFileName: CARD_ID_TO_SPRITE_FILE[card.id]!,
+  }));
+
+  for (const [cardId, altFiles] of Object.entries(ALT_SPRITE_FILES)) {
+    altFiles.forEach((sourceFileName, idx) => {
+      const targetFileName = `${cardId}_alt${idx + 1}.jpg`;
+      jobs.push({
+        key: `${cardId}_alt${idx + 1}`,
+        targetFileName,
+        sourceFileName,
+      });
+    });
+  }
+
   let downloaded = 0;
   let skipped = 0;
   let totalBytes = 0;
 
-  const queue = [...cards];
+  const queue = [...jobs];
   const workerCount = 6;
 
   async function runWorker(): Promise<void> {
     while (queue.length > 0) {
-      const card = queue.shift();
-      if (!card) return;
+      const job = queue.shift();
+      if (!job) return;
 
-      const targetPath = path.join(OUTPUT_DIR, `${card.id}.jpg`);
+      const targetPath = path.join(OUTPUT_DIR, job.targetFileName);
       if (!force && existsSync(targetPath)) {
         const existing = readFileSync(targetPath);
         if (isValidJpeg(existing)) {
@@ -222,16 +270,15 @@ async function importSprites(): Promise<void> {
         }
       }
 
-      const sourceFile = CARD_ID_TO_SPRITE_FILE[card.id];
-      const url = `${SPRITE_BASE_URL}${sourceFile}`;
+      const url = `${SPRITE_BASE_URL}${job.sourceFileName}`;
       const response = await fetch(url);
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status} al descargar ${url} para ${card.id}`);
+        throw new Error(`HTTP ${response.status} al descargar ${url} para ${job.key}`);
       }
 
       const bytes = new Uint8Array(await response.arrayBuffer());
       if (!isValidJpeg(bytes)) {
-        throw new Error(`Archivo inválido (no es JPEG válido > 1KB): ${url} para ${card.id}`);
+        throw new Error(`Archivo inválido (no es JPEG válido > 1KB): ${url} para ${job.key}`);
       }
 
       writeFileSync(targetPath, bytes);
@@ -242,9 +289,10 @@ async function importSprites(): Promise<void> {
 
   await Promise.all(Array.from({ length: workerCount }, () => runWorker()));
 
+  const altTotal = Object.values(ALT_SPRITE_FILES).reduce((sum, list) => sum + list.length, 0);
   const mb = (totalBytes / (1024 * 1024)).toFixed(2);
   console.log(
-    `[SPRITES OK] ${downloaded + skipped}/${cards.length} sprites válidos en src/assets/cards/ (${downloaded} descargados, ${skipped} existentes, ${mb} MB totales)`,
+    `[SPRITES OK] ${downloaded + skipped}/${jobs.length} sprites válidos en src/assets/cards/ (${cards.length} base + ${altTotal} variantes; ${downloaded} descargados, ${skipped} existentes, ${mb} MB totales)`,
   );
 }
 

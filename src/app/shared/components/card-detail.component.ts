@@ -143,7 +143,9 @@ export class CardDetailComponent {
   readonly playRequested = output<CardInstance>();
 
   readonly failedSpriteUrl = signal<string | null>(null);
-  readonly spriteUrl = computed(() => getCardSpritePath(this.card().card.id));
+  readonly spriteUrl = computed(() =>
+    getCardSpritePath(this.card().card.id, this.card().instanceId),
+  );
   readonly hasSprite = computed(() => this.failedSpriteUrl() !== this.spriteUrl());
 
   readonly factionName = computed(() => FACTION_META[this.card().card.faction].label);

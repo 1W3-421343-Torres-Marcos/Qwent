@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, input, output } from '@an
 import type { CardInstance, RowState, RowType } from '../../../../core';
 import { AbilityIconComponent, RowIconComponent } from '../../../shared/components/card-icons.component';
 import { CardTokenComponent } from '../../../shared/components/card-token.component';
+import { createSpriteFallbackTracker } from '../../../shared/constants/card-art';
 
 const ROW_WEATHER_CLASSES: Readonly<Record<RowType, string>> = {
   CLOSE_COMBAT: 'bg-weather-frost/15 ring-1 ring-inset ring-weather-frost/50',
@@ -22,7 +23,7 @@ const ROW_WEATHER_CLASSES: Readonly<Record<RowType, string>> = {
     >
       @if (weatherActive()) {
         <span
-          class="qwent-weather-pulse pointer-events-none absolute inset-0 rounded"
+          class="pointer-events-none absolute inset-0 overflow-hidden rounded"
           [class]="weatherOverlayClass()"
         ></span>
       }
@@ -39,13 +40,28 @@ const ROW_WEATHER_CLASSES: Readonly<Record<RowType, string>> = {
         (click)="onHornSlotClick($event)"
         [disabled]="!isSelectable()"
         aria-label="Ranura de Cuerno del Comandante"
-        class="flex h-9 w-9 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded border transition"
+        class="relative flex h-9 w-9 sm:h-11 sm:w-11 shrink-0 items-center justify-center overflow-hidden rounded border transition"
         [class]="hornSlotClasses()"
       >
         @if (row().hornCard) {
-          <span class="h-5 w-5 text-gold-bright">
-            <app-ability-icon ability="COMMANDERS_HORN" />
-          </span>
+          @if (art.hasSprite('sp_commanders_horn')) {
+            <img
+              [src]="art.spritePath('sp_commanders_horn')"
+              alt="Cuerno del Comandante"
+              decoding="async"
+              (error)="art.markFailed('sp_commanders_horn')"
+              class="pointer-events-none absolute inset-0 h-full w-full object-cover object-top"
+            />
+            <span
+              class="relative z-10 flex h-4 w-4 items-center justify-center rounded-full bg-tavern-dark/80 p-0.5 text-gold-bright shadow"
+            >
+              <app-ability-icon ability="COMMANDERS_HORN" />
+            </span>
+          } @else {
+            <span class="h-5 w-5 text-gold-bright">
+              <app-ability-icon ability="COMMANDERS_HORN" />
+            </span>
+          }
         } @else {
           <span class="h-4 w-4 text-bronze/60">
             <app-ability-icon ability="COMMANDERS_HORN" />
@@ -85,6 +101,8 @@ export class BoardRowComponent {
   readonly unitTargeted = output<CardInstance>();
   readonly cardInspected = output<CardInstance>();
 
+  readonly art = createSpriteFallbackTracker();
+
   readonly rowContainerClasses = computed(() => {
     const base = this.weatherActive()
       ? ROW_WEATHER_CLASSES[this.rowType()]
@@ -107,9 +125,9 @@ export class BoardRowComponent {
   });
 
   weatherOverlayClass(): string {
-    if (this.rowType() === 'CLOSE_COMBAT') return 'bg-weather-frost/30';
-    if (this.rowType() === 'RANGED') return 'bg-weather-fog/30';
-    return 'bg-weather-rain/30';
+    if (this.rowType() === 'CLOSE_COMBAT') return 'qwent-row-frost';
+    if (this.rowType() === 'RANGED') return 'qwent-row-fog';
+    return 'qwent-row-rain';
   }
 
   onRowContainerClick(): void {

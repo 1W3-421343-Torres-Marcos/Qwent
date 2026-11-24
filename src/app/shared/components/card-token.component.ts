@@ -75,7 +75,7 @@ export class CardTokenComponent {
   readonly failedSpriteUrl = signal<string | null>(null);
 
   readonly resolvedSpritePath = computed(
-    () => this.spritePath() ?? getCardSpritePath(this.card().card.id),
+    () => this.spritePath() ?? getCardSpritePath(this.card().card.id, this.card().instanceId),
   );
 
   readonly hasSprite = computed(() => {

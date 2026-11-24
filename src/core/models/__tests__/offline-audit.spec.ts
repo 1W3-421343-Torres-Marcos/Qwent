@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { getExpectedAltSpriteIds } from '../../../app/shared/constants/card-art.utils';
 
 const ROOT_DIR = path.resolve(process.cwd());
 const SRC_DIR = path.join(ROOT_DIR, 'src');
@@ -80,12 +81,15 @@ describe('Offline Audit & Android Packaging Compliance (F6.3)', () => {
     expect(styles).toContain('@drawable/qwent_splash');
   });
 
-  it('embeds valid offline JPEG portraits in src/assets/cards/ covering all 150 cards plus token sprites without orphans', () => {
+  it('embeds valid offline JPEG portraits in src/assets/cards/ covering all 150 cards, tokens and 29 alt variants without orphans', () => {
     const cardsJson = JSON.parse(
       readFileSync(path.join(SRC_DIR, 'assets', 'data', 'cards.json'), 'utf8'),
     ) as ReadonlyArray<{ readonly id: string }>;
     const validIds = new Set(cardsJson.map((card) => card.id));
     validIds.add('nt_bovine_defense_force');
+    for (const altId of getExpectedAltSpriteIds()) {
+      validIds.add(altId);
+    }
 
     const spritesDir = path.join(SRC_DIR, 'assets', 'cards');
     expect(existsSync(spritesDir)).toBe(true);

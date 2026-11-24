@@ -28,13 +28,13 @@ import { FACTION_META } from '../../../shared/constants/faction-meta';
           class="relative flex h-full aspect-[3/4] shrink-0 flex-col justify-between overflow-hidden rounded border p-1 text-left transition active:scale-95"
           [class]="cardSurfaceClass(card)"
         >
-          @if (art.hasSprite(card.card.id)) {
+          @if (art.hasSprite(card.card.id, card.instanceId)) {
             <img
-              [src]="art.spritePath(card.card.id)"
+              [src]="art.spritePath(card.card.id, card.instanceId)"
               [alt]="card.card.name"
               loading="lazy"
               decoding="async"
-              (error)="art.markFailed(card.card.id)"
+              (error)="art.markFailed(card.card.id, card.instanceId)"
               class="pointer-events-none absolute inset-0 h-full w-full object-cover object-top"
             />
             <span

@@ -72,13 +72,13 @@ import { createSpriteFallbackTracker } from '../../../shared/constants/card-art'
                 [class.border-gold-bright]="card.card.isHero"
                 [class.border-bronze]="!card.card.isHero"
               >
-                @if (art.hasSprite(card.card.id)) {
+                @if (art.hasSprite(card.card.id, card.instanceId)) {
                   <img
-                    [src]="art.spritePath(card.card.id)"
+                    [src]="art.spritePath(card.card.id, card.instanceId)"
                     [alt]="card.card.name"
                     loading="lazy"
                     decoding="async"
-                    (error)="art.markFailed(card.card.id)"
+                    (error)="art.markFailed(card.card.id, card.instanceId)"
                     class="pointer-events-none absolute inset-0 h-full w-full object-cover object-top"
                   />
                   <span
@@ -254,13 +254,13 @@ import { createSpriteFallbackTracker } from '../../../shared/constants/card-art'
                 (click)="medicTargetSelected.emit(card.instanceId)"
                 class="relative flex min-h-[68px] items-center gap-2 overflow-hidden rounded-lg border border-bronze bg-tavern-dark/90 p-2 text-left transition hover:border-gold-bright active:scale-95"
               >
-                @if (art.hasSprite(card.card.id)) {
+                @if (art.hasSprite(card.card.id, card.instanceId)) {
                   <img
-                    [src]="art.spritePath(card.card.id)"
+                    [src]="art.spritePath(card.card.id, card.instanceId)"
                     [alt]="card.card.name"
                     loading="lazy"
                     decoding="async"
-                    (error)="art.markFailed(card.card.id)"
+                    (error)="art.markFailed(card.card.id, card.instanceId)"
                     class="pointer-events-none absolute inset-0 h-full w-full object-cover object-top"
                   />
                   <span
@@ -310,13 +310,13 @@ import { createSpriteFallbackTracker } from '../../../shared/constants/card-art'
                 (click)="leaderTargetSelected.emit(card.instanceId)"
                 class="relative flex min-h-[68px] items-center gap-2 overflow-hidden rounded-lg border border-bronze bg-tavern-dark/90 p-2 text-left transition hover:border-gold-bright active:scale-95"
               >
-                @if (art.hasSprite(card.card.id)) {
+                @if (art.hasSprite(card.card.id, card.instanceId)) {
                   <img
-                    [src]="art.spritePath(card.card.id)"
+                    [src]="art.spritePath(card.card.id, card.instanceId)"
                     [alt]="card.card.name"
                     loading="lazy"
                     decoding="async"
-                    (error)="art.markFailed(card.card.id)"
+                    (error)="art.markFailed(card.card.id, card.instanceId)"
                     class="pointer-events-none absolute inset-0 h-full w-full object-cover object-top"
                   />
                   <span
@@ -404,13 +404,13 @@ import { createSpriteFallbackTracker } from '../../../shared/constants/card-art'
           <div class="mt-3 grid grid-cols-2 gap-2 overflow-y-auto sm:grid-cols-3">
             @for (card of player.discard; track card.instanceId) {
               <div class="relative flex min-h-[56px] items-center gap-2 overflow-hidden rounded border border-bronze/60 bg-tavern-dark/80 p-2 text-xs">
-                @if (art.hasSprite(card.card.id)) {
+                @if (art.hasSprite(card.card.id, card.instanceId)) {
                   <img
-                    [src]="art.spritePath(card.card.id)"
+                    [src]="art.spritePath(card.card.id, card.instanceId)"
                     [alt]="card.card.name"
                     loading="lazy"
                     decoding="async"
-                    (error)="art.markFailed(card.card.id)"
+                    (error)="art.markFailed(card.card.id, card.instanceId)"
                     class="pointer-events-none absolute inset-0 h-full w-full object-cover object-top"
                   />
                   <span
