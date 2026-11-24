@@ -9,6 +9,7 @@ import type {
   WeatherState,
 } from '../models/game-state';
 import { canUseLeader } from '../abilities/leaders';
+import { isPassiveLeaderActive } from '../abilities/passive-leaders';
 import { getOpponentId } from '../engine/round-resolution';
 
 export interface AIPlayerSelfView {
@@ -48,6 +49,7 @@ export interface AIPlayerView {
   readonly roundNumber: 1 | 2 | 3;
   readonly activePlayer: PlayerId;
   readonly weather: WeatherState;
+  readonly doubleSpyStrength: boolean;
   readonly pendingSelection: PendingSelection | null;
   readonly roundHistory: readonly RoundResult[];
   readonly me: AIPlayerSelfView;
@@ -105,6 +107,7 @@ export function createAIView(state: GameState, botId: PlayerId): AIPlayerView {
     roundNumber: state.roundNumber,
     activePlayer: state.activePlayer,
     weather: state.weather,
+    doubleSpyStrength: isPassiveLeaderActive(state, 'DOUBLE_SPY_STRENGTH'),
     pendingSelection: state.pendingSelection,
     roundHistory: state.roundHistory,
     me: toSelfView(state.players[botId], canUseLeader(state, botId)),

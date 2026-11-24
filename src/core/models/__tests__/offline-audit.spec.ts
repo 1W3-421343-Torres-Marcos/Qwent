@@ -81,10 +81,12 @@ describe('Offline Audit & Android Packaging Compliance (F6.3)', () => {
     expect(styles).toContain('@drawable/qwent_splash');
   });
 
-  it('embeds valid offline JPEG portraits in src/assets/cards/ covering all 150 cards, tokens and 29 alt variants without orphans', () => {
+  it('embeds valid offline JPEG portraits in src/assets/cards/ covering all 154 cards, tokens and 29 alt variants without orphans', () => {
     const cardsJson = JSON.parse(
       readFileSync(path.join(SRC_DIR, 'assets', 'data', 'cards.json'), 'utf8'),
-    ) as ReadonlyArray<{ readonly id: string }>;
+    ) as ReadonlyArray<{ readonly id: string; readonly name: string; readonly description: string }>;
+    expect(cardsJson).toHaveLength(154);
+
     const validIds = new Set(cardsJson.map((card) => card.id));
     validIds.add('nt_bovine_defense_force');
     for (const altId of getExpectedAltSpriteIds()) {
@@ -95,6 +97,7 @@ describe('Offline Audit & Android Packaging Compliance (F6.3)', () => {
     expect(existsSync(spritesDir)).toBe(true);
 
     const jpgFiles = readdirSync(spritesDir).filter((name) => name.endsWith('.jpg'));
+    expect(jpgFiles.length).toBe(184);
     expect(jpgFiles.length).toBe(validIds.size);
 
     for (const fileName of jpgFiles) {
@@ -107,6 +110,18 @@ describe('Offline Audit & Android Packaging Compliance (F6.3)', () => {
       expect(bytes[1]).toBe(0xd8);
       expect(bytes[2]).toBe(0xff);
     }
+  });
+
+  it('localizes all 154 catalog card names and descriptions to Spanish without English dataset residue', () => {
+    const cardsJson = JSON.parse(
+      readFileSync(path.join(SRC_DIR, 'assets', 'data', 'cards.json'), 'utf8'),
+    ) as ReadonlyArray<{ readonly id: string; readonly name: string; readonly description: string }>;
+
+    const englishResiduePattern = /\b(the|and|with|your|from|when|for|you|this|that|they|their|were|are|have|has|northern realms|nilfgaardian empire|siege tower|grave hag)\b/i;
+    const unlocalized = cardsJson.filter((card) =>
+      englishResiduePattern.test(`${card.name} ${card.description}`),
+    );
+    expect(unlocalized).toEqual([]);
   });
 
   it('embeds all 29 offline SFX and 4 tavern BGM MP3 files with valid audio headers', () => {

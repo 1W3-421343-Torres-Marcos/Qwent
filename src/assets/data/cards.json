@@ -13,6 +13,19 @@
     "description": "Líder: destruye la unidad no-Héroe más fuerte del Asedio rival si su fila suma >= 10."
   },
   {
+    "id": "nr_leader_foltest_son_of_medell",
+    "name": "Foltest: Hijo de Medell",
+    "faction": "NORTHERN_REALMS",
+    "type": "LEADER",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [],
+    "ability": null,
+    "leaderAbility": "SCORCH_ENEMY_RANGED_10",
+    "maxCopies": 1,
+    "description": "Líder: destruye la unidad no-Héroe más fuerte de Distancia rival si su fila suma >= 10."
+  },
+  {
     "id": "nr_leader_foltest_siege_master",
     "name": "Foltest: Maestro de Asedio",
     "faction": "NORTHERN_REALMS",
@@ -67,7 +80,7 @@
   },
   {
     "id": "nr_catapult",
-    "name": "Catapult",
+    "name": "Catapulta",
     "faction": "NORTHERN_REALMS",
     "type": "UNIT",
     "baseStrength": 8,
@@ -122,7 +135,7 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"I once made a prisoner vomit his own entrails... Ah, good times…\""
+    "description": "«Una vez hice vomitar sus propias entrañas a un prisionero... Qué buenos tiempos»."
   },
   {
     "id": "nr_esterad_thyssen",
@@ -178,7 +191,7 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"If I'm to die today, I wish to look smashing for the occasion.\""
+    "description": "«Si voy a morir hoy, prefiero lucir deslumbrante para la ocasión»."
   },
   {
     "id": "nr_dun_banner_medic",
@@ -210,7 +223,7 @@
   },
   {
     "id": "nr_poor_fucking_infantry",
-    "name": "Poor Fucking Infantry",
+    "name": "Pobre infantería de mierda",
     "faction": "NORTHERN_REALMS",
     "type": "UNIT",
     "baseStrength": 1,
@@ -238,20 +251,6 @@
     "description": "Espía: se juega en Cuerpo a cuerpo del rival y robas 2 cartas de tu mazo."
   },
   {
-    "id": "nr_redanian_foot_soldier",
-    "name": "Redanian Foot Soldier",
-    "faction": "NORTHERN_REALMS",
-    "type": "UNIT",
-    "baseStrength": 1,
-    "isHero": false,
-    "allowedRows": [
-      "CLOSE_COMBAT"
-    ],
-    "ability": null,
-    "maxCopies": 2,
-    "description": "\"I've bled for Redania! I've killed for Redania.. Dammit, I've even raped for Redania!\""
-  },
-  {
     "id": "nr_sabrina_glevissig",
     "name": "Sabrina Glevissig",
     "faction": "NORTHERN_REALMS",
@@ -263,7 +262,7 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"Daughter of the Kaedweni Wilderness.\""
+    "description": "«Hija de los páramos indómitos de Kaedwen»."
   },
   {
     "id": "nr_sheldon_skaggs",
@@ -277,25 +276,11 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"I was there, on the front lines! Right where the fightin' was thickest!\""
-  },
-  {
-    "id": "nr_siege_tower",
-    "name": "Siege Tower",
-    "faction": "NORTHERN_REALMS",
-    "type": "UNIT",
-    "baseStrength": 6,
-    "isHero": false,
-    "allowedRows": [
-      "SIEGE"
-    ],
-    "ability": null,
-    "maxCopies": 1,
-    "description": "\"I love the clamor of siege towers in the morning. Sounds like victory.\""
+    "description": "«¡Estuve en primera línea, justo donde arreciaba el combate!»"
   },
   {
     "id": "nr_siegfried_of_denesle",
-    "name": "Siegfried of Denesle",
+    "name": "Sigfrido de Denesle",
     "faction": "NORTHERN_REALMS",
     "type": "UNIT",
     "baseStrength": 5,
@@ -305,7 +290,7 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"We're on the same side, witcher. You'll realize this one day.\""
+    "description": "«Estamos en el mismo bando, brujo. Algún día te darás cuenta»."
   },
   {
     "id": "nr_sigismund_dijkstra",
@@ -323,7 +308,7 @@
   },
   {
     "id": "nr_sile_de_tansarville",
-    "name": "Sile de Tansarville",
+    "name": "Síle de Tansarville",
     "faction": "NORTHERN_REALMS",
     "type": "UNIT",
     "baseStrength": 4,
@@ -333,7 +318,21 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"The Lodge lacks humility. Our lust for power may yet be our undoing.\""
+    "description": "«La Logia carece de humildad. Nuestra sed de poder será nuestra perdición»."
+  },
+  {
+    "id": "nr_redanian_foot_soldier",
+    "name": "Soldado de a pie redaniano",
+    "faction": "NORTHERN_REALMS",
+    "type": "UNIT",
+    "baseStrength": 1,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 2,
+    "description": "«¡He sangrado por Redania! ¡He matado por Redania!». Infantería de línea del norte."
   },
   {
     "id": "nr_thaler",
@@ -348,6 +347,20 @@
     "ability": "SPY",
     "maxCopies": 1,
     "description": "Espía: se coloca en el campo rival y robas 2 cartas."
+  },
+  {
+    "id": "nr_siege_tower",
+    "name": "Torre de asedio",
+    "faction": "NORTHERN_REALMS",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "SIEGE"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "«Adoro el estruendo de las torres de asedio por la mañana. Suena a victoria»."
   },
   {
     "id": "nr_trebuchet",
@@ -403,7 +416,7 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"The world belongs to whoever's best at crackin' skulls and impregnatin' lasses.\""
+    "description": "«El mundo pertenece a quienes mejor saben partir cráneos en batalla»."
   },
   {
     "id": "ng_leader_emhyr_relentless",
@@ -430,6 +443,19 @@
     "leaderAbility": "HORN_RANGED_LEADER",
     "maxCopies": 1,
     "description": "Líder: duplica (x2) la fuerza de todas tus unidades normales en Distancia."
+  },
+  {
+    "id": "ng_leader_emhyr_invader",
+    "name": "Emhyr: Invasor del Norte",
+    "faction": "NILFGAARD",
+    "type": "LEADER",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [],
+    "ability": null,
+    "leaderAbility": "RANDOMIZE_REVIVES",
+    "maxCopies": 1,
+    "description": "Líder pasivo: las habilidades que reviven unidades del descarte al tablero eligen una unidad no-Héroe al azar para ambos jugadores."
   },
   {
     "id": "ng_leader_emhyr_white_flame",
@@ -469,7 +495,7 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"A fireball? Of course. Whatever Your Imperial Majesty wishes.\""
+    "description": "«¿Una bola de fuego? Por supuesto. Lo que desee Su Majestad Imperial»."
   },
   {
     "id": "ng_etolian_auxiliary",
@@ -511,7 +537,7 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"Nilfgaardian mages do have a choice: servile submission, or the gallows.\""
+    "description": "«Los magos nilfgaardianos tienen elección: sumisión servil o la horca»."
   },
   {
     "id": "ng_cahir",
@@ -539,7 +565,7 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"Cynthia's talents can be deadly. She needs a tight leash.\""
+    "description": "«Los talentos de Cynthia pueden ser letales. Necesita correa corta»."
   },
   {
     "id": "ng_zerrikanian_fire_scorpion",
@@ -581,7 +607,7 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"Magic is the highest good. It transcends all borders and divisions.\""
+    "description": "«La magia es el bien supremo. Trasciende todas las fronteras y divisiones»."
   },
   {
     "id": "ng_impera_brigade",
@@ -599,6 +625,20 @@
     "description": "Vínculo estrecho: multiplica su fuerza por cada guardia igual en la fila."
   },
   {
+    "id": "ng_siege_engineer",
+    "name": "Ingeniero de asedio",
+    "faction": "NILFGAARD",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "SIEGE"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "«Empuñado con destreza, un transportador puede ser un arma letal»."
+  },
+  {
     "id": "ng_nausicaa_cavalry",
     "name": "Jinete de Nausicaa",
     "faction": "NILFGAARD",
@@ -614,6 +654,21 @@
     "description": "Vínculo estrecho: multiplica su fuerza por cada jinete igual en la fila."
   },
   {
+    "id": "ng_young_emissary",
+    "name": "Joven emisario",
+    "faction": "NILFGAARD",
+    "type": "UNIT",
+    "baseStrength": 5,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "TIGHT_BOND",
+    "bondGroup": "young_emissary",
+    "maxCopies": 2,
+    "description": "Vínculo estrecho: multiplica su fuerza por cada copia igual en la fila."
+  },
+  {
     "id": "ng_letho_of_gulet",
     "name": "Letho de Gulet",
     "faction": "NILFGAARD",
@@ -626,6 +681,20 @@
     "ability": null,
     "maxCopies": 1,
     "description": "Héroe. Brujo de la Escuela de la Víbora."
+  },
+  {
+    "id": "ng_rotten_mangonel",
+    "name": "Mangonel podrido",
+    "faction": "NILFGAARD",
+    "type": "UNIT",
+    "baseStrength": 3,
+    "isHero": false,
+    "allowedRows": [
+      "SIEGE"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "«El hedor a podredumbre despierta recuerdos de la infancia»."
   },
   {
     "id": "ng_menno_coehoorn",
@@ -653,7 +722,7 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"No Nordling pikemen or dwarven spearbearers can hope to best trained cavalry.\""
+    "description": "«Ningún piquero norteño ni lancero enano puede resistir nuestra caballería»."
   },
   {
     "id": "ng_morvran_voorhis",
@@ -681,7 +750,7 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"Learned a lot at Braibant Military Academy. How to scrub potatoes, for instance.\""
+    "description": "«Aprendí mucho en la Academia Militar de Braibant. A pelar patatas, por ejemplo»."
   },
   {
     "id": "ng_rainfarn",
@@ -695,7 +764,7 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"You'll die as painfully as that pathetic traitor Windhalm did.\""
+    "description": "«Morirás con tanto sufrimiento como aquel patético traidor de Windhalm»."
   },
   {
     "id": "ng_renuald_aep_matsen",
@@ -709,21 +778,7 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"They say the Impera fear nothing. Untrue. Renuald scares them shitless.\""
-  },
-  {
-    "id": "ng_rotten_mangonel",
-    "name": "Rotten Mangonel",
-    "faction": "NILFGAARD",
-    "type": "UNIT",
-    "baseStrength": 3,
-    "isHero": false,
-    "allowedRows": [
-      "SIEGE"
-    ],
-    "ability": null,
-    "maxCopies": 1,
-    "description": "\"The rotten smell brings back childhood memories\""
+    "description": "«Dicen que los Impera no temen a nada. Falso: Renuald los aterra»."
   },
   {
     "id": "ng_shilard_fitz_oesterlen",
@@ -738,34 +793,6 @@
     "ability": "SPY",
     "maxCopies": 1,
     "description": "Espía: se coloca en el campo rival y robas 2 cartas."
-  },
-  {
-    "id": "ng_siege_engineer",
-    "name": "Siege Engineer",
-    "faction": "NILFGAARD",
-    "type": "UNIT",
-    "baseStrength": 6,
-    "isHero": false,
-    "allowedRows": [
-      "SIEGE"
-    ],
-    "ability": null,
-    "maxCopies": 1,
-    "description": "\"Wielded correctly, a protractor can be a deadly weapon.\""
-  },
-  {
-    "id": "ng_siege_technician",
-    "name": "Siege Technician",
-    "faction": "NILFGAARD",
-    "type": "UNIT",
-    "baseStrength": 0,
-    "isHero": false,
-    "allowedRows": [
-      "SIEGE"
-    ],
-    "ability": "MEDIC",
-    "maxCopies": 1,
-    "description": "Médico: revive una unidad no-Héroe de tu descarte."
   },
   {
     "id": "ng_stefan_skellen",
@@ -793,7 +820,21 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"And hands off the girl! Whatever we may be, we're not savages.\""
+    "description": "«¡Apartad las manos de la chica! Seamos lo que seamos, no somos salvajes»."
+  },
+  {
+    "id": "ng_siege_technician",
+    "name": "Técnico de asedio",
+    "faction": "NILFGAARD",
+    "type": "UNIT",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [
+      "SIEGE"
+    ],
+    "ability": "MEDIC",
+    "maxCopies": 1,
+    "description": "Médico: revive una unidad no-Héroe de tu descarte."
   },
   {
     "id": "ng_tibor_eggebracht",
@@ -821,7 +862,7 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"For a fire mage, he's not very... flamboyant.\""
+    "description": "«Para ser un mago del fuego, no resulta demasiado extravagante»."
   },
   {
     "id": "ng_vattier_de_rideaux",
@@ -849,22 +890,7 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"Discipline is the Empire's deadliest weapon.\""
-  },
-  {
-    "id": "ng_young_emissary",
-    "name": "Young Emissary",
-    "faction": "NILFGAARD",
-    "type": "UNIT",
-    "baseStrength": 5,
-    "isHero": false,
-    "allowedRows": [
-      "CLOSE_COMBAT"
-    ],
-    "ability": "TIGHT_BOND",
-    "bondGroup": "young_emissary",
-    "maxCopies": 2,
-    "description": "Vínculo estrecho: multiplica su fuerza por cada copia igual en la fila."
+    "description": "«La disciplina es el arma más mortífera del Imperio»."
   },
   {
     "id": "mo_leader_eredin_commander",
@@ -891,6 +917,19 @@
     "leaderAbility": "SCORCH_ENEMY_CLOSE_10",
     "maxCopies": 1,
     "description": "Líder: destruye la unidad no-Héroe más fuerte de Cuerpo a cuerpo rival si suma >= 10."
+  },
+  {
+    "id": "mo_leader_eredin_treacherous",
+    "name": "Eredin: El Traidor",
+    "faction": "MONSTERS",
+    "type": "LEADER",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [],
+    "ability": null,
+    "leaderAbility": "DOUBLE_SPY_STRENGTH",
+    "maxCopies": 1,
+    "description": "Líder pasivo: duplica (x2) la fuerza de todas las cartas Espía en ambos lados del tablero."
   },
   {
     "id": "mo_leader_eredin_bringer_of_death",
@@ -949,6 +988,21 @@
     "description": "Ágil: puede colocarse en Cuerpo a cuerpo o Distancia."
   },
   {
+    "id": "mo_celaeno_harpy",
+    "name": "Arpía celaeno",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 2,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT",
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "Ágil (Cuerpo o Distancia)."
+  },
+  {
     "id": "mo_arachas_behemoth",
     "name": "Behemot arachas",
     "faction": "MONSTERS",
@@ -964,37 +1018,36 @@
     "description": "Reunión: invoca todas las Arachas desde tu mano y mazo."
   },
   {
-    "id": "mo_botchling",
-    "name": "Botchling",
+    "id": "mo_foglet",
+    "name": "Boira",
     "faction": "MONSTERS",
     "type": "UNIT",
-    "baseStrength": 4,
+    "baseStrength": 2,
     "isHero": false,
     "allowedRows": [
       "CLOSE_COMBAT"
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"Admit your mistakes and bury them proper - else they'll come back to haunt you.\""
+    "description": "«La niebla avanza sigilosa. Las boiras se deslizan sobre sus víctimas»."
   },
   {
-    "id": "mo_celaeno_harpy",
-    "name": "Celaeno Harpy",
+    "id": "mo_grave_hag",
+    "name": "Bruja sepulcral",
     "faction": "MONSTERS",
     "type": "UNIT",
-    "baseStrength": 2,
+    "baseStrength": 5,
     "isHero": false,
     "allowedRows": [
-      "CLOSE_COMBAT",
       "RANGED"
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "Ágil (Cuerpo o Distancia)."
+    "description": "«Sus largas lenguas sirven para sorber médula y preparar el banquete»."
   },
   {
     "id": "mo_cockatrice",
-    "name": "Cockatrice",
+    "name": "Cocatriz",
     "faction": "MONSTERS",
     "type": "UNIT",
     "baseStrength": 2,
@@ -1004,52 +1057,21 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"Born of an egg laid by a cockerel... if you believe such peasant drivel.\""
+    "description": "«Nacida de un huevo puesto por un gallo... si crees esas patrañas campesinas»."
   },
   {
-    "id": "mo_crone_brewess",
-    "name": "Crone Brewess",
+    "id": "mo_forktail",
+    "name": "Colahorquilla",
     "faction": "MONSTERS",
     "type": "UNIT",
-    "baseStrength": 6,
+    "baseStrength": 5,
     "isHero": false,
     "allowedRows": [
       "CLOSE_COMBAT"
     ],
-    "ability": "MUSTER",
-    "musterGroup": "crone",
+    "ability": null,
     "maxCopies": 1,
-    "description": "Reunión: invoca todas las cartas iguales o del mismo grupo desde mano y mazo."
-  },
-  {
-    "id": "mo_crone_weavess",
-    "name": "Crone Weavess",
-    "faction": "MONSTERS",
-    "type": "UNIT",
-    "baseStrength": 6,
-    "isHero": false,
-    "allowedRows": [
-      "CLOSE_COMBAT"
-    ],
-    "ability": "MUSTER",
-    "musterGroup": "crone",
-    "maxCopies": 1,
-    "description": "Reunión: invoca todas las cartas iguales o del mismo grupo desde mano y mazo."
-  },
-  {
-    "id": "mo_crone_whispess",
-    "name": "Crone Whispess",
-    "faction": "MONSTERS",
-    "type": "UNIT",
-    "baseStrength": 6,
-    "isHero": false,
-    "allowedRows": [
-      "CLOSE_COMBAT"
-    ],
-    "ability": "MUSTER",
-    "musterGroup": "crone",
-    "maxCopies": 1,
-    "description": "Reunión: invoca todas las cartas iguales o del mismo grupo desde mano y mazo."
+    "description": "«¿Colas bifurcadas? Parecen más bien enormes cuchillas de carnicero»."
   },
   {
     "id": "mo_fiend",
@@ -1080,6 +1102,20 @@
     "description": "Héroe (inmune a climas y efectos)."
   },
   {
+    "id": "mo_fire_elemental",
+    "name": "Elemental de fuego",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "SIEGE"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "«El fuego resulta tan encantador»."
+  },
+  {
     "id": "mo_earth_elemental",
     "name": "Elemental de tierra",
     "faction": "MONSTERS",
@@ -1095,7 +1131,7 @@
   },
   {
     "id": "mo_endrega",
-    "name": "Endrega",
+    "name": "Endriago",
     "faction": "MONSTERS",
     "type": "UNIT",
     "baseStrength": 2,
@@ -1105,53 +1141,11 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"The nest! Take out the nest, or the bastards'll just keep coming!\""
-  },
-  {
-    "id": "mo_fire_elemental",
-    "name": "Fire Elemental",
-    "faction": "MONSTERS",
-    "type": "UNIT",
-    "baseStrength": 6,
-    "isHero": false,
-    "allowedRows": [
-      "SIEGE"
-    ],
-    "ability": null,
-    "maxCopies": 1,
-    "description": "\"Fire is so delightful.\""
-  },
-  {
-    "id": "mo_foglet",
-    "name": "Foglet",
-    "faction": "MONSTERS",
-    "type": "UNIT",
-    "baseStrength": 2,
-    "isHero": false,
-    "allowedRows": [
-      "CLOSE_COMBAT"
-    ],
-    "ability": null,
-    "maxCopies": 1,
-    "description": "\"Fog creeps on little cat feet. Foglets creep over the bodies of their victims.\""
-  },
-  {
-    "id": "mo_forktail",
-    "name": "Forktail",
-    "faction": "MONSTERS",
-    "type": "UNIT",
-    "baseStrength": 5,
-    "isHero": false,
-    "allowedRows": [
-      "CLOSE_COMBAT"
-    ],
-    "ability": null,
-    "maxCopies": 1,
-    "description": "\"Fork tails... Bah! Fuckers' tails're more like cleavers.\""
+    "description": "«¡El nido! ¡Acabad con el nido o estas alimañas no dejarán de salir!»"
   },
   {
     "id": "mo_frightener",
-    "name": "Frightener",
+    "name": "Espantajo",
     "faction": "MONSTERS",
     "type": "UNIT",
     "baseStrength": 5,
@@ -1161,11 +1155,11 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"What have I done?\" the mage cried out, frightened of his own creation."
+    "description": "«\"¿Qué he hecho?\", gritó el mago, aterrado ante su propia creación»."
   },
   {
     "id": "mo_gargoyle",
-    "name": "Gargoyle",
+    "name": "Gárgola",
     "faction": "MONSTERS",
     "type": "UNIT",
     "baseStrength": 2,
@@ -1175,7 +1169,7 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"Ancient sculptors' nightmarish fantasies, brought to life by bored mages.\""
+    "description": "«Pesadillas de antiguos escultores cobrando vida por capricho de magos aburridos»."
   },
   {
     "id": "mo_ice_giant",
@@ -1192,22 +1186,8 @@
     "description": "Coloso de Undvik."
   },
   {
-    "id": "mo_grave_hag",
-    "name": "Grave Hag",
-    "faction": "MONSTERS",
-    "type": "UNIT",
-    "baseStrength": 5,
-    "isHero": false,
-    "allowedRows": [
-      "RANGED"
-    ],
-    "ability": null,
-    "maxCopies": 1,
-    "description": "\"Their long tongues're for slurping marrow - and whipping prep.\""
-  },
-  {
     "id": "mo_griffin",
-    "name": "Griffin",
+    "name": "Grifo",
     "faction": "MONSTERS",
     "type": "UNIT",
     "baseStrength": 5,
@@ -1217,7 +1197,21 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"Griffins like to toy with their prey. Eat 'em alive, piece by piece.\""
+    "description": "«A los grifos les gusta jugar con su presa y devorarla viva, pedazo a pedazo»."
+  },
+  {
+    "id": "mo_wyvern",
+    "name": "Guiverno",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 2,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "«Imagina un cruce entre una serpiente alada y una pesadilla. Un guiverno es peor»."
   },
   {
     "id": "mo_ghoul",
@@ -1233,6 +1227,20 @@
     "musterGroup": "mo_ghoul",
     "maxCopies": 3,
     "description": "Reunión: invoca todas las copias de Gul desde tu mano y mazo."
+  },
+  {
+    "id": "mo_werewolf",
+    "name": "Hombre lobo",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 5,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "«Los lobos no son tan malos como dicen. Los hombres lobo son mucho peores»."
   },
   {
     "id": "mo_imlerith",
@@ -1278,6 +1286,65 @@
     "description": "Héroe. Espíritu ancestral del bosque, inmune a efectos y climas."
   },
   {
+    "id": "mo_botchling",
+    "name": "Malogrado",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 4,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "«Admite tus errores y entiérralos como es debido, o volverán para atormentarte»."
+  },
+  {
+    "id": "mo_crone_brewess",
+    "name": "Moira: Guisandera",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "MUSTER",
+    "musterGroup": "crone",
+    "maxCopies": 1,
+    "description": "Reunión: invoca todas las cartas iguales o del mismo grupo desde mano y mazo."
+  },
+  {
+    "id": "mo_crone_whispess",
+    "name": "Moira: Susurradora",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "MUSTER",
+    "musterGroup": "crone",
+    "maxCopies": 1,
+    "description": "Reunión: invoca todas las cartas iguales o del mismo grupo desde mano y mazo."
+  },
+  {
+    "id": "mo_crone_weavess",
+    "name": "Moira: Tejedora",
+    "faction": "MONSTERS",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "MUSTER",
+    "musterGroup": "crone",
+    "maxCopies": 1,
+    "description": "Reunión: invoca todas las cartas iguales o del mismo grupo desde mano y mazo."
+  },
+  {
     "id": "mo_nekker",
     "name": "Nekker",
     "faction": "MONSTERS",
@@ -1294,7 +1361,7 @@
   },
   {
     "id": "mo_plague_maiden",
-    "name": "Plague Maiden",
+    "name": "Pesta",
     "faction": "MONSTERS",
     "type": "UNIT",
     "baseStrength": 5,
@@ -1304,7 +1371,7 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"The sick rave about a boil-pocked woman surrounded by herds of rabid rats…\""
+    "description": "«Los enfermos deliran con una mujer cubierta de bubas rodeada de ratas rabiosas»."
   },
   {
     "id": "mo_toad",
@@ -1322,7 +1389,7 @@
   },
   {
     "id": "mo_vampire_bruxa",
-    "name": "Vampire: Bruxa",
+    "name": "Vampiro: Bruxa",
     "faction": "MONSTERS",
     "type": "UNIT",
     "baseStrength": 4,
@@ -1337,7 +1404,7 @@
   },
   {
     "id": "mo_vampire_ekimmara",
-    "name": "Vampire: Ekimmara",
+    "name": "Vampiro: Ekimma",
     "faction": "MONSTERS",
     "type": "UNIT",
     "baseStrength": 4,
@@ -1352,7 +1419,7 @@
   },
   {
     "id": "mo_vampire_fleder",
-    "name": "Vampire: Fleder",
+    "name": "Vampiro: Fleder",
     "faction": "MONSTERS",
     "type": "UNIT",
     "baseStrength": 4,
@@ -1367,7 +1434,7 @@
   },
   {
     "id": "mo_vampire_garkain",
-    "name": "Vampire: Garkain",
+    "name": "Vampiro: Garkain",
     "faction": "MONSTERS",
     "type": "UNIT",
     "baseStrength": 4,
@@ -1382,7 +1449,7 @@
   },
   {
     "id": "mo_vampire_katakan",
-    "name": "Vampire: Katakan",
+    "name": "Vampiro: Katakan",
     "faction": "MONSTERS",
     "type": "UNIT",
     "baseStrength": 5,
@@ -1394,34 +1461,6 @@
     "musterGroup": "vampire",
     "maxCopies": 1,
     "description": "Reunión: invoca todas las cartas iguales o del mismo grupo desde mano y mazo."
-  },
-  {
-    "id": "mo_werewolf",
-    "name": "Werewolf",
-    "faction": "MONSTERS",
-    "type": "UNIT",
-    "baseStrength": 5,
-    "isHero": false,
-    "allowedRows": [
-      "CLOSE_COMBAT"
-    ],
-    "ability": null,
-    "maxCopies": 1,
-    "description": "\"Wolves aren't as bad as they say. Werewolves, though – they're worse.\""
-  },
-  {
-    "id": "mo_wyvern",
-    "name": "Wyvern",
-    "faction": "MONSTERS",
-    "type": "UNIT",
-    "baseStrength": 2,
-    "isHero": false,
-    "allowedRows": [
-      "RANGED"
-    ],
-    "ability": null,
-    "maxCopies": 1,
-    "description": "\"Imagine a cross between a winged snake and a nightmare. Wyverns are worse.\""
   },
   {
     "id": "st_leader_francesca_pureblood",
@@ -1445,9 +1484,22 @@
     "isHero": false,
     "allowedRows": [],
     "ability": null,
-    "leaderAbility": "SCORCH_ENEMY_CLOSE_10",
+    "leaderAbility": "OPTIMIZE_AGILE_ROWS",
     "maxCopies": 1,
-    "description": "Líder: destruye la unidad no-Héroe más fuerte de Cuerpo a cuerpo rival si suma >= 10."
+    "description": "Líder: mueve tus unidades ágiles a la fila permitida que maximice su fuerza total."
+  },
+  {
+    "id": "st_leader_francesca_beautiful",
+    "name": "Francesca: La Hermosa",
+    "faction": "SCOIATAEL",
+    "type": "LEADER",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [],
+    "ability": null,
+    "leaderAbility": "HORN_RANGED_LEADER",
+    "maxCopies": 1,
+    "description": "Líder: duplica (x2) la fuerza de todas tus unidades normales en Distancia."
   },
   {
     "id": "st_leader_francesca_daisy",
@@ -1471,9 +1523,23 @@
     "isHero": false,
     "allowedRows": [],
     "ability": null,
-    "leaderAbility": "HORN_RANGED_LEADER",
+    "leaderAbility": "SCORCH_ENEMY_CLOSE_10",
     "maxCopies": 1,
-    "description": "Líder: duplica (x2) la fuerza de todas tus unidades normales en Distancia."
+    "description": "Líder: destruye la unidad no-Héroe más fuerte de Cuerpo a cuerpo rival si su fila suma >= 10."
+  },
+  {
+    "id": "st_dol_blathanna_archer",
+    "name": "Arquero de Dol Blathanna",
+    "faction": "SCOIATAEL",
+    "type": "UNIT",
+    "baseStrength": 4,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "«Da otro paso, dh'oine. Te verías mejor con una flecha entre los ojos»."
   },
   {
     "id": "st_barclay_els",
@@ -1546,36 +1612,7 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"I know how to carry out orders, so you can shove your advice up your coal chute.\""
-  },
-  {
-    "id": "st_dol_blathanna_archer",
-    "name": "Dol Blathanna Archer",
-    "faction": "SCOIATAEL",
-    "type": "UNIT",
-    "baseStrength": 4,
-    "isHero": false,
-    "allowedRows": [
-      "RANGED"
-    ],
-    "ability": null,
-    "maxCopies": 1,
-    "description": "\"Take another step, dh'oine. You'd look better with an arrow between your eyes.\""
-  },
-  {
-    "id": "st_dwarven_skirmisher",
-    "name": "Dwarven Skirmisher",
-    "faction": "SCOIATAEL",
-    "type": "UNIT",
-    "baseStrength": 3,
-    "isHero": false,
-    "allowedRows": [
-      "CLOSE_COMBAT"
-    ],
-    "ability": "MUSTER",
-    "musterGroup": "dwarven_skirmisher",
-    "maxCopies": 3,
-    "description": "Reunión: invoca todas las cartas iguales o del mismo grupo desde mano y mazo."
+    "description": "«Sé perfectamente cómo cumplir órdenes, así que ahórrate los consejos»."
   },
   {
     "id": "st_eithne",
@@ -1637,6 +1674,21 @@
     "description": "Reunión: invoca todas las copias de Hostigador élfico desde tu mano y mazo."
   },
   {
+    "id": "st_dwarven_skirmisher",
+    "name": "Hostigador enano",
+    "faction": "SCOIATAEL",
+    "type": "UNIT",
+    "baseStrength": 3,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "MUSTER",
+    "musterGroup": "dwarven_skirmisher",
+    "maxCopies": 3,
+    "description": "Reunión: invoca todas las cartas iguales o del mismo grupo desde mano y mazo."
+  },
+  {
     "id": "st_ida_emean_aep_sivney",
     "name": "Ida Emean aep Sivney",
     "faction": "SCOIATAEL",
@@ -1648,7 +1700,7 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"I am a Sage. My power lies in possessing knowledge. Not sharing it.\""
+    "description": "«Soy una Sabia. Mi poder reside en poseer el conocimiento, no en compartirlo»."
   },
   {
     "id": "st_iorveth",
@@ -1693,6 +1745,20 @@
     "description": "Inyección de moral: suma +1 a todas las demás unidades normales de Distancia."
   },
   {
+    "id": "st_vrihedd_brigade_recruit",
+    "name": "Recluta de la brigada Vrihedd",
+    "faction": "SCOIATAEL",
+    "type": "UNIT",
+    "baseStrength": 4,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "«El odio arde más que cualquier fuego y corta más profundo que cualquier hoja»."
+  },
+  {
     "id": "st_riordain",
     "name": "Riordain",
     "faction": "SCOIATAEL",
@@ -1704,7 +1770,7 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"Stare into their eyes, feast on their terror. Then go in for the kill.\""
+    "description": "«Míralos a los ojos, aliméntate de su terror. Luego lánzate a matar»."
   },
   {
     "id": "st_saesenthessis",
@@ -1760,7 +1826,7 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"I'd gladly kill you from up close, stare in your eyes... But you reek, human.\""
+    "description": "«Con gusto te mataría de cerca mirándote a los ojos... pero apestas, humano»."
   },
   {
     "id": "st_vrihedd_brigade",
@@ -1776,20 +1842,6 @@
     "ability": null,
     "maxCopies": 2,
     "description": "Ágil: puede colocarse en Cuerpo a cuerpo o Distancia."
-  },
-  {
-    "id": "st_vrihedd_brigade_recruit",
-    "name": "Vrihedd Brigade Recruit",
-    "faction": "SCOIATAEL",
-    "type": "UNIT",
-    "baseStrength": 4,
-    "isHero": false,
-    "allowedRows": [
-      "RANGED"
-    ],
-    "ability": null,
-    "maxCopies": 1,
-    "description": "\"Hatred burns brighter than any fire, and cuts deeper than any blade.\""
   },
   {
     "id": "st_yaevinn",
@@ -1821,20 +1873,6 @@
     "description": "Héroe (inmune a climas y efectos)."
   },
   {
-    "id": "nt_cow",
-    "name": "Cow",
-    "faction": "NEUTRAL",
-    "type": "UNIT",
-    "baseStrength": 0,
-    "isHero": false,
-    "allowedRows": [
-      "RANGED"
-    ],
-    "ability": null,
-    "maxCopies": 1,
-    "description": "Vengador: al ser descartada al final de la ronda, invoca una Fuerza de Defensa Bovina (8) en Cuerpo a cuerpo para la siguiente ronda."
-  },
-  {
     "id": "nt_mysterious_elf",
     "name": "Elfo misterioso (Avallac'h)",
     "faction": "NEUTRAL",
@@ -1860,7 +1898,7 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"Men, the polite ones, at least, call me a monster. A blood-drinking freak.\""
+    "description": "«Los hombres, al menos los educados, me llaman monstruo. Un engendro chupasangre»."
   },
   {
     "id": "nt_gaunter_odimm",
@@ -1937,7 +1975,7 @@
   },
   {
     "id": "nt_roach",
-    "name": "Roach",
+    "name": "Sardinilla",
     "faction": "NEUTRAL",
     "type": "UNIT",
     "baseStrength": 3,
@@ -1947,7 +1985,7 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"Come on, Roach! Faster!\""
+    "description": "«¡Vamos, Sardinilla! ¡Más rápido!»"
   },
   {
     "id": "nt_triss_merigold",
@@ -1964,6 +2002,20 @@
     "description": "Héroe (inmune a climas y efectos)."
   },
   {
+    "id": "nt_cow",
+    "name": "Vaca",
+    "faction": "NEUTRAL",
+    "type": "UNIT",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "Vengador: al ser descartada al final de la ronda, invoca una Fuerza de Defensa Bovina (8) en Cuerpo a cuerpo para la siguiente ronda."
+  },
+  {
     "id": "nt_vesemir",
     "name": "Vesemir",
     "faction": "NEUTRAL",
@@ -1975,7 +2027,7 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"If you're to be hanged, ask for water. Anything can happen before they fetch it.\""
+    "description": "«Si van a ahorcarte, pide agua. Nunca se sabe qué puede ocurrir antes de que la traigan»."
   },
   {
     "id": "nt_villentretenmerth",
@@ -2017,7 +2069,7 @@
     ],
     "ability": null,
     "maxCopies": 1,
-    "description": "\"Life without old mates and booze is like a woman without a rump.\""
+    "description": "«La vida sin viejos camaradas ni buena bebida no vale gran cosa»."
   },
   {
     "id": "sp_commanders_horn",

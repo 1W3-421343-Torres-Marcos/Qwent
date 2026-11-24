@@ -999,7 +999,11 @@ export class GameFacadeService {
     }
     if (action.type === 'USE_LEADER') {
       const ability = prev.players[action.playerId].leader?.leaderAbility;
-      if (ability === 'SCORCH_ENEMY_CLOSE_10' || ability === 'SCORCH_ENEMY_SIEGE_10') {
+      if (
+        ability === 'SCORCH_ENEMY_CLOSE_10' ||
+        ability === 'SCORCH_ENEMY_RANGED_10' ||
+        ability === 'SCORCH_ENEMY_SIEGE_10'
+      ) {
         const oppId = getOpponentId(action.playerId);
         return next.players[oppId].discard.length > prev.players[oppId].discard.length;
       }

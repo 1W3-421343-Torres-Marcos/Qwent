@@ -1,7 +1,8 @@
 import { ROW_TYPES, type AbilityType, type CardInstance, type LeaderAbilityType, type PlayerId, type RowType } from '../models/types';
 import type { GameAction } from '../models/actions';
-import type { RowState, WeatherState } from '../models/game-state';
+import type { PlayerState, RowState, WeatherState } from '../models/game-state';
 import { isScorchVulnerable, isValidDecoyTarget } from '../abilities/ability-resolver';
+import { optimizeAgilePlayerRows } from '../abilities/leaders';
 import { calculateRowStrength, isWeatherActiveForRow } from '../scoring/calculate-strength';
 import type { AIPlayerView } from './ai-view';
 
@@ -23,10 +24,18 @@ const WEATHER_ROW_BY_ABILITY: Readonly<Partial<Record<AbilityType, RowType>>> = 
   WEATHER_RAIN: 'SIEGE',
 };
 
-function sumRowTotals(rows: Readonly<Record<RowType, RowState>>, weather: WeatherState): number {
+function sumRowTotals(
+  rows: Readonly<Record<RowType, RowState>>,
+  weather: WeatherState,
+  doubleSpyStrength = false,
+): number {
   let total = 0;
   for (const rowType of ROW_TYPES) {
-    total += calculateRowStrength(rows[rowType], isWeatherActiveForRow(weather, rowType)).totalStrength;
+    total += calculateRowStrength(
+      rows[rowType],
+      isWeatherActiveForRow(weather, rowType),
+      doubleSpyStrength,
+    ).totalStrength;
   }
   return total;
 }
@@ -174,6 +183,7 @@ export function pickAgileRow(
     const simulatedRow = calculateRowStrength(
       { ...currentRow, cards: [...currentRow.cards, card] },
       weatherActive,
+      view.doubleSpyStrength,
     );
     const delta = simulatedRow.totalStrength - currentRow.totalStrength;
     if (delta > bestDelta) {
@@ -229,8 +239,16 @@ function evaluateWeatherCard(view: AIPlayerView, ability: AbilityType): { score:
 
   const oppBefore = view.opponent.rows[rowType].totalStrength;
   const meBefore = view.me.rows[rowType].totalStrength;
-  const oppAfter = calculateRowStrength(view.opponent.rows[rowType], true).totalStrength;
-  const meAfter = calculateRowStrength(view.me.rows[rowType], true).totalStrength;
+  const oppAfter = calculateRowStrength(
+    view.opponent.rows[rowType],
+    true,
+    view.doubleSpyStrength,
+  ).totalStrength;
+  const meAfter = calculateRowStrength(
+    view.me.rows[rowType],
+    true,
+    view.doubleSpyStrength,
+  ).totalStrength;
 
   const swing = oppBefore - oppAfter - (meBefore - meAfter);
   return {
@@ -245,8 +263,8 @@ function evaluateClearWeather(view: AIPlayerView): { score: number; swing: numbe
   }
 
   const clearWeather: WeatherState = { frost: null, fog: null, rain: null };
-  const myAfter = sumRowTotals(view.me.rows, clearWeather);
-  const oppAfter = sumRowTotals(view.opponent.rows, clearWeather);
+  const myAfter = sumRowTotals(view.me.rows, clearWeather, view.doubleSpyStrength);
+  const oppAfter = sumRowTotals(view.opponent.rows, clearWeather, view.doubleSpyStrength);
   const swing = myAfter - view.me.totalScore - (oppAfter - view.opponent.totalScore);
 
   return {
@@ -276,6 +294,7 @@ function scoreUnitPlacement(view: AIPlayerView, instance: CardInstance, targetRo
     const oppSimulated = calculateRowStrength(
       { ...oppRow, cards: [...oppRow.cards, instance] },
       isWeatherActiveForRow(view.weather, targetRow),
+      view.doubleSpyStrength,
     );
     const oppGain = oppSimulated.totalStrength - oppRow.totalStrength;
     const drawBonus = view.me.myDeckCount >= 2 ? 26 : view.me.myDeckCount * 10;
@@ -292,6 +311,7 @@ function scoreUnitPlacement(view: AIPlayerView, instance: CardInstance, targetRo
   const simulated = calculateRowStrength(
     { ...currentRow, cards: [...currentRow.cards, instance] },
     weatherActive,
+    view.doubleSpyStrength,
   );
   const rowGain = simulated.totalStrength - currentRow.totalStrength;
   let score = rowGain;
@@ -361,6 +381,7 @@ function evaluateLeaderCandidate(view: AIPlayerView): ScoredPlayCandidate | null
     const afterHorn = calculateRowStrength(
       { ...row, hornCard: dummyHorn },
       isWeatherActiveForRow(view.weather, rowType),
+      view.doubleSpyStrength,
     );
     const gain = afterHorn.totalStrength - row.totalStrength;
     return {
@@ -398,8 +419,17 @@ function evaluateLeaderCandidate(view: AIPlayerView): ScoredPlayCandidate | null
     };
   }
 
-  if (ability === 'SCORCH_ENEMY_CLOSE_10' || ability === 'SCORCH_ENEMY_SIEGE_10') {
-    const rowType: RowType = ability === 'SCORCH_ENEMY_CLOSE_10' ? 'CLOSE_COMBAT' : 'SIEGE';
+  if (
+    ability === 'SCORCH_ENEMY_CLOSE_10' ||
+    ability === 'SCORCH_ENEMY_RANGED_10' ||
+    ability === 'SCORCH_ENEMY_SIEGE_10'
+  ) {
+    const rowType: RowType =
+      ability === 'SCORCH_ENEMY_CLOSE_10'
+        ? 'CLOSE_COMBAT'
+        : ability === 'SCORCH_ENEMY_RANGED_10'
+          ? 'RANGED'
+          : 'SIEGE';
     const mirror = view.opponent.rows[rowType];
     if (mirror.totalStrength < 10) {
       return { action, tacticalScore: -35, netPointSwing: 0 };
@@ -414,6 +444,32 @@ function evaluateLeaderCandidate(view: AIPlayerView): ScoredPlayCandidate | null
       action,
       tacticalScore: maxOpp > 0 ? maxOpp * 1.4 : -35,
       netPointSwing: maxOpp,
+    };
+  }
+
+  if (ability === 'OPTIMIZE_AGILE_ROWS') {
+    const selfSnapshot: PlayerState = {
+      id: view.me.id,
+      name: 'bot',
+      faction: view.me.faction,
+      leader: view.me.leader,
+      leaderUsed: view.me.leaderUsed,
+      gems: view.me.gems,
+      passed: view.me.passed,
+      hand: view.me.hand,
+      deck: [],
+      discard: view.me.discard,
+      rows: view.me.rows,
+      totalScore: view.me.totalScore,
+      mulligansRemaining: view.me.mulligansRemaining,
+      mulliganDone: view.me.mulliganDone,
+    };
+    const optimized = optimizeAgilePlayerRows(selfSnapshot, view.weather, view.doubleSpyStrength);
+    const gain = optimized.totalScore - view.me.totalScore;
+    return {
+      action,
+      tacticalScore: gain > 0 ? gain * 1.35 : -35,
+      netPointSwing: gain,
     };
   }
 
@@ -465,6 +521,7 @@ export function generatePlayCandidates(view: AIPlayerView): readonly ScoredPlayC
           const afterHorn = calculateRowStrength(
             { ...row, hornCard: instance },
             isWeatherActiveForRow(view.weather, rowType),
+            view.doubleSpyStrength,
           );
           const gain = afterHorn.totalStrength - row.totalStrength;
           candidates.push({

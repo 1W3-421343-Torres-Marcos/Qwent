@@ -387,7 +387,7 @@ const WEATHER_BOX_SLOTS = [
             <span
               class="inline-block rounded border border-bronze/60 bg-tavern-dark/80 px-1.5 py-0.5 text-[9px] font-bold uppercase text-gold"
             >
-              v1.5.0
+              v1.6.0
             </span>
             <div class="grid grid-cols-2 gap-1">
               <button

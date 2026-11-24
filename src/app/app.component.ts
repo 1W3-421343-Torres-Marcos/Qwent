@@ -35,7 +35,7 @@ type ScreenView = 'MENU' | 'DECK_BUILDER' | 'BOARD' | 'HISTORY';
             <span
               class="rounded border border-gold/60 bg-row-leather px-3 py-0.5 text-[11px] font-bold uppercase tracking-widest text-gold"
             >
-              v1.5.0 — Release Offline
+              v1.6.0 — Release Offline
             </span>
             <span
               class="rounded border border-bronze bg-tavern-dark/80 px-3 py-0.5 text-[11px] font-medium text-parchment/80"

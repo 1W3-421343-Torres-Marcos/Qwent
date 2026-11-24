@@ -97,13 +97,14 @@ describe('Deterministic Cards ETL (F5.2)', () => {
     const validation = validateCatalog(catalog);
     expect(validation.errors).toEqual([]);
     expect(validation.valid).toBe(true);
+    expect(catalog).toHaveLength(154);
 
     const retransformed = transformDatasetToCatalog(catalog);
     expect(JSON.stringify(catalog)).toBe(JSON.stringify(retransformed));
 
     for (const faction of PLAYABLE_FACTIONS) {
       const factionLeaders = catalog.filter((c) => c.type === 'LEADER' && c.faction === faction);
-      expect(factionLeaders.length).toBeGreaterThanOrEqual(3);
+      expect(factionLeaders).toHaveLength(5);
     }
 
     const coveredLeaderAbilities = new Set(

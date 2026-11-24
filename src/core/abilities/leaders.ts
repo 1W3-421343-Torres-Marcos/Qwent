@@ -1,7 +1,8 @@
-import type { AbilityType, CardInstance, LeaderAbilityType, PlayerId, RowType } from '../models/types';
+import { ROW_TYPES, type AbilityType, type CardInstance, type LeaderAbilityType, type PlayerId, type RowType } from '../models/types';
 import type { GameState, PlayerState, WeatherState } from '../models/game-state';
-import { recalculateBoard } from '../scoring/calculate-strength';
+import { recalculateBoard, recalculatePlayer } from '../scoring/calculate-strength';
 import { drawCards, resolveScorchRow } from './ability-resolver';
+import { isPassiveLeaderActive } from './passive-leaders';
 
 export const LEADER_HORN_DEFINITION_ID = 'leader_horn_effect' as const;
 
@@ -25,6 +26,7 @@ function getOpponent(playerId: PlayerId): PlayerId {
  * Applies start-of-match passive leader abilities:
  * 1) CANCEL_ENEMY_LEADER disables both players' leaders before other start passives.
  * 2) DRAW_EXTRA_CARD_START draws 1 extra opening card if not cancelled, marking leader as used.
+ * 3) RANDOMIZE_REVIVES / DOUBLE_SPY_STRENGTH mark their passive leaders as started/used.
  */
 export function applyPassiveStartLeaders(
   p1: PlayerState,
@@ -36,11 +38,22 @@ export function applyPassiveStartLeaders(
   let nextP1: PlayerState = p1Cancels || p2Cancels ? { ...p1, leaderUsed: true } : p1;
   let nextP2: PlayerState = p1Cancels || p2Cancels ? { ...p2, leaderUsed: true } : p2;
 
-  if (nextP1.leader?.leaderAbility === 'DRAW_EXTRA_CARD_START' && !nextP1.leaderUsed) {
-    nextP1 = { ...drawCards(nextP1, 1), leaderUsed: true };
+  const isStartPassive = (ability?: LeaderAbilityType): boolean =>
+    ability === 'DRAW_EXTRA_CARD_START' ||
+    ability === 'RANDOMIZE_REVIVES' ||
+    ability === 'DOUBLE_SPY_STRENGTH';
+
+  if (isStartPassive(nextP1.leader?.leaderAbility) && !nextP1.leaderUsed) {
+    nextP1 =
+      nextP1.leader?.leaderAbility === 'DRAW_EXTRA_CARD_START'
+        ? { ...drawCards(nextP1, 1), leaderUsed: true }
+        : { ...nextP1, leaderUsed: true };
   }
-  if (nextP2.leader?.leaderAbility === 'DRAW_EXTRA_CARD_START' && !nextP2.leaderUsed) {
-    nextP2 = { ...drawCards(nextP2, 1), leaderUsed: true };
+  if (isStartPassive(nextP2.leader?.leaderAbility) && !nextP2.leaderUsed) {
+    nextP2 =
+      nextP2.leader?.leaderAbility === 'DRAW_EXTRA_CARD_START'
+        ? { ...drawCards(nextP2, 1), leaderUsed: true }
+        : { ...nextP2, leaderUsed: true };
   }
 
   return { p1: nextP1, p2: nextP2 };
@@ -60,7 +73,12 @@ export function canUseLeader(state: GameState, playerId: PlayerId): boolean {
   }
 
   const ability = player.leader.leaderAbility;
-  if (ability === 'CANCEL_ENEMY_LEADER' || ability === 'DRAW_EXTRA_CARD_START') {
+  if (
+    ability === 'CANCEL_ENEMY_LEADER' ||
+    ability === 'DRAW_EXTRA_CARD_START' ||
+    ability === 'RANDOMIZE_REVIVES' ||
+    ability === 'DOUBLE_SPY_STRENGTH'
+  ) {
     return false;
   }
 
@@ -83,9 +101,16 @@ export function canUseLeader(state: GameState, playerId: PlayerId): boolean {
     return opponent.discard.some((c) => c.card.type === 'UNIT' && !c.card.isHero);
   }
 
+  if (ability === 'OPTIMIZE_AGILE_ROWS') {
+    return ROW_TYPES.some((row) =>
+      player.rows[row].cards.some((c) => !c.card.isHero && c.card.allowedRows.length > 1),
+    );
+  }
+
   return (
     ability === 'CLEAR_WEATHER_LEADER' ||
     ability === 'SCORCH_ENEMY_CLOSE_10' ||
+    ability === 'SCORCH_ENEMY_RANGED_10' ||
     ability === 'SCORCH_ENEMY_SIEGE_10'
   );
 }
@@ -224,8 +249,16 @@ export function resolveLeaderUse(state: GameState, playerId: PlayerId): GameStat
     return resolveScorchRow(baseState, playerId, 'CLOSE_COMBAT');
   }
 
+  if (ability === 'SCORCH_ENEMY_RANGED_10') {
+    return resolveScorchRow(baseState, playerId, 'RANGED');
+  }
+
   if (ability === 'SCORCH_ENEMY_SIEGE_10') {
     return resolveScorchRow(baseState, playerId, 'SIEGE');
+  }
+
+  if (ability === 'OPTIMIZE_AGILE_ROWS') {
+    return resolveOptimizeAgileRows(baseState, playerId);
   }
 
   if (ability === 'REVIVE_OWN_DISCARD_TO_HAND' || ability === 'STEAL_ENEMY_DISCARD_TO_HAND') {
@@ -319,4 +352,95 @@ export function resolveLeaderTargetSelection(
       },
     },
   };
+}
+
+function moveUnitBetweenRows(
+  rows: Readonly<Record<RowType, PlayerState['rows'][RowType]>>,
+  unit: CardInstance,
+  fromRow: RowType,
+  toRow: RowType,
+): Readonly<Record<RowType, PlayerState['rows'][RowType]>> {
+  return {
+    ...rows,
+    [fromRow]: {
+      ...rows[fromRow],
+      cards: rows[fromRow].cards.filter((c) => c.instanceId !== unit.instanceId),
+    },
+    [toRow]: {
+      ...rows[toRow],
+      cards: [...rows[toRow].cards, unit],
+    },
+  };
+}
+
+/**
+ * Purely moves each non-Hero Agile unit on `player`'s board to the allowed row
+ * that strictly maximizes the player's total score under `weather` and `doubleSpyStrength`.
+ */
+export function optimizeAgilePlayerRows(
+  player: PlayerState,
+  weather: WeatherState,
+  doubleSpyStrength: boolean,
+): PlayerState {
+  let currentPlayer = recalculatePlayer(player, weather, doubleSpyStrength);
+
+  const agileUnits: CardInstance[] = [];
+  for (const rowType of ROW_TYPES) {
+    for (const card of currentPlayer.rows[rowType].cards) {
+      if (!card.card.isHero && card.card.allowedRows.length > 1) {
+        agileUnits.push(card);
+      }
+    }
+  }
+
+  for (const agile of agileUnits) {
+    let sourceRow: RowType | null = null;
+    for (const rowType of ROW_TYPES) {
+      if (currentPlayer.rows[rowType].cards.some((c) => c.instanceId === agile.instanceId)) {
+        sourceRow = rowType;
+        break;
+      }
+    }
+    if (sourceRow === null) {
+      continue;
+    }
+
+    let bestScore = currentPlayer.totalScore;
+    let bestRows = currentPlayer.rows;
+
+    for (const candidateRow of agile.card.allowedRows) {
+      if (candidateRow === sourceRow) {
+        continue;
+      }
+      const candidateRows = moveUnitBetweenRows(currentPlayer.rows, agile, sourceRow, candidateRow);
+      const candidateScore = recalculatePlayer(
+        { ...currentPlayer, rows: candidateRows },
+        weather,
+        doubleSpyStrength,
+      ).totalScore;
+      if (candidateScore > bestScore) {
+        bestScore = candidateScore;
+        bestRows = candidateRows;
+      }
+    }
+
+    if (bestRows !== currentPlayer.rows) {
+      currentPlayer = recalculatePlayer({ ...currentPlayer, rows: bestRows }, weather, doubleSpyStrength);
+    }
+  }
+
+  return currentPlayer;
+}
+
+function resolveOptimizeAgileRows(state: GameState, playerId: PlayerId): GameState {
+  const doubleSpyStrength = isPassiveLeaderActive(state, 'DOUBLE_SPY_STRENGTH');
+  const currentPlayer = optimizeAgilePlayerRows(state.players[playerId], state.weather, doubleSpyStrength);
+
+  return recalculateBoard({
+    ...state,
+    players: {
+      ...state.players,
+      [playerId]: currentPlayer,
+    },
+  });
 }

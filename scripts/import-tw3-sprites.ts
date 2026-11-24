@@ -14,6 +14,7 @@ const CARD_ID_TO_SPRITE_FILE: Readonly<Record<string, string>> = {
   nr_leader_foltest_siege_master: 'realms_foltest_copper.jpg',
   nr_leader_foltest_king_of_temeria: 'realms_foltest_silver.jpg',
   nr_leader_foltest_lord_commander: 'realms_foltest_gold.jpg',
+  nr_leader_foltest_son_of_medell: 'realms_foltest_son_of_medell.jpg',
 
   // Northern Realms Units
   nr_ballista: 'realms_ballista.jpg',
@@ -47,6 +48,7 @@ const CARD_ID_TO_SPRITE_FILE: Readonly<Record<string, string>> = {
   ng_leader_emhyr_emperor: 'nilfgaard_emhyr_copper.jpg',
   ng_leader_emhyr_white_flame: 'nilfgaard_emhyr_bronze.jpg',
   ng_leader_emhyr_imperial_majesty: 'nilfgaard_emhyr_silver.jpg',
+  ng_leader_emhyr_invader: 'nilfgaard_emhyr_invader_of_the_north.jpg',
 
   // Nilfgaard Units
   ng_albrich: 'nilfgaard_albrich.jpg',
@@ -84,6 +86,7 @@ const CARD_ID_TO_SPRITE_FILE: Readonly<Record<string, string>> = {
   mo_leader_eredin_destroyer: 'monsters_eredin_gold.jpg',
   mo_leader_eredin_bringer_of_death: 'monsters_eredin_bronze.jpg',
   mo_leader_eredin_king: 'monsters_eredin_copper.jpg',
+  mo_leader_eredin_treacherous: 'monsters_eredin_the_treacherous.jpg',
 
   // Monsters Units
   mo_arachas: 'monsters_arachas.jpg',
@@ -127,6 +130,7 @@ const CARD_ID_TO_SPRITE_FILE: Readonly<Record<string, string>> = {
   st_leader_francesca_hope: 'scoiatael_francesca_hope_of_the_aen_seidhe.jpg',
   st_leader_francesca_daisy: 'scoiatael_francesca_copper.jpg',
   st_leader_francesca_queen: 'scoiatael_francesca_silver.jpg',
+  st_leader_francesca_beautiful: 'scoiatael_francesca_gold.jpg',
 
   // Scoia'tael Units
   st_barclay_els: 'scoiatael_barclay.jpg',

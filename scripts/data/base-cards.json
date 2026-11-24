@@ -52,6 +52,19 @@
     "description": "Líder: destruye la unidad no-Héroe más fuerte del Asedio rival si su fila suma >= 10."
   },
   {
+    "id": "nr_leader_foltest_son_of_medell",
+    "name": "Foltest: Hijo de Medell",
+    "faction": "NORTHERN_REALMS",
+    "type": "LEADER",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [],
+    "ability": null,
+    "leaderAbility": "SCORCH_ENEMY_RANGED_10",
+    "maxCopies": 1,
+    "description": "Líder: destruye la unidad no-Héroe más fuerte de Distancia rival si su fila suma >= 10."
+  },
+  {
     "id": "nr_blue_stripes_commando",
     "name": "Comando de los Franjas Azules",
     "faction": "NORTHERN_REALMS",
@@ -226,6 +239,19 @@
     "description": "Líder: duplica (x2) la fuerza de todas tus unidades normales en Distancia."
   },
   {
+    "id": "ng_leader_emhyr_invader",
+    "name": "Emhyr: Invasor del Norte",
+    "faction": "NILFGAARD",
+    "type": "LEADER",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [],
+    "ability": null,
+    "leaderAbility": "RANDOMIZE_REVIVES",
+    "maxCopies": 1,
+    "description": "Líder pasivo: las habilidades que reviven unidades del descarte al tablero eligen una unidad no-Héroe al azar para ambos jugadores."
+  },
+  {
     "id": "ng_impera_brigade",
     "name": "Guardia de la brigada Impera",
     "faction": "NILFGAARD",
@@ -398,6 +424,19 @@
     "leaderAbility": "SCORCH_ENEMY_CLOSE_10",
     "maxCopies": 1,
     "description": "Líder: destruye la unidad no-Héroe más fuerte de Cuerpo a cuerpo rival si suma >= 10."
+  },
+  {
+    "id": "mo_leader_eredin_treacherous",
+    "name": "Eredin: El Traidor",
+    "faction": "MONSTERS",
+    "type": "LEADER",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [],
+    "ability": null,
+    "leaderAbility": "DOUBLE_SPY_STRENGTH",
+    "maxCopies": 1,
+    "description": "Líder pasivo: duplica (x2) la fuerza de todas las cartas Espía en ambos lados del tablero."
   },
   {
     "id": "mo_nekker",
@@ -582,13 +621,26 @@
     "isHero": false,
     "allowedRows": [],
     "ability": null,
-    "leaderAbility": "SCORCH_ENEMY_CLOSE_10",
+    "leaderAbility": "OPTIMIZE_AGILE_ROWS",
     "maxCopies": 1,
-    "description": "Líder: destruye la unidad no-Héroe más fuerte de Cuerpo a cuerpo rival si suma >= 10."
+    "description": "Líder: mueve tus unidades ágiles a la fila permitida que maximice su fuerza total."
   },
   {
     "id": "st_leader_francesca_queen",
     "name": "Francesca: Reina de Dol Blathanna",
+    "faction": "SCOIATAEL",
+    "type": "LEADER",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [],
+    "ability": null,
+    "leaderAbility": "SCORCH_ENEMY_CLOSE_10",
+    "maxCopies": 1,
+    "description": "Líder: destruye la unidad no-Héroe más fuerte de Cuerpo a cuerpo rival si su fila suma >= 10."
+  },
+  {
+    "id": "st_leader_francesca_beautiful",
+    "name": "Francesca: La Hermosa",
     "faction": "SCOIATAEL",
     "type": "LEADER",
     "baseStrength": 0,

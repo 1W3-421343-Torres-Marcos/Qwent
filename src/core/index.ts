@@ -77,6 +77,7 @@ export {
   resolveLeaderTargetSelection,
   resolveLeaderUse,
 } from './abilities/leaders';
+export { isPassiveLeaderActive } from './abilities/passive-leaders';
 export { createAIView } from './ai/ai-view';
 export type { AIOpponentView, AIPlayerSelfView, AIPlayerView } from './ai/ai-view';
 export { decideAction } from './ai/bot-player';

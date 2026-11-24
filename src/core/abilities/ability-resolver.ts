@@ -1,6 +1,8 @@
 import { ROW_TYPES, type CardInstance, type PlayerId, type RowType } from '../models/types';
 import type { GameState, PlayerState } from '../models/game-state';
+import { nextRng } from '../engine/prng';
 import { recalculateBoard } from '../scoring/calculate-strength';
+import { isPassiveLeaderActive } from './passive-leaders';
 
 function getOpponent(playerId: PlayerId): PlayerId {
   return playerId === 'PLAYER_1' ? 'PLAYER_2' : 'PLAYER_1';
@@ -200,6 +202,16 @@ function resolveMedicEntry(state: GameState, playerId: PlayerId): GameState {
   const eligible = player.discard.filter((c) => c.card.type === 'UNIT' && !c.card.isHero);
   if (eligible.length === 0) {
     return state;
+  }
+
+  if (isPassiveLeaderActive(state, 'RANDOMIZE_REVIVES')) {
+    const rng = nextRng(state.rngSeed);
+    const chosen = eligible[Math.floor(rng.value * eligible.length)]!;
+    const nextState: GameState = {
+      ...state,
+      rngSeed: rng.nextSeed,
+    };
+    return reviveUnitFromDiscard(nextState, playerId, chosen.instanceId);
   }
 
   return {
@@ -408,25 +420,11 @@ function placeRevivedUnitOnRow(
   return resolveUnitEntry(placedState, playerId, revived, targetRow);
 }
 
-/**
- * Resolves MEDIC target selection: first removes the unit from discard, then routes Spies,
- * Agile units (via AGILE_ROW pending selection), or single-row units + chained abilities.
- */
-export function resolveMedicSelection(
+function reviveUnitFromDiscard(
   state: GameState,
   playerId: PlayerId,
   targetInstanceId: string,
 ): GameState {
-  const pending = state.pendingSelection;
-  if (
-    state.phase !== 'PENDING_SELECTION' ||
-    pending?.type !== 'MEDIC_DISCARD' ||
-    pending.playerId !== playerId ||
-    !pending.eligibleInstanceIds.includes(targetInstanceId)
-  ) {
-    return state;
-  }
-
   const player = state.players[playerId];
   const revived = player.discard.find((c) => c.instanceId === targetInstanceId);
   if (!revived || revived.card.type !== 'UNIT' || revived.card.isHero) {
@@ -479,6 +477,28 @@ export function resolveMedicSelection(
     revived,
     revived.card.allowedRows[0]!,
   );
+}
+
+/**
+ * Resolves MEDIC target selection: first removes the unit from discard, then routes Spies,
+ * Agile units (via AGILE_ROW pending selection), or single-row units + chained abilities.
+ */
+export function resolveMedicSelection(
+  state: GameState,
+  playerId: PlayerId,
+  targetInstanceId: string,
+): GameState {
+  const pending = state.pendingSelection;
+  if (
+    state.phase !== 'PENDING_SELECTION' ||
+    pending?.type !== 'MEDIC_DISCARD' ||
+    pending.playerId !== playerId ||
+    !pending.eligibleInstanceIds.includes(targetInstanceId)
+  ) {
+    return state;
+  }
+
+  return reviveUnitFromDiscard(state, playerId, targetInstanceId);
 }
 
 /**

@@ -13,7 +13,7 @@
 | U3 | Salir de partida en juego, historial offline y ritmo de IA | [x] | 100% |
 | U4 | Sensación en vivo de partida TW3 (banners, preview IA, corona y gemas) | [x] | 100% |
 | U5 | Fidelidad visual del tablero, artes alternativos, dorsos y climas | [x] | 100% |
-| U6 | 5.º Líder por facción (*Hearts of Stone*) y localización completa al español | [ ] | 0% |
+| U6 | 5.º Líder por facción (*Hearts of Stone*) y localización completa al español | [x] | 100% |
 | U7 | Expansión *Blood and Wine* (Skellige) y niveles de dificultad de IA | [ ] | 0% |
 
 **Estados:** `[ ]` pendiente | `[~]` en curso | `[x]` completada
@@ -37,9 +37,9 @@
 - [x] **U5.4**: Auditoría offline actualizada en `offline-audit.spec.ts`, versión `1.5.0`, `gwent-u5-debug.apk` (`--phase=u5`) y tag `v1.5.0`
 
 ## U6: 5.º Líder por facción (*Hearts of Stone*) y localización completa al español (`v1.6.0`)
-- [ ] **U6.1**: Implementar en Clean Core (`types.ts`, `leaders.ts`, `calculate-strength.ts`), catálogo, IA y sprites los 4 quintos líderes de *Hearts of Stone*: *Foltest: Hijo de Medell* (`SCORCH_ENEMY_RANGED_10`), *Emhyr: Invasor del Norte* (`RANDOMIZE_REVIVES`), *Eredin: El Traidor* (`DOUBLE_SPY_STRENGTH`) y completar los 5 líderes de Scoia'tael (*Francesca: La Hermosa* + habilidad `OPTIMIZE_AGILE_ROWS` en *Esperanza de Aen Seidhe*), cubierto por tests en `leaders.spec.ts`
-- [ ] **U6.2**: Diccionario determinista de localización al español oficial de TW3 en `scripts/import-tw3-dataset.ts` para unificar nombres y descripciones que quedaron en inglés sin alterar ningún `id` (preservando compatibilidad con `localStorage`)
-- [ ] **U6.3**: Validación ETL + tests en verde, versión `1.6.0`, `gwent-u6-debug.apk` (`--phase=u6`) y tag `v1.6.0`
+- [x] **U6.1**: Implementar en Clean Core (`types.ts`, `leaders.ts`, `calculate-strength.ts`), catálogo, IA y sprites los 4 quintos líderes de *Hearts of Stone*: *Foltest: Hijo de Medell* (`SCORCH_ENEMY_RANGED_10`), *Emhyr: Invasor del Norte* (`RANDOMIZE_REVIVES`), *Eredin: El Traidor* (`DOUBLE_SPY_STRENGTH`) y completar los 5 líderes de Scoia'tael (*Francesca: La Hermosa* + habilidad `OPTIMIZE_AGILE_ROWS` en *Esperanza de Aen Seidhe*), cubierto por tests en `leaders.spec.ts`
+- [x] **U6.2**: Diccionario determinista de localización al español oficial de TW3 en `scripts/import-tw3-dataset.ts` para unificar nombres y descripciones que quedaron en inglés sin alterar ningún `id` (preservando compatibilidad con `localStorage`)
+- [x] **U6.3**: Validación ETL + tests en verde, versión `1.6.0`, `gwent-u6-debug.apk` (`--phase=u6`) y tag `v1.6.0`
 
 ## U7: Expansión *Blood and Wine* (Facción Skellige) y niveles de dificultad de IA (`v1.7.0`)
 - [ ] **U7.1**: Actualizar alcance en `AGENTS.md` e implementar en Clean Core la 5.ª facción `SKELLIGE`: pasiva de Ronda 3 (revive hasta 2 unidades no-Héroe aleatorias del descarte con `rngSeed`), habilidades `BERSERKER` + `MARDROEME` (*Ermion* + especial *Mardroeme* → *Vildkaarl* / *Joven Vildkaarl* + `sfx/mardroeme.mp3`), *Kambi* → *Hemdall* (`11` Héroe), *Cerys* (`MUSTER` con *Doncellas Escuderas*), clima dual *Tormenta de Skellige* (`WEATHER_STORM`: Niebla + Lluvia) y líderes *Crach an Craite* y *Rey Bran*
@@ -97,3 +97,6 @@
 | 2026-11-24 | **U5.2**: Creado `DeckBackComponent` con dorsos de facción para pilas de Mazo y añadidas miniaturas reales en caja de Clima (`BoardPageComponent`) y ranura de Cuerno (`BoardRowComponent`) | U5.3: Capas atmosféricas CSS GPU en filas afectadas por clima |
 | 2026-11-24 | **U5.3**: Añadidas capas climáticas animadas GPU (`.qwent-row-frost`, `.qwent-row-fog`, `.qwent-row-rain`) en `styles.css` y `BoardRowComponent` | U5.4: Tests unitarios, auditoría offline (180 sprites), versión `1.5.0`, APK y tag `v1.5.0` |
 | 2026-11-24 | **U5.4 (`v1.5.0`)**: Tests de variantes (`card-art.spec.ts`), auditoría offline de **180** sprites JPEG válidos (**18** archivos / **73** tests en verde), build Angular `407.89 kB` iniciales y APK **`gwent-u5-debug.apk`** (`17.95 MB`) compilado en verde | Completada **U5**; siguiente etapa planificada: **U6** |
+| 2026-11-24 | **U6.1**: Implementados los 4 quintos líderes (*Hearts of Stone*: `SCORCH_ENEMY_RANGED_10`, `RANDOMIZE_REVIVES`, `DOUBLE_SPY_STRENGTH`, `OPTIMIZE_AGILE_ROWS`) en Core (`passive-leaders.ts`, `leaders.ts`, `calculate-strength.ts`, `ability-resolver.ts`), IA (`ai-view.ts`, `heuristics.ts`), `base-cards.json` y `import-tw3-sprites.ts` (390 simulaciones Bot vs. Bot en verde) | U6.2: Diccionario de localización al español oficial TW3 y descarga de los 4 sprites nuevos |
+| 2026-11-24 | **U6.2**: Localizadas al español las **76** cartas importadas en `import-tw3-dataset.ts` manteniendo intactos todos los `id`, regenerado `cards.json` (**154** cartas / **20** Líderes) e importados los **4** sprites nuevos (`183/183` en `import:sprites`, **184** total `.jpg`) | U6.3: Tests de los nuevos líderes, auditoría ETL/offline, versión `1.6.0`, APK y tag `v1.6.0` |
+| 2026-11-24 | **U6.3 (`v1.6.0`)**: Añadidos tests de los 4 nuevos líderes (`leaders.spec.ts`), auditoría ETL exacta de **5 líderes por facción** (`etl-cards.spec.ts`), auditoría offline de **184** sprites `.jpg` y localización completa al español (**18** archivos / **78** tests en verde), build Angular `412.41 kB` iniciales y APK **`gwent-u6-debug.apk`** (`18.17 MB`) compilado en verde | Completada **U6**; siguiente etapa planificada: **U7** |

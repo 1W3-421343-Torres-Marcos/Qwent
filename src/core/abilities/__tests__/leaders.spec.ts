@@ -5,6 +5,7 @@ import {
   canUseLeader,
   createInitialGameState,
   dispatch,
+  isPassiveLeaderActive,
   recalculateBoard,
   type CardDefinition,
   type CardInstance,
@@ -273,5 +274,254 @@ describe('F5.1 Leader Abilities', () => {
     expect(cancelled.players.PLAYER_1.hand).toHaveLength(10);
     expect(cancelled.players.PLAYER_1.leaderUsed).toBe(true);
     expect(cancelled.players.PLAYER_2.leaderUsed).toBe(true);
+  });
+});
+
+describe('U6.1 Hearts of Stone 5th Leaders', () => {
+  it('supports SCORCH_ENEMY_RANGED_10 when enemy Ranged >= 10 and ignores rows < 10', () => {
+    const foltestRanged = byId('nr_leader_foltest_son_of_medell');
+    let belowState = createLeaderMatch(foltestRanged);
+    belowState = recalculateBoard({
+      ...belowState,
+      activePlayer: 'PLAYER_1',
+      players: {
+        PLAYER_1: {
+          ...belowState.players.PLAYER_1,
+          hand: [inst('p1_h', 'nr_ves')],
+        },
+        PLAYER_2: {
+          ...belowState.players.PLAYER_2,
+          hand: [inst('p2_h', 'nr_ves')],
+          rows: {
+            ...belowState.players.PLAYER_2.rows,
+            RANGED: { cards: [inst('p2_alb', 'ng_albrich'), inst('p2_put', 'ng_puttkammer')], hornCard: null, totalStrength: 0 },
+          },
+        },
+      },
+    });
+
+    belowState = dispatch(belowState, { type: 'USE_LEADER', playerId: 'PLAYER_1' });
+    expect(belowState.players.PLAYER_2.rows.RANGED.cards.map((c) => c.instanceId)).toEqual(['p2_alb', 'p2_put']);
+    expect(belowState.players.PLAYER_2.discard).toHaveLength(0);
+
+    let scorchState = createLeaderMatch(foltestRanged);
+    scorchState = recalculateBoard({
+      ...scorchState,
+      activePlayer: 'PLAYER_1',
+      players: {
+        PLAYER_1: {
+          ...scorchState.players.PLAYER_1,
+          hand: [inst('p1_h2', 'nr_ves')],
+        },
+        PLAYER_2: {
+          ...scorchState.players.PLAYER_2,
+          hand: [inst('p2_h2', 'nr_ves')],
+          rows: {
+            ...scorchState.players.PLAYER_2.rows,
+            RANGED: {
+              cards: [inst('p2_phil', 'nr_philippa_eilhart'), inst('p2_assire', 'ng_assire_var_anahid')], // 10 Hero + 6 = 16
+              hornCard: null,
+              totalStrength: 0,
+            },
+          },
+        },
+      },
+    });
+
+    scorchState = dispatch(scorchState, { type: 'USE_LEADER', playerId: 'PLAYER_1' });
+    expect(scorchState.players.PLAYER_2.rows.RANGED.cards.map((c) => c.instanceId)).toEqual(['p2_phil']);
+    expect(scorchState.players.PLAYER_2.discard.map((c) => c.instanceId)).toEqual(['p2_assire']);
+  });
+
+  it('applies RANDOMIZE_REVIVES deterministically for both players unless cancelled by CANCEL_ENEMY_LEADER', () => {
+    const emhyrInvader = byId('ng_leader_emhyr_invader');
+    const emhyrCancel = byId('ng_leader_emhyr_white_flame');
+
+    const setupWithEmhyr = (enemyLeader: CardDefinition | null, seed: number): GameState => {
+      const base = createLeaderMatch(emhyrInvader, enemyLeader, seed);
+      return recalculateBoard({
+        ...base,
+        activePlayer: 'PLAYER_2',
+        players: {
+          ...base.players,
+          PLAYER_1: {
+            ...base.players.PLAYER_1,
+            hand: [inst('p1_hold', 'nr_ves')],
+          },
+          PLAYER_2: {
+            ...base.players.PLAYER_2,
+            hand: [inst('p2_medic', 'nr_dun_banner_medic')],
+            discard: [
+              inst('d_ves', 'nr_ves'),
+              inst('d_ball', 'nr_ballista'),
+              inst('d_cahir', 'ng_cahir'),
+            ],
+          },
+        },
+      });
+    };
+
+    const s1 = setupWithEmhyr(null, 42);
+    expect(s1.players.PLAYER_1.leaderUsed).toBe(true);
+    expect(canUseLeader(s1, 'PLAYER_1')).toBe(false);
+    expect(isPassiveLeaderActive(s1, 'RANDOMIZE_REVIVES')).toBe(true);
+
+    const afterMedicA = dispatch(s1, { type: 'PLAY_CARD', playerId: 'PLAYER_2', instanceId: 'p2_medic' });
+    const afterMedicB = dispatch(setupWithEmhyr(null, 42), {
+      type: 'PLAY_CARD',
+      playerId: 'PLAYER_2',
+      instanceId: 'p2_medic',
+    });
+
+    expect(afterMedicA.phase).toBe('PLAYING');
+    expect(afterMedicA.pendingSelection).toBeNull();
+    expect(afterMedicA.players.PLAYER_2.discard).toHaveLength(2);
+    expect(afterMedicA.rngSeed).not.toBe(s1.rngSeed);
+    expect(afterMedicA.players.PLAYER_2.discard.map((c) => c.instanceId)).toEqual(
+      afterMedicB.players.PLAYER_2.discard.map((c) => c.instanceId),
+    );
+
+    const cancelled = setupWithEmhyr(emhyrCancel, 42);
+    expect(isPassiveLeaderActive(cancelled, 'RANDOMIZE_REVIVES')).toBe(false);
+    const afterCancelledMedic = dispatch(cancelled, {
+      type: 'PLAY_CARD',
+      playerId: 'PLAYER_2',
+      instanceId: 'p2_medic',
+    });
+    expect(afterCancelledMedic.phase).toBe('PENDING_SELECTION');
+    expect(afterCancelledMedic.pendingSelection?.type).toBe('MEDIC_DISCARD');
+  });
+
+  it('applies DOUBLE_SPY_STRENGTH on both sides, composes with weather/horn, and disables under CANCEL_ENEMY_LEADER', () => {
+    const eredinSpy = byId('mo_leader_eredin_treacherous');
+    const emhyrCancel = byId('ng_leader_emhyr_white_flame');
+
+    let state = createLeaderMatch(eredinSpy, null, 99);
+    expect(state.players.PLAYER_1.leaderUsed).toBe(true);
+    expect(isPassiveLeaderActive(state, 'DOUBLE_SPY_STRENGTH')).toBe(true);
+
+    state = recalculateBoard({
+      ...state,
+      activePlayer: 'PLAYER_1',
+      weather: {
+        frost: { card: inst('w_frost', 'sp_biting_frost'), owner: 'PLAYER_1' },
+        fog: null,
+        rain: null,
+      },
+      players: {
+        PLAYER_1: {
+          ...state.players.PLAYER_1,
+          hand: [inst('p1_spy', 'nr_prince_stennis'), inst('p1_elf', 'nt_mysterious_elf')],
+          rows: {
+            ...state.players.PLAYER_1.rows,
+            CLOSE_COMBAT: { cards: [inst('p1_shil', 'ng_shilard_fitz_oesterlen')], hornCard: null, totalStrength: 0 },
+          },
+        },
+        PLAYER_2: {
+          ...state.players.PLAYER_2,
+          hand: [inst('p2_horn', 'sp_commanders_horn')],
+          rows: {
+            ...state.players.PLAYER_2.rows,
+            RANGED: { cards: [inst('p2_stefan', 'ng_stefan_skellen')], hornCard: null, totalStrength: 0 },
+          },
+        },
+      },
+    });
+
+    // Clear weather on Ranged: Stefan (9) * 2 = 18; Frost on Close: Shilard 1 * 2 = 2
+    expect(state.players.PLAYER_2.rows.RANGED.cards[0]?.effectiveStrength).toBe(18);
+    expect(state.players.PLAYER_1.rows.CLOSE_COMBAT.cards[0]?.effectiveStrength).toBe(2);
+
+    // P1 plays Stennis (5) onto Frosted P2 Close -> 1 * 2 = 2; P2 plays Horn -> 2 * 2 = 4
+    state = dispatch(state, { type: 'PLAY_CARD', playerId: 'PLAYER_1', instanceId: 'p1_spy' });
+    expect(state.players.PLAYER_2.rows.CLOSE_COMBAT.cards[0]?.effectiveStrength).toBe(2);
+
+    state = dispatch(state, {
+      type: 'PLAY_CARD',
+      playerId: 'PLAYER_2',
+      instanceId: 'p2_horn',
+      targetRow: 'CLOSE_COMBAT',
+    });
+    expect(state.players.PLAYER_2.rows.CLOSE_COMBAT.cards[0]?.effectiveStrength).toBe(4);
+
+    // Hero Spy remains 0
+    state = dispatch(state, { type: 'PLAY_CARD', playerId: 'PLAYER_1', instanceId: 'p1_elf' });
+    const elfOnP2 = state.players.PLAYER_2.rows.CLOSE_COMBAT.cards.find((c) => c.instanceId === 'p1_elf');
+    expect(elfOnP2?.effectiveStrength).toBe(0);
+
+    // Under CANCEL_ENEMY_LEADER, Spies revert to normal strength
+    let cancelled = createLeaderMatch(eredinSpy, emhyrCancel, 99);
+    expect(isPassiveLeaderActive(cancelled, 'DOUBLE_SPY_STRENGTH')).toBe(false);
+    cancelled = recalculateBoard({
+      ...cancelled,
+      players: {
+        ...cancelled.players,
+        PLAYER_2: {
+          ...cancelled.players.PLAYER_2,
+          rows: {
+            ...cancelled.players.PLAYER_2.rows,
+            CLOSE_COMBAT: { cards: [inst('p1_stennis_norm', 'nr_prince_stennis')], hornCard: null, totalStrength: 0 },
+          },
+        },
+      },
+    });
+    expect(cancelled.players.PLAYER_2.rows.CLOSE_COMBAT.cards[0]?.effectiveStrength).toBe(5);
+  });
+
+  it('optimizes non-Hero Agile row placements with OPTIMIZE_AGILE_ROWS without moving optimal or Hero units', () => {
+    const hopeLeader = byId('st_leader_francesca_hope');
+    let emptyBoard = createLeaderMatch(hopeLeader, null, 7);
+    emptyBoard = { ...emptyBoard, phase: 'PLAYING', pendingSelection: null, activePlayer: 'PLAYER_1' };
+    expect(canUseLeader(emptyBoard, 'PLAYER_1')).toBe(false);
+
+    let state = recalculateBoard({
+      ...emptyBoard,
+      weather: {
+        frost: { card: inst('w_frost', 'sp_biting_frost'), owner: 'PLAYER_2' },
+        fog: null,
+        rain: null,
+      },
+      players: {
+        PLAYER_1: {
+          ...emptyBoard.players.PLAYER_1,
+          hand: [inst('p1_h', 'nr_ves')],
+          rows: {
+            CLOSE_COMBAT: {
+              cards: [
+                inst('ag_scout', 'st_dol_blathanna_scout'), // 6 Agile -> currently 1 in Frost
+                inst('ag_harpy', 'mo_harpy'), // 2 Agile -> currently 1 in Frost
+                inst('hero_kayran', 'mo_kayran'), // 8 Hero Agile -> stays in Close
+              ],
+              hornCard: null,
+              totalStrength: 0,
+            },
+            RANGED: {
+              cards: [inst('ag_opt', 'st_vrihedd_brigade')], // 5 Agile -> already 10 with Horn
+              hornCard: inst('ranged_horn', 'sp_commanders_horn'),
+              totalStrength: 0,
+            },
+            SIEGE: { cards: [], hornCard: null, totalStrength: 0 },
+          },
+        },
+        PLAYER_2: {
+          ...emptyBoard.players.PLAYER_2,
+          hand: [inst('p2_h', 'nr_ves')],
+        },
+      },
+    });
+
+    expect(canUseLeader(state, 'PLAYER_1')).toBe(true);
+    expect(state.players.PLAYER_1.totalScore).toBe(20); // 10 (Close) + 10 (Ranged)
+
+    state = dispatch(state, { type: 'USE_LEADER', playerId: 'PLAYER_1' });
+
+    expect(state.players.PLAYER_1.rows.CLOSE_COMBAT.cards.map((c) => c.instanceId)).toEqual(['hero_kayran']);
+    expect(state.players.PLAYER_1.rows.RANGED.cards.map((c) => c.instanceId)).toEqual([
+      'ag_opt',
+      'ag_scout',
+      'ag_harpy',
+    ]);
+    // 8 (Kayran) + (5 + 6 + 2) * 2 = 8 + 26 = 34
+    expect(state.players.PLAYER_1.totalScore).toBe(34);
   });
 });
