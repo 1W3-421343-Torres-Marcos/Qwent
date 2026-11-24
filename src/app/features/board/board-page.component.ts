@@ -354,7 +354,7 @@ const VISUAL_FX_CLASS_MAP: Readonly<Partial<Record<VisualEffectType, string>>> =
             <span
               class="inline-block rounded border border-bronze/60 bg-tavern-dark/80 px-1.5 py-0.5 text-[9px] font-bold uppercase text-gold"
             >
-              v1.2.0
+              v1.3.0
             </span>
             <div class="grid grid-cols-2 gap-1">
               <button
@@ -410,6 +410,14 @@ const VISUAL_FX_CLASS_MAP: Readonly<Partial<Record<VisualEffectType, string>>> =
                 {{ feedback.hapticsEnabled() ? '≈' : '–' }}
               </button>
             </div>
+            <button
+              type="button"
+              (click)="requestExitMatch()"
+              aria-label="Salir de la partida"
+              class="min-h-[28px] w-full rounded border border-strength-nerf/60 bg-tavern-dark/90 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-parchment/90 transition hover:border-strength-nerf hover:text-strength-nerf active:scale-95"
+            >
+              Salir
+            </button>
           </div>
 
           <!-- Active Player Piles & Hold-to-Pass (Lower Third) -->
@@ -524,6 +532,42 @@ const VISUAL_FX_CLASS_MAP: Readonly<Partial<Record<VisualEffectType, string>>> =
         (mulliganSwapRequested)="facade.mulliganSwap($event)"
         (finishMulliganRequested)="facade.finishMulligan()"
       />
+      <!-- Exit Match Confirmation Modal -->
+      @if (exitConfirmOpen()) {
+        <div
+          (click)="cancelExitMatch()"
+          class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+        >
+          <div
+            (click)="$event.stopPropagation()"
+            class="w-full max-w-sm rounded-xl border-2 border-bronze bg-board-wood p-5 text-center shadow-2xl"
+          >
+            <p class="text-[11px] font-bold uppercase tracking-widest text-gold">Abandonar duelo</p>
+            <h3 class="mt-1 font-serif text-xl font-extrabold text-parchment">
+              ¿Salir de la partida?
+            </h3>
+            <p class="mt-1.5 text-xs text-parchment/80">
+              La partida actual se abandonará y volverás al menú principal.
+            </p>
+            <div class="mt-4 grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                (click)="cancelExitMatch()"
+                class="min-h-[44px] rounded-lg border border-bronze bg-tavern-dark px-3 py-2 text-xs font-bold uppercase tracking-wider text-parchment transition hover:border-gold active:scale-95"
+              >
+                Seguir jugando
+              </button>
+              <button
+                type="button"
+                (click)="confirmExitMatch()"
+                class="min-h-[44px] rounded-lg border-2 border-strength-nerf bg-strength-nerf/20 px-3 py-2 text-xs font-bold uppercase tracking-wider text-parchment transition hover:bg-strength-nerf/35 active:scale-95"
+              >
+                Salir al menú
+              </button>
+            </div>
+          </div>
+        </div>
+      }
     </main>
   `,
 })
@@ -534,6 +578,7 @@ export class BoardPageComponent {
 
   readonly exitToMenu = output<void>();
   readonly holdProgress = signal(0);
+  readonly exitConfirmOpen = signal(false);
   readonly art = createSpriteFallbackTracker();
   readonly visualEffectClass = computed(() => {
     const fx = this.facade.visualEffect();
@@ -547,11 +592,31 @@ export class BoardPageComponent {
   constructor() {
     this.destroyRef.onDestroy(() => {
       this.cancelHoldPass();
+      this.facade.abandonMatch();
     });
   }
 
   onBackdropClick(): void {
     this.facade.clearSelection();
+  }
+
+  requestExitMatch(): void {
+    this.feedback.play('tap');
+    this.cancelHoldPass();
+    this.exitConfirmOpen.set(true);
+  }
+
+  cancelExitMatch(): void {
+    this.feedback.play('tap');
+    this.exitConfirmOpen.set(false);
+  }
+
+  confirmExitMatch(): void {
+    this.feedback.play('tap');
+    this.exitConfirmOpen.set(false);
+    this.cancelHoldPass();
+    this.facade.abandonMatch();
+    this.exitToMenu.emit();
   }
 
   factionAccent(faction: FactionId): string {

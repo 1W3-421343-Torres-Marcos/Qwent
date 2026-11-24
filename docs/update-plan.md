@@ -10,12 +10,19 @@
 | :--- | :--- | :---: | :---: |
 | U1 | Arte local de cartas TW3 (100% offline) | [x] | 100% |
 | U2 | Audio de taberna offline, FX de cartas y regla Vaca → Chort | [x] | 100% |
+| U3 | Salir de partida en juego, historial offline y ritmo de IA | [x] | 100% |
 
 **Estados:** `[ ]` pendiente | `[~]` en curso | `[x]` completada
 
 ---
 
 ## Backlog / Actualizaciones Planificadas
+
+## U3: Salir de partida en juego, historial offline y ritmo de IA
+- [x] **U3.1**: Delay de IA más pausado (`1350 ms` / `650 ms`), `abandonMatch()` y botón **Salir** con confirmación en tablero
+- [x] **U3.2**: Servicio offline `MatchHistoryService` (`qwent.history.v1`), helpers puros, guardado al finalizar partida y tests Vitest
+- [x] **U3.3**: Pantalla de Historial de Partidas (`MatchHistoryPageComponent`) y botón de acceso desde el Menú
+- [x] **U3.4**: Versión `1.3.0`, verificación completa, APK `gwent-u3-debug.apk`, tag `v1.3.0` y push a GitHub
 
 ## U2: Audio de taberna offline, FX de cartas y regla Vaca → Chort
 - [x] **U2.1**: Script `scripts/import-tw3-audio.ts` e importación offline de 29 SFX, 4 temas de taberna y sprite de *Bovine Defense Force*
@@ -46,3 +53,7 @@
 | 2026-11-23 | **U2.3**: Añadidas animaciones GPU por tipo de carta (`CardTokenComponent`) y overlays diferenciados por clima/habilidad en `BoardPageComponent` y `styles.css` | U2.4: Regla clásica *La Vaca* (`nt_cow` → *Fuerza de Defensa Bovina*) en Core + tests |
 | 2026-11-23 | **U2.4**: Implementada regla *Vengador* (`nt_cow` → *Fuerza de Defensa Bovina* fuerza `8`) en `round-resolution.ts`, actualizada descripción en `cards.json` y añadidos tests en `avenger.spec.ts` | U2.5: Auditoría offline, versión `1.2.0`, APK `gwent-u2-debug.apk`, tag `v1.2.0` y push |
 | 2026-11-23 | **U2.5 (`v1.2.0`)**: Auditoría offline ampliada (**151** retratos `.jpg`, **29** SFX + **4** BGM MP3 válidos), **15** archivos / **61** tests en verde, build Angular `370.82 kB` iniciales y APK **`gwent-u2-debug.apk`** (`16.77 MB`) compilado en verde | Completada **U2**; listo para probar en dispositivo o planificar **U3** |
+| 2026-11-24 | **U3.1**: Aumentado delay de la IA a `1350 ms` / `650 ms` en `GameFacadeService`, añadido `abandonMatch()` y botón **Salir** con modal de confirmación en `BoardPageComponent` | U3.2: Servicio offline `MatchHistoryService` (`qwent.history.v1`), guardado al finalizar partida y tests Vitest |
+| 2026-11-24 | **U3.2**: Creados `match-history.utils.ts`, `MatchHistoryService` (`qwent.history.v1`), tests Vitest en `match-history.spec.ts` y registro automático en `GameFacadeService` al llegar a `MATCH_END` | U3.3: Pantalla `MatchHistoryPageComponent` y acceso desde el Menú Principal |
+| 2026-11-24 | **U3.3**: Creada pantalla `MatchHistoryPageComponent` (filtros, stats, puntajes ronda a ronda y borrado con confirmación) e integrado acceso `Historial (N)` en `AppComponent` | U3.4: Versión `1.3.0`, verificación completa, APK `gwent-u3-debug.apk`, tag `v1.3.0` y push |
+| 2026-11-24 | **U3.4 (`v1.3.0`)**: Incluido `src/app/**/*.spec.ts` en `vitest.config.ts` (**16** archivos / **65** tests en verde), build Angular `387.43 kB` iniciales y APK **`gwent-u3-debug.apk`** (`16.77 MB`) compilado en verde | Completada **U3**; listo para instalar en Android o planificar **U4** |

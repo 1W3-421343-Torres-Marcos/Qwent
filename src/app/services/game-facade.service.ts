@@ -19,6 +19,7 @@ import {
 import { FACTION_META } from '../shared/constants/faction-meta';
 import { DeckStorageService } from './deck-storage.service';
 import { FeedbackService, type FeedbackCue } from './feedback.service';
+import { MatchHistoryService } from './match-history.service';
 
 export type GameMode = 'VS_AI' | 'LOCAL_2P';
 export type VisualEffectType =
@@ -34,8 +35,8 @@ export type VisualEffectType =
   | 'ROUND_END';
 
 const TURN_BREATHER_MS = 450;
-const AI_PLAY_DELAY_MS = 550;
-const AI_MULLIGAN_DELAY_MS = 250;
+const AI_PLAY_DELAY_MS = 1350;
+const AI_MULLIGAN_DELAY_MS = 650;
 const VISUAL_FX_DURATION_MS = 480;
 
 @Injectable({ providedIn: 'root' })
@@ -43,6 +44,7 @@ export class GameFacadeService {
   private readonly destroyRef = inject(DestroyRef);
   private readonly deckStorage = inject(DeckStorageService);
   private readonly feedback = inject(FeedbackService);
+  private readonly matchHistory = inject(MatchHistoryService);
   private readonly catalog = rawCards as readonly CardDefinition[];
   private handoffTimerId: ReturnType<typeof setTimeout> | null = null;
   private aiTimerId: ReturnType<typeof setTimeout> | null = null;
@@ -226,6 +228,19 @@ export class GameFacadeService {
   confirmTurnHandoff(): void {
     this.turnHandoffPending.set(false);
     this.feedback.play('turnMe');
+  }
+
+  abandonMatch(): void {
+    this.clearTimers();
+    this.clearFxTimer();
+    this.isAiThinking.set(false);
+    this.isTransitioningTurn.set(false);
+    this.turnHandoffPending.set(false);
+    this.selectedInstanceId.set(null);
+    this.inspectedCard.set(null);
+    this.discardModalPlayerId.set(null);
+    this.visualEffect.set(null);
+    this.feedback.play('tap');
   }
 
   clearSelection(): void {
@@ -515,6 +530,9 @@ export class GameFacadeService {
     this.emitVisualAndFeedback(prev, next, action);
 
     if (next.phase === 'ROUND_END' || next.phase === 'MATCH_END') {
+      if (prev.phase !== 'MATCH_END' && next.phase === 'MATCH_END') {
+        this.matchHistory.recordCompletedMatch(next, this.gameMode());
+      }
       this.clearTimers();
       this.isTransitioningTurn.set(false);
       this.isAiThinking.set(false);
