@@ -1,8 +1,16 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { PLAYABLE_FACTIONS, QWENT_PHASE, type PlayableFactionId } from '../core';
+import {
+  AI_DIFFICULTIES,
+  AI_DIFFICULTY_LABELS,
+  PLAYABLE_FACTIONS,
+  QWENT_PHASE,
+  type AIDifficulty,
+  type PlayableFactionId,
+} from '../core';
 import { BoardPageComponent } from './features/board/board-page.component';
 import { DeckBuilderPageComponent } from './features/deck-builder/deck-builder-page.component';
 import { MatchHistoryPageComponent } from './features/history/match-history-page.component';
+import { AiSettingsService } from './services/ai-settings.service';
 import { DeckStorageService } from './services/deck-storage.service';
 import { FeedbackService } from './services/feedback.service';
 import { GameFacadeService, type GameMode } from './services/game-facade.service';
@@ -35,7 +43,7 @@ type ScreenView = 'MENU' | 'DECK_BUILDER' | 'BOARD' | 'HISTORY';
             <span
               class="rounded border border-gold/60 bg-row-leather px-3 py-0.5 text-[11px] font-bold uppercase tracking-widest text-gold"
             >
-              v1.6.0 — Release Offline
+              v1.7.0 — Release Offline
             </span>
             <span
               class="rounded border border-bronze bg-tavern-dark/80 px-3 py-0.5 text-[11px] font-medium text-parchment/80"
@@ -104,6 +112,27 @@ type ScreenView = 'MENU' | 'DECK_BUILDER' | 'BOARD' | 'HISTORY';
               <p class="mt-0.5 line-clamp-1 text-[10px] text-parchment/70">
                 {{ opponentPassive() }}
               </p>
+              <div class="mt-1.5 flex items-center justify-between gap-1.5 border-t border-bronze/40 pt-1.5">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-parchment/70">
+                  Dificultad IA
+                </span>
+                <div class="flex items-center gap-1" role="group" aria-label="Seleccionar dificultad de IA">
+                  @for (level of aiDifficulties; track level) {
+                    <button
+                      type="button"
+                      (click)="selectAiDifficulty(level)"
+                      class="min-h-[28px] rounded border px-2 py-0.5 text-[10px] font-bold transition active:scale-95"
+                      [class]="
+                        aiSettings.difficulty() === level
+                          ? 'border-gold-bright bg-gold/25 text-gold-bright'
+                          : 'border-bronze/60 bg-board-wood text-parchment/75 hover:border-gold'
+                      "
+                    >
+                      {{ aiDifficultyLabel(level) }}
+                    </button>
+                  }
+                </div>
+              </div>
             </div>
           </div>
 
@@ -192,12 +221,14 @@ type ScreenView = 'MENU' | 'DECK_BUILDER' | 'BOARD' | 'HISTORY';
 })
 export class AppComponent {
   private readonly facade = inject(GameFacadeService);
+  readonly aiSettings = inject(AiSettingsService);
   readonly deckStorage = inject(DeckStorageService);
   readonly feedback = inject(FeedbackService);
   readonly matchHistory = inject(MatchHistoryService);
 
   readonly phase = QWENT_PHASE;
   readonly factions = PLAYABLE_FACTIONS;
+  readonly aiDifficulties = AI_DIFFICULTIES;
   readonly screen = signal<ScreenView>('MENU');
 
   readonly playerLeaderName = computed(() => {
@@ -242,6 +273,15 @@ export class AppComponent {
   onOpponentFactionChange(event: Event): void {
     const value = (event.target as HTMLSelectElement).value as PlayableFactionId;
     this.deckStorage.setOpponentFaction(value);
+  }
+
+  aiDifficultyLabel(level: AIDifficulty): string {
+    return AI_DIFFICULTY_LABELS[level];
+  }
+
+  selectAiDifficulty(level: AIDifficulty): void {
+    this.feedback.play('tap');
+    this.aiSettings.setDifficulty(level);
   }
 
   openScreen(target: Exclude<ScreenView, 'BOARD'>): void {

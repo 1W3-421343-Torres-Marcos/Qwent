@@ -360,4 +360,101 @@ describe('AIPlayerView & Bot Heuristics (F4.2)', () => {
       playerId: 'PLAYER_2',
     });
   });
+
+  it('differentiates NOVICE, TAVERNER, and MASTER difficulties and handles Skellige Mardroeme/Storm/Crach tactics', () => {
+    const skStarter = decks.find((d) => d.faction === 'SKELLIGE')!;
+    const skMatch = createInitialGameState({
+      rngSeed: 321,
+      catalog,
+      skipMulligan: true,
+      player1: { name: 'P1', faction: 'NORTHERN_REALMS', deckCardIds: decks[0]!.cardIds },
+      player2: {
+        name: 'BotSK',
+        faction: 'SKELLIGE',
+        leader: catalog.find((c) => c.id === 'sk_leader_crach_an_craite') ?? null,
+        deckCardIds: skStarter.cardIds,
+      },
+    });
+
+    // 1. MASTER swaps nt_roach during Mulligan, while NOVICE skips weak/Roach swaps when at <=1 swap
+    const mulliganViewState: GameState = {
+      ...skMatch,
+      phase: 'MULLIGAN',
+      activePlayer: 'PLAYER_2',
+      players: {
+        ...skMatch.players,
+        PLAYER_2: {
+          ...skMatch.players.PLAYER_2,
+          mulligansRemaining: 1,
+          mulliganDone: false,
+          hand: [inst('p2_roach', 'nt_roach'), inst('p2_ger', 'nt_geralt_of_rivia')],
+        },
+      },
+    };
+    const mulliganView = createAIView(mulliganViewState, 'PLAYER_2');
+    expect(decideAction(mulliganView, 'NOVICE')).toEqual({
+      type: 'FINISH_MULLIGAN',
+      playerId: 'PLAYER_2',
+    });
+    expect(decideAction(mulliganView, 'MASTER')).toEqual({
+      type: 'MULLIGAN_SWAP',
+      playerId: 'PLAYER_2',
+      instanceId: 'p2_roach',
+    });
+
+    // 2. Bot prioritizes Mardroeme on Close row with Berserker present
+    const mardroemeState = recalculateBoard({
+      ...skMatch,
+      activePlayer: 'PLAYER_2',
+      players: {
+        ...skMatch.players,
+        PLAYER_2: {
+          ...skMatch.players.PLAYER_2,
+          hand: [inst('p2_mard', 'sk_mardroeme'), inst('p2_vanilla', 'sk_donar_an_hindar')],
+          rows: {
+            ...skMatch.players.PLAYER_2.rows,
+            CLOSE_COMBAT: { cards: [inst('p2_bers', 'sk_berserker')], hornCard: null, totalStrength: 0 },
+          },
+        },
+      },
+    });
+    expect(decideAction(createAIView(mardroemeState, 'PLAYER_2'), 'MASTER')).toEqual({
+      type: 'PLAY_CARD',
+      playerId: 'PLAYER_2',
+      instanceId: 'p2_mard',
+      targetRow: 'CLOSE_COMBAT',
+    });
+
+    // 3. NOVICE picks a suboptimal legal action when multiple positive plays exist
+    const multiPlayState = recalculateBoard({
+      ...skMatch,
+      roundNumber: 1,
+      activePlayer: 'PLAYER_2',
+      players: {
+        PLAYER_1: {
+          ...skMatch.players.PLAYER_1,
+          hand: [inst('p1_a', 'nr_ves'), inst('p1_b', 'nr_ballista'), inst('p1_c', 'nr_catapult')],
+        },
+        PLAYER_2: {
+          ...skMatch.players.PLAYER_2,
+          hand: [
+            inst('p2_hero', 'nt_geralt_of_rivia'),
+            inst('p2_mid', 'sk_blueboy_lugos'),
+            inst('p2_small', 'sk_udalryk'),
+          ],
+        },
+      },
+    });
+    const multiView = createAIView(multiPlayState, 'PLAYER_2');
+    const masterAction = decideAction(multiView, 'MASTER');
+    const noviceAction = decideAction(multiView, 'NOVICE');
+    expect(masterAction).toEqual({
+      type: 'PLAY_CARD',
+      playerId: 'PLAYER_2',
+      instanceId: 'p2_hero',
+      targetRow: 'CLOSE_COMBAT',
+    });
+    expect(noviceAction.type).toBe('PLAY_CARD');
+    expect(noviceAction).not.toEqual(masterAction);
+  });
 });

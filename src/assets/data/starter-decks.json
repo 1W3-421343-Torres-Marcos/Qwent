@@ -153,5 +153,46 @@
       "sp_biting_frost",
       "sp_clear_weather"
     ]
+  },
+  {
+    "id": "starter_skellige",
+    "name": "Skellige",
+    "faction": "SKELLIGE",
+    "leaderId": "sk_leader_crach_an_craite",
+    "cardIds": [
+      "sk_cerys",
+      "sk_clan_drummond_shield_maiden",
+      "sk_clan_drummond_shield_maiden",
+      "sk_clan_drummond_shield_maiden",
+      "sk_berserker",
+      "sk_young_berserker",
+      "sk_young_berserker",
+      "sk_young_berserker",
+      "sk_ermion",
+      "sk_birna_bran",
+      "sk_clan_an_craite_warrior",
+      "sk_clan_an_craite_warrior",
+      "sk_clan_an_craite_warrior",
+      "sk_light_longship",
+      "sk_light_longship",
+      "sk_light_longship",
+      "sk_war_longship",
+      "sk_war_longship",
+      "sk_war_longship",
+      "sk_draig_bon_dhu",
+      "sk_clan_dimun_pirate",
+      "sk_hjalmar",
+      "sk_kambi",
+      "sk_olaf",
+      "nt_mysterious_elf",
+      "nt_yennefer_of_vengerberg",
+      "sk_mardroeme",
+      "sk_mardroeme",
+      "sp_skellige_storm",
+      "sp_decoy",
+      "sp_decoy",
+      "sp_commanders_horn",
+      "sp_clear_weather"
+    ]
   }
 ]

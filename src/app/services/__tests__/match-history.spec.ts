@@ -119,6 +119,25 @@ describe('Offline Match History Utils (U3.2)', () => {
     const json = serializeStoredHistory([entry]);
     expect(parseStoredHistory(json)).toEqual([entry]);
 
+    const skEntry = buildMatchHistoryEntry(
+      {
+        ...buildMockFinishedMatch('PLAYER_2'),
+        players: {
+          PLAYER_1: {
+            ...buildMockFinishedMatch('PLAYER_2').players.PLAYER_1,
+            faction: 'SKELLIGE',
+          },
+          PLAYER_2: buildMockFinishedMatch('PLAYER_2').players.PLAYER_2,
+        },
+      },
+      'VS_AI',
+      '2026-11-24T10:15:00.000Z',
+      'MASTER',
+    );
+    expect(skEntry.aiDifficulty).toBe('MASTER');
+    expect(skEntry.player1.faction).toBe('SKELLIGE');
+    expect(parseStoredHistory(serializeStoredHistory([skEntry, entry]))).toEqual([skEntry, entry]);
+
     expect(parseStoredHistory(null)).toEqual([]);
     expect(parseStoredHistory('{invalid json')).toEqual([]);
     expect(parseStoredHistory(JSON.stringify({ version: 2, entries: [entry] }))).toEqual([]);

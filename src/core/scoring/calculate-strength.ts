@@ -1,7 +1,7 @@
 import { ROW_TYPES, type RowType } from '../models/types';
 import type { CardInstance } from '../models/types';
 import type { GameState, PlayerState, RowState, WeatherState } from '../models/game-state';
-import { isPassiveLeaderActive } from '../abilities/passive-leaders';
+import { isPassiveLeaderActive, isPlayerPassiveLeaderActive } from '../abilities/passive-leaders';
 
 const ROW_TO_WEATHER_KEY: Readonly<Record<RowType, keyof WeatherState>> = {
   CLOSE_COMBAT: 'frost',
@@ -36,6 +36,7 @@ function calculateUnitStrength(
   hornUnitCount: number,
   hasHornCard: boolean,
   doubleSpyStrength: boolean,
+  halfWeatherPenalty: boolean,
 ): number {
   const { card } = instance;
   if (card.isHero) {
@@ -45,8 +46,12 @@ function calculateUnitStrength(
     return 0;
   }
 
-  // Step 1 & 2: Base strength or reduced to 1 under active weather
-  let value = weatherActive ? 1 : card.baseStrength;
+  // Step 1 & 2: Base strength, reduced to 1 under active weather (or ceil(base/2) under King Bran)
+  let value = weatherActive
+    ? halfWeatherPenalty
+      ? Math.ceil(card.baseStrength / 2)
+      : 1
+    : card.baseStrength;
 
   // Step 2b: Passive leader Eredin the Treacherous doubles non-Hero Spy strength on both sides
   if (doubleSpyStrength && card.ability === 'SPY') {
@@ -80,6 +85,7 @@ export function calculateRowStrength(
   row: RowState,
   weatherActive: boolean,
   doubleSpyStrength = false,
+  halfWeatherPenalty = false,
 ): RowState {
   const bondCounts = countByBondGroup(row.cards);
   let moraleCount = 0;
@@ -107,6 +113,7 @@ export function calculateRowStrength(
       hornUnitCount,
       hasHornCard,
       doubleSpyStrength,
+      halfWeatherPenalty,
     );
     totalStrength += effectiveStrength;
     return {
@@ -129,21 +136,25 @@ export function recalculatePlayer(
   player: PlayerState,
   weather: WeatherState,
   doubleSpyStrength = false,
+  halfWeatherPenalty = false,
 ): PlayerState {
   const closeRow = calculateRowStrength(
     player.rows.CLOSE_COMBAT,
     isWeatherActiveForRow(weather, 'CLOSE_COMBAT'),
     doubleSpyStrength,
+    halfWeatherPenalty,
   );
   const rangedRow = calculateRowStrength(
     player.rows.RANGED,
     isWeatherActiveForRow(weather, 'RANGED'),
     doubleSpyStrength,
+    halfWeatherPenalty,
   );
   const siegeRow = calculateRowStrength(
     player.rows.SIEGE,
     isWeatherActiveForRow(weather, 'SIEGE'),
     doubleSpyStrength,
+    halfWeatherPenalty,
   );
 
   const rows: Readonly<Record<RowType, RowState>> = {
@@ -169,12 +180,14 @@ export function recalculatePlayer(
  */
 export function recalculateBoard(state: GameState): GameState {
   const doubleSpyStrength = isPassiveLeaderActive(state, 'DOUBLE_SPY_STRENGTH');
+  const p1HalfWeather = isPlayerPassiveLeaderActive(state, 'PLAYER_1', 'HALF_WEATHER_PENALTY');
+  const p2HalfWeather = isPlayerPassiveLeaderActive(state, 'PLAYER_2', 'HALF_WEATHER_PENALTY');
 
   return {
     ...state,
     players: {
-      PLAYER_1: recalculatePlayer(state.players.PLAYER_1, state.weather, doubleSpyStrength),
-      PLAYER_2: recalculatePlayer(state.players.PLAYER_2, state.weather, doubleSpyStrength),
+      PLAYER_1: recalculatePlayer(state.players.PLAYER_1, state.weather, doubleSpyStrength, p1HalfWeather),
+      PLAYER_2: recalculatePlayer(state.players.PLAYER_2, state.weather, doubleSpyStrength, p2HalfWeather),
     },
   };
 }

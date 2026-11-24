@@ -1,17 +1,40 @@
-import type { LeaderAbilityType } from '../models/types';
+import type { LeaderAbilityType, PlayerId } from '../models/types';
 import type { GameState } from '../models/game-state';
+
+function isCancelledByAnyLeader(state: GameState): boolean {
+  return (
+    state.players.PLAYER_1.leader?.leaderAbility === 'CANCEL_ENEMY_LEADER' ||
+    state.players.PLAYER_2.leader?.leaderAbility === 'CANCEL_ENEMY_LEADER'
+  );
+}
 
 /**
  * Checks whether a global match-wide passive leader ability (Hearts of Stone)
  * is currently active for either player and not nullified by CANCEL_ENEMY_LEADER.
  */
 export function isPassiveLeaderActive(state: GameState, ability: LeaderAbilityType): boolean {
-  const p1Ability = state.players.PLAYER_1.leader?.leaderAbility;
-  const p2Ability = state.players.PLAYER_2.leader?.leaderAbility;
-
-  if (p1Ability === 'CANCEL_ENEMY_LEADER' || p2Ability === 'CANCEL_ENEMY_LEADER') {
+  if (isCancelledByAnyLeader(state)) {
     return false;
   }
 
-  return p1Ability === ability || p2Ability === ability;
+  return (
+    state.players.PLAYER_1.leader?.leaderAbility === ability ||
+    state.players.PLAYER_2.leader?.leaderAbility === ability
+  );
+}
+
+/**
+ * Checks whether a per-player passive leader ability (such as King Bran's HALF_WEATHER_PENALTY)
+ * is currently active for `playerId` and not nullified by CANCEL_ENEMY_LEADER.
+ */
+export function isPlayerPassiveLeaderActive(
+  state: GameState,
+  playerId: PlayerId,
+  ability: LeaderAbilityType,
+): boolean {
+  if (isCancelledByAnyLeader(state)) {
+    return false;
+  }
+
+  return state.players[playerId].leader?.leaderAbility === ability;
 }

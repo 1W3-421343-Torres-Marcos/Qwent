@@ -46,8 +46,8 @@ describe('Catalog & Starter Decks Integrity (F5.2)', () => {
     expect(cards.some((c) => c.ability === 'SCORCH_ROW')).toBe(true);
   });
 
-  it('validates all 4 playable faction starter decks with real leaders against TW3 rules', () => {
-    expect(decks.length).toBe(4);
+  it('validates all 5 playable faction starter decks with real leaders against TW3 rules', () => {
+    expect(decks.length).toBe(5);
     const catalogMap = new Map(cards.map((c) => [c.id, c]));
 
     for (const faction of PLAYABLE_FACTIONS) {

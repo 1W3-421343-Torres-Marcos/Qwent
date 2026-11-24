@@ -966,5 +966,55 @@
     "ability": "SCORCH",
     "maxCopies": 3,
     "description": "Destruye las unidades no-Héroe de mayor fuerza efectiva en ambos lados del tablero."
+  },
+  {
+    "id": "sp_skellige_storm",
+    "name": "Tormenta de Skellige",
+    "faction": "NEUTRAL",
+    "type": "SPECIAL",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [],
+    "ability": "WEATHER_STORM",
+    "maxCopies": 3,
+    "description": "Clima dual: reduce la fuerza de las unidades normales en Distancia y Asedio de ambos lados."
+  },
+  {
+    "id": "sk_mardroeme",
+    "name": "Mardroeme",
+    "faction": "SKELLIGE",
+    "type": "SPECIAL",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": ["CLOSE_COMBAT", "RANGED"],
+    "ability": "MARDROEME",
+    "maxCopies": 3,
+    "description": "Especial: transforma en Vildkaarl o Joven Vildkaarl a tus unidades Berserker de la fila elegida durante esta ronda."
+  },
+  {
+    "id": "sk_leader_crach_an_craite",
+    "name": "Crach an Craite",
+    "faction": "SKELLIGE",
+    "type": "LEADER",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [],
+    "ability": null,
+    "leaderAbility": "SHUFFLE_DISCARDS_TO_DECK",
+    "maxCopies": 1,
+    "description": "Líder: baraja todos los descartes de ambos jugadores de vuelta en sus respectivos mazos."
+  },
+  {
+    "id": "sk_leader_king_bran",
+    "name": "Rey Bran",
+    "faction": "SKELLIGE",
+    "type": "LEADER",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [],
+    "ability": null,
+    "leaderAbility": "HALF_WEATHER_PENALTY",
+    "maxCopies": 1,
+    "description": "Líder pasivo: tus unidades afectadas por clima conservan la mitad de su fuerza base (redondeada hacia arriba)."
   }
 ]

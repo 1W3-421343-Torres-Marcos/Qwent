@@ -105,6 +105,21 @@ export class RowIconComponent {
           <path d="M13.5 2s.5 3.5-2 6c-1.8 1.8-3 4-3 6.2a5.5 5.5 0 0011 0c0-3.2-2.2-6-6-12.2z" />
         </svg>
       }
+      @case ('BERSERKER') {
+        <svg viewBox="0 0 24 24" class="h-full w-full fill-current" aria-hidden="true">
+          <path d="M5 4l3 4 4-3 4 3 3-4-1 7c0 4.5-2.7 7.8-6 9-3.3-1.2-6-4.5-6-9L5 4zm4.5 7.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm5 0a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" />
+        </svg>
+      }
+      @case ('MARDROEME') {
+        <svg viewBox="0 0 24 24" class="h-full w-full fill-current" aria-hidden="true">
+          <path d="M12 3C7.2 3 3.5 6.3 3.5 10.5c0 1.4 1.1 2.5 2.5 2.5h4v5.5a2 2 0 004 0V13h4a2.5 2.5 0 002.5-2.5C20.5 6.3 16.8 3 12 3zm-2.5 4a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4zm5 1a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z" />
+        </svg>
+      }
+      @case ('WEATHER_STORM') {
+        <svg viewBox="0 0 24 24" class="h-full w-full fill-current" aria-hidden="true">
+          <path d="M6 14h11a3.5 3.5 0 00.6-6.9A5 5 0 007.8 6 4 4 0 006 14zm6 1l-3 4h2.5l-1 3.5 4.5-5H12.5L14 15h-2z" />
+        </svg>
+      }
     }
   `,
 })

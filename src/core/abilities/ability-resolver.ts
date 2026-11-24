@@ -1,8 +1,35 @@
 import { ROW_TYPES, type CardInstance, type PlayerId, type RowType } from '../models/types';
-import type { GameState, PlayerState } from '../models/game-state';
+import type { GameState, PlayerState, WeatherState } from '../models/game-state';
 import { nextRng } from '../engine/prng';
 import { recalculateBoard } from '../scoring/calculate-strength';
 import { isPassiveLeaderActive } from './passive-leaders';
+import { transformBerserkerInstance } from './skellige-tokens';
+
+/**
+ * Collects unique active weather cards per owner across frost/fog/rain (deduplicating Skellige Storm).
+ */
+export function collectWeatherSlotDiscards(
+  weather: WeatherState,
+): Readonly<Record<PlayerId, readonly CardInstance[]>> {
+  const p1Cards: CardInstance[] = [];
+  const p2Cards: CardInstance[] = [];
+  const seenInstanceIds = new Set<string>();
+
+  for (const key of ['frost', 'fog', 'rain'] as const) {
+    const slot = weather[key];
+    if (slot === null || seenInstanceIds.has(slot.card.instanceId)) {
+      continue;
+    }
+    seenInstanceIds.add(slot.card.instanceId);
+    if (slot.owner === 'PLAYER_1') {
+      p1Cards.push(slot.card);
+    } else {
+      p2Cards.push(slot.card);
+    }
+  }
+
+  return { PLAYER_1: p1Cards, PLAYER_2: p2Cards };
+}
 
 function getOpponent(playerId: PlayerId): PlayerId {
   return playerId === 'PLAYER_1' ? 'PLAYER_2' : 'PLAYER_1';
@@ -150,9 +177,7 @@ export function resolveMuster(
 ): GameState {
   const player = state.players[playerId];
   const isMatch = (c: CardInstance): boolean =>
-    c.card.type === 'UNIT' &&
-    c.card.ability === 'MUSTER' &&
-    c.card.musterGroup === musterGroup;
+    c.card.type === 'UNIT' && c.card.musterGroup === musterGroup;
 
   const fromHand = player.hand.filter(isMatch);
   const fromDeck = player.deck.filter(isMatch);
@@ -273,28 +298,41 @@ function destroyMatchingUnitsInPlayerRows(
 }
 
 /**
- * Resolves global Scorch: sends Scorch to caster's discard, finds highest effective strength
- * among non-Hero, non-Decoy units on both sides, destroys all tied units to their side's discard,
- * and recalculates the board immediately.
+ * Marks `mardroemeActive` on `targetRow` for the remainder of the round and transforms
+ * any Berserker units in that row into Vildkaarl / Young Vildkaarl tokens.
  */
-export function resolveScorchGlobal(
+export function resolveMardroemeOnRow(
   state: GameState,
   playerId: PlayerId,
-  scorchInstance: CardInstance,
-  remainingHand: readonly CardInstance[],
+  targetRow: RowType,
 ): GameState {
-  const caster = state.players[playerId];
-  const preparedState = recalculateBoard({
+  const player = state.players[playerId];
+  const row = player.rows[targetRow];
+  const transformedCards = row.cards.map((card) =>
+    card.card.ability === 'BERSERKER' ? transformBerserkerInstance(card) : card,
+  );
+
+  return recalculateBoard({
     ...state,
     players: {
       ...state.players,
       [playerId]: {
-        ...caster,
-        hand: remainingHand,
-        discard: [...caster.discard, scorchInstance],
+        ...player,
+        rows: {
+          ...player.rows,
+          [targetRow]: {
+            ...row,
+            cards: transformedCards,
+            mardroemeActive: true,
+          },
+        },
       },
     },
   });
+}
+
+function applyScorchGlobalToBoard(state: GameState): GameState {
+  const preparedState = recalculateBoard(state);
 
   let maxStrength = 0;
   for (const side of ['PLAYER_1', 'PLAYER_2'] as const) {
@@ -319,6 +357,31 @@ export function resolveScorchGlobal(
     players: {
       PLAYER_1: destroyMatchingUnitsInPlayerRows(preparedState.players.PLAYER_1, isTarget),
       PLAYER_2: destroyMatchingUnitsInPlayerRows(preparedState.players.PLAYER_2, isTarget),
+    },
+  });
+}
+
+/**
+ * Resolves global Scorch: sends Scorch to caster's discard, finds highest effective strength
+ * among non-Hero, non-Decoy units on both sides, destroys all tied units to their side's discard,
+ * and recalculates the board immediately.
+ */
+export function resolveScorchGlobal(
+  state: GameState,
+  playerId: PlayerId,
+  scorchInstance: CardInstance,
+  remainingHand: readonly CardInstance[],
+): GameState {
+  const caster = state.players[playerId];
+  return applyScorchGlobalToBoard({
+    ...state,
+    players: {
+      ...state.players,
+      [playerId]: {
+        ...caster,
+        hand: remainingHand,
+        discard: [...caster.discard, scorchInstance],
+      },
     },
   });
 }
@@ -385,6 +448,15 @@ export function resolveUnitEntry(
   }
   if (instance.card.ability === 'SCORCH_ROW') {
     return resolveScorchRow(state, playerId, placedRow);
+  }
+  if (instance.card.ability === 'SCORCH') {
+    return applyScorchGlobalToBoard(state);
+  }
+  if (instance.card.ability === 'MARDROEME') {
+    return resolveMardroemeOnRow(state, playerId, placedRow);
+  }
+  if (instance.card.ability === 'BERSERKER' && state.players[playerId].rows[placedRow].mardroemeActive) {
+    return resolveMardroemeOnRow(state, playerId, placedRow);
   }
   return state;
 }

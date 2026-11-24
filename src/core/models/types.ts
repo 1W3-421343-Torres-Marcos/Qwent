@@ -11,6 +11,7 @@ export type FactionId =
   | 'NILFGAARD'
   | 'MONSTERS'
   | 'SCOIATAEL'
+  | 'SKELLIGE'
   | 'NEUTRAL';
 
 export type PlayableFactionId = Exclude<FactionId, 'NEUTRAL'>;
@@ -20,6 +21,7 @@ export const PLAYABLE_FACTIONS: readonly PlayableFactionId[] = [
   'NILFGAARD',
   'MONSTERS',
   'SCOIATAEL',
+  'SKELLIGE',
 ];
 
 export type CardType = 'UNIT' | 'SPECIAL' | 'LEADER';
@@ -37,7 +39,10 @@ export type AbilityType =
   | 'WEATHER_FROST'
   | 'WEATHER_FOG'
   | 'WEATHER_RAIN'
-  | 'WEATHER_CLEAR';
+  | 'WEATHER_CLEAR'
+  | 'BERSERKER'
+  | 'MARDROEME'
+  | 'WEATHER_STORM';
 
 export const ABILITY_TYPES: readonly AbilityType[] = [
   'TIGHT_BOND',
@@ -53,6 +58,9 @@ export const ABILITY_TYPES: readonly AbilityType[] = [
   'WEATHER_FOG',
   'WEATHER_RAIN',
   'WEATHER_CLEAR',
+  'BERSERKER',
+  'MARDROEME',
+  'WEATHER_STORM',
 ];
 
 export const LEADER_ABILITY_TYPES = [
@@ -73,6 +81,8 @@ export const LEADER_ABILITY_TYPES = [
   'RANDOMIZE_REVIVES',
   'DOUBLE_SPY_STRENGTH',
   'OPTIMIZE_AGILE_ROWS',
+  'SHUFFLE_DISCARDS_TO_DECK',
+  'HALF_WEATHER_PENALTY',
 ] as const;
 
 export type LeaderAbilityType = (typeof LEADER_ABILITY_TYPES)[number];

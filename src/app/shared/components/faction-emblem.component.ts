@@ -27,6 +27,11 @@ import type { FactionId } from '../../../core';
           <path d="M19.5 3.5c-5.2.3-9.8 2.8-12.7 7.1-1.3 2-2 4.3-2.3 6.9l-2 2 1.4 1.4 2.1-2.1c2.6-.3 4.9-1 6.9-2.3 4.3-2.9 6.8-7.5 6.6-13Zm-4.2 4.2-6.8 6.8c-.7-2 .3-4.6 2.5-6 1.4-.9 2.9-1.1 4.3-.8Z" />
         </svg>
       }
+      @case ('SKELLIGE') {
+        <svg viewBox="0 0 24 24" class="h-full w-full" fill="currentColor" aria-hidden="true">
+          <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 3.2l2.2 3.8H9.8L12 5.2zm-5.2 5.6h10.4l-1.4 4.4H8.2l-1.4-4.4zm2.6 5.9h5.2L12 19.6l-2.6-2.9z" />
+        </svg>
+      }
       @default {
         <svg viewBox="0 0 24 24" class="h-full w-full" fill="currentColor" aria-hidden="true">
           <path d="M12 2 14.8 8.6 22 9.3l-5.4 4.7 1.7 7-6.3-3.8L5.7 21l1.7-7L2 9.3l7.2-.7L12 2Z" />

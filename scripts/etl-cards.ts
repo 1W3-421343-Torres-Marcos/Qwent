@@ -35,6 +35,7 @@ const VALID_FACTIONS: ReadonlySet<FactionId> = new Set([
   'NILFGAARD',
   'MONSTERS',
   'SCOIATAEL',
+  'SKELLIGE',
   'NEUTRAL',
 ]);
 
@@ -48,7 +49,8 @@ const FACTION_SORT_ORDER: Readonly<Record<FactionId, number>> = {
   NILFGAARD: 1,
   MONSTERS: 2,
   SCOIATAEL: 3,
-  NEUTRAL: 4,
+  SKELLIGE: 4,
+  NEUTRAL: 5,
 };
 
 const TYPE_SORT_ORDER: Readonly<Record<CardType, number>> = {

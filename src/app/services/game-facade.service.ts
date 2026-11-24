@@ -26,6 +26,7 @@ import {
   type BoardBannerData,
   type BoardBannerPayload,
 } from './board-events.utils';
+import { AiSettingsService } from './ai-settings.service';
 import { DeckStorageService } from './deck-storage.service';
 import { FeedbackService, type FeedbackCue } from './feedback.service';
 import { MatchHistoryService } from './match-history.service';
@@ -54,6 +55,7 @@ const GEM_BREAK_DURATION_MS = 650;
 @Injectable({ providedIn: 'root' })
 export class GameFacadeService {
   private readonly destroyRef = inject(DestroyRef);
+  private readonly aiSettings = inject(AiSettingsService);
   private readonly deckStorage = inject(DeckStorageService);
   private readonly feedback = inject(FeedbackService);
   private readonly matchHistory = inject(MatchHistoryService);
@@ -104,6 +106,11 @@ export class GameFacadeService {
   readonly isSelectingDecoyTarget = computed(() => {
     const selected = this.selectedHandCard();
     return selected !== null && selected.card.type === 'SPECIAL' && selected.card.ability === 'DECOY';
+  });
+
+  readonly isSelectingMardroemeRow = computed(() => {
+    const selected = this.selectedHandCard();
+    return selected !== null && selected.card.type === 'SPECIAL' && selected.card.ability === 'MARDROEME';
   });
 
   readonly isSelectingAgilePrePlay = computed(() => {
@@ -169,6 +176,9 @@ export class GameFacadeService {
     if (this.isSelectingHornTarget()) {
       return 'Cuerno: toca una fila propia disponible';
     }
+    if (this.isSelectingMardroemeRow()) {
+      return 'Mardroeme: toca Cuerpo a cuerpo o Distancia para transformar Berserkers';
+    }
     if (this.isSelectingAgilePrePlay()) {
       return `Ágil: toca una fila permitida para ${selected.card.name}`;
     }
@@ -179,7 +189,10 @@ export class GameFacadeService {
     () =>
       this.isHumanTurn() &&
       this.state().phase === 'PLAYING' &&
-      (this.isSelectingDecoyTarget() || this.isSelectingHornTarget() || this.isSelectingAgilePrePlay()),
+      (this.isSelectingDecoyTarget() ||
+        this.isSelectingHornTarget() ||
+        this.isSelectingMardroemeRow() ||
+        this.isSelectingAgilePrePlay()),
   );
 
   readonly inspectorCanConfirmPlay = computed(() => {
@@ -196,6 +209,7 @@ export class GameFacadeService {
     }
     if (
       this.isSelectingHornTarget() ||
+      this.isSelectingMardroemeRow() ||
       this.isSelectingDecoyTarget() ||
       this.isSelectingAgilePrePlay()
     ) {
@@ -322,6 +336,9 @@ export class GameFacadeService {
     if (selected.card.type === 'SPECIAL' && selected.card.ability === 'COMMANDERS_HORN') {
       return current.players[current.activePlayer].rows[rowType].hornCard === null;
     }
+    if (selected.card.type === 'SPECIAL' && selected.card.ability === 'MARDROEME') {
+      return selected.card.allowedRows.includes(rowType);
+    }
     if (selected.card.type === 'UNIT' && selected.card.ability !== 'SPY') {
       return selected.card.allowedRows.includes(rowType);
     }
@@ -342,7 +359,9 @@ export class GameFacadeService {
     if (currentlySelectedId === card.instanceId) {
       if (
         (card.card.type === 'SPECIAL' &&
-          (card.card.ability === 'COMMANDERS_HORN' || card.card.ability === 'DECOY')) ||
+          (card.card.ability === 'COMMANDERS_HORN' ||
+            card.card.ability === 'DECOY' ||
+            card.card.ability === 'MARDROEME')) ||
         (card.card.type === 'UNIT' && card.card.ability !== 'SPY' && card.card.allowedRows.length > 1)
       ) {
         this.clearSelection();
@@ -575,7 +594,12 @@ export class GameFacadeService {
         this.enqueueBanner(nilfTieBanner);
       }
       if (prev.phase !== 'MATCH_END' && next.phase === 'MATCH_END') {
-        this.matchHistory.recordCompletedMatch(next, this.gameMode());
+        const mode = this.gameMode();
+        this.matchHistory.recordCompletedMatch(
+          next,
+          mode,
+          mode === 'VS_AI' ? this.aiSettings.difficulty() : undefined,
+        );
       }
       this.clearTimers();
       this.isTransitioningTurn.set(false);
@@ -664,7 +688,7 @@ export class GameFacadeService {
       this.isAiThinking.set(false);
       const latest = this.state();
       if (latest.activePlayer !== 'PLAYER_2') return;
-      const aiAction = decideAction(createAIView(latest, 'PLAYER_2'));
+      const aiAction = decideAction(createAIView(latest, 'PLAYER_2'), this.aiSettings.difficulty());
       this.applyAction(aiAction);
     }, delayMs);
   }
@@ -975,6 +999,10 @@ export class GameFacadeService {
         return { fx: null, cue: 'decoy' };
       case 'COMMANDERS_HORN':
         return { fx: 'HORN', cue: 'horn' };
+      case 'MARDROEME':
+        return { fx: 'MUSTER', cue: 'mardroeme' };
+      case 'WEATHER_STORM':
+        return { fx: 'WEATHER_RAIN', cue: 'rain' };
       default: {
         const resolvedRow = targetRow ?? played.card.allowedRows[0];
         if (resolvedRow === 'SIEGE') return { fx: null, cue: 'cardSiege' };

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, output, signal } from '@angular/core';
-import type { FactionId } from '../../../core';
+import { AI_DIFFICULTY_LABELS, type AIDifficulty, type FactionId } from '../../../core';
 import { FeedbackService } from '../../services/feedback.service';
 import { MatchHistoryService } from '../../services/match-history.service';
 import {
@@ -143,6 +143,11 @@ const OUTCOME_META: Readonly<Record<MatchOutcome, { readonly label: string; read
                   <span class="rounded border border-bronze/50 bg-tavern-dark/80 px-2 py-0.5 text-[10px] font-semibold text-parchment/85">
                     {{ entry.mode === 'VS_AI' ? 'vs. IA' : 'Local 2P' }}
                   </span>
+                  @if (entry.mode === 'VS_AI' && entry.aiDifficulty; as diff) {
+                    <span class="rounded border border-gold/50 bg-gold/10 px-2 py-0.5 text-[10px] font-semibold text-gold-bright">
+                      {{ aiDifficultyLabel(diff) }}
+                    </span>
+                  }
                 </div>
                 <time class="text-[11px] font-medium text-parchment/65">
                   {{ formatDate(entry.playedAtIso) }}
@@ -264,6 +269,10 @@ export class MatchHistoryPageComponent {
 
   factionAccent(faction: FactionId): string {
     return FACTION_META[faction].accentClass;
+  }
+
+  aiDifficultyLabel(difficulty: AIDifficulty): string {
+    return AI_DIFFICULTY_LABELS[difficulty];
   }
 
   formatDate(iso: string): string {

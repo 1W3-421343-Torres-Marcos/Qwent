@@ -56,6 +56,7 @@ export {
   isValidDecoyTarget,
   resolveAgileSelection,
   resolveDecoy,
+  resolveMardroemeOnRow,
   resolveMedicSelection,
   resolveMuster,
   resolveScorchGlobal,
@@ -65,11 +66,12 @@ export {
 } from './abilities/ability-resolver';
 export {
   applyNorthernRealmsWinDraw,
+  applySkelligeRound3Revive,
   resolveRound1StartState,
   resolveRoundWinnerWithFactions,
   selectMonstersCarryover,
 } from './abilities/factions';
-export type { MonstersCarryoverResult } from './abilities/factions';
+export type { MonstersCarryoverResult, SkelligeReviveResult } from './abilities/factions';
 export {
   LEADER_HORN_DEFINITION_ID,
   applyPassiveStartLeaders,
@@ -77,7 +79,23 @@ export {
   resolveLeaderTargetSelection,
   resolveLeaderUse,
 } from './abilities/leaders';
-export { isPassiveLeaderActive } from './abilities/passive-leaders';
+export { isPassiveLeaderActive, isPlayerPassiveLeaderActive } from './abilities/passive-leaders';
+export {
+  BERSERKER_CARD_ID,
+  HEMDALL_CARD,
+  KAMBI_CARD_ID,
+  VILDKAARL_CARD,
+  YOUNG_BERSERKER_CARD_ID,
+  YOUNG_VILDKAARL_CARD,
+  transformBerserkerInstance,
+} from './abilities/skellige-tokens';
+export {
+  AI_DIFFICULTIES,
+  AI_DIFFICULTY_LABELS,
+  DEFAULT_AI_DIFFICULTY,
+  isValidAIDifficulty,
+} from './ai/ai-difficulty';
+export type { AIDifficulty } from './ai/ai-difficulty';
 export { createAIView } from './ai/ai-view';
 export type { AIOpponentView, AIPlayerSelfView, AIPlayerView } from './ai/ai-view';
 export { decideAction } from './ai/bot-player';

@@ -17,6 +17,7 @@ const SFX_FILES: readonly string[] = [
   'bond',
   'morale',
   'horn',
+  'mardroeme',
   'medic',
   'muster',
   'spy',

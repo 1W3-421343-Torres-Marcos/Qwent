@@ -47,6 +47,15 @@ export const FACTION_META: Readonly<Record<FactionId, FactionDisplayMeta>> = {
     surfaceClass: 'bg-scoiatael/35',
     accentClass: 'text-green-300',
   },
+  SKELLIGE: {
+    id: 'SKELLIGE',
+    label: 'Skellige',
+    shortLabel: 'Skellige',
+    passiveSummary: 'En Ronda 3 revive hasta 2 unidades aleatorias no-Héroe del descarte.',
+    borderClass: 'border-purple-400/75',
+    surfaceClass: 'bg-skellige/35',
+    accentClass: 'text-purple-300',
+  },
   NEUTRAL: {
     id: 'NEUTRAL',
     label: 'Neutral',

@@ -8,6 +8,12 @@ export interface MonstersCarryoverResult {
   readonly nextSeed: number;
 }
 
+export interface SkelligeReviveResult {
+  readonly player: PlayerState;
+  readonly revivedCount: number;
+  readonly nextSeed: number;
+}
+
 /**
  * Resolves the round winner applying Nilfgaard's faction passive:
  * Nilfgaard wins tied rounds, except in a Nilfgaard vs. Nilfgaard mirror where a tie remains DRAW.
@@ -105,5 +111,63 @@ export function resolveRound1StartState(state: GameState): GameState {
     activePlayer: startingPlayer,
     rngSeed: coinFlip.nextSeed,
     pendingSelection: null,
+  };
+}
+
+/**
+ * Applies Skellige's Round 3 faction passive using deterministic PRNG:
+ * revives up to 2 random non-Hero units from discard directly onto their rows.
+ */
+export function applySkelligeRound3Revive(
+  player: PlayerState,
+  rngSeed: number,
+): SkelligeReviveResult {
+  if (player.faction !== 'SKELLIGE') {
+    return { player, revivedCount: 0, nextSeed: rngSeed };
+  }
+
+  let currentPool = player.discard.filter((c) => c.card.type === 'UNIT' && !c.card.isHero);
+  if (currentPool.length === 0) {
+    return { player, revivedCount: 0, nextSeed: rngSeed };
+  }
+
+  let currentSeed = rngSeed;
+  const revived: CardInstance[] = [];
+  const countToRevive = Math.min(2, currentPool.length);
+
+  for (let i = 0; i < countToRevive; i++) {
+    const step = nextRng(currentSeed);
+    currentSeed = step.nextSeed;
+    const chosenIndex = Math.min(currentPool.length - 1, Math.floor(step.value * currentPool.length));
+    const chosen = currentPool[chosenIndex]!;
+    revived.push(chosen);
+    currentPool = currentPool.filter((c) => c.instanceId !== chosen.instanceId);
+  }
+
+  const revivedIds = new Set(revived.map((c) => c.instanceId));
+  const nextDiscard = player.discard.filter((c) => !revivedIds.has(c.instanceId));
+  const nextRows: Record<RowType, PlayerState['rows'][RowType]> = {
+    CLOSE_COMBAT: player.rows.CLOSE_COMBAT,
+    RANGED: player.rows.RANGED,
+    SIEGE: player.rows.SIEGE,
+  };
+
+  for (const unit of revived) {
+    const rowType = unit.card.allowedRows[0] ?? 'CLOSE_COMBAT';
+    const currentRow = nextRows[rowType];
+    nextRows[rowType] = {
+      ...currentRow,
+      cards: [...currentRow.cards, { ...unit, effectiveStrength: unit.card.baseStrength }],
+    };
+  }
+
+  return {
+    player: {
+      ...player,
+      discard: nextDiscard,
+      rows: nextRows,
+    },
+    revivedCount: revived.length,
+    nextSeed: currentSeed,
   };
 }

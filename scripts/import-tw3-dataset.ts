@@ -25,6 +25,7 @@ const FACTION_PREFIX: Readonly<Record<FactionId, string>> = {
   NILFGAARD: 'ng',
   MONSTERS: 'mo',
   SCOIATAEL: 'st',
+  SKELLIGE: 'sk',
   NEUTRAL: 'nt',
 };
 
@@ -33,6 +34,7 @@ const FACTION_MAP: Readonly<Record<string, FactionId>> = {
   'Nilfgaardian Empire': 'NILFGAARD',
   Monsters: 'MONSTERS',
   "Scoia'tael": 'SCOIATAEL',
+  Skellige: 'SKELLIGE',
   Neutral: 'NEUTRAL',
 };
 
@@ -41,6 +43,7 @@ const FACTION_NAME_ES: Readonly<Record<FactionId, string>> = {
   NILFGAARD: 'Imperio Nilfgaardiano',
   MONSTERS: 'Monstruos',
   SCOIATAEL: "Scoia'tael",
+  SKELLIGE: 'Skellige',
   NEUTRAL: 'Neutral',
 };
 
@@ -270,6 +273,58 @@ const ES_CARD_LOCALIZATION: Readonly<Record<string, CardLocalizationEntry>> = {
     name: 'Zoltan Chivay',
     description: '«La vida sin viejos camaradas ni buena bebida no vale gran cosa».',
   },
+
+  // Skellige (Blood and Wine)
+  sk_berserker: { name: 'Berserker' },
+  sk_birna_bran: { name: 'Birna Bran' },
+  sk_blueboy_lugos: {
+    name: 'Lugos el Azul',
+    description: '«Dicen que surca mares helados con tanta furia como su padre en batalla».',
+  },
+  sk_cerys: { name: 'Cerys' },
+  sk_clan_an_craite_warrior: { name: 'Guerrero del clan An Craite' },
+  sk_clan_brokvar_archer: {
+    name: 'Arquero del clan Brokvar',
+    description: '«Ninguna gaviota vuela más rápido que una flecha de Brokvar entre las olas».',
+  },
+  sk_clan_dimun_pirate: { name: 'Pirata del clan Dimun' },
+  sk_clan_drummond_shield_maiden: { name: 'Doncella escudera de Drummond' },
+  sk_clan_heymaey_skald: {
+    name: 'Escaldo del clan Heymaey',
+    description: '«Canta gestas de hidromiel, acero y tormentas hasta helar la sangre rival».',
+  },
+  sk_clan_tordarroch_armorsmith: {
+    name: 'Armero del clan Tordarroch',
+    description: '«Acero templado entre glaciares para resistir el empuje de cualquier monstruo».',
+  },
+  sk_donar_an_hindar: {
+    name: 'Donar an Hindar',
+    description: '«Anciano jarl de Hindarsfjall, respetado en cada consejo de las islas».',
+  },
+  sk_draig_bon_dhu: { name: 'Draig Bon-Dhu' },
+  sk_ermion: { name: 'Armiño' },
+  sk_hjalmar: { name: 'Hjalmar' },
+  sk_holger_blackhand: {
+    name: 'Holger Manonegra',
+    description: '«Saquear naves nilfgaardianas es una tradición tan vieja como las mareas».',
+  },
+  sk_kambi: { name: 'Kambi' },
+  sk_light_longship: { name: 'Drakkar ligero' },
+  sk_madman_lugos: {
+    name: 'Lugos el Loco',
+    description: '«¡Que vengan mil enemigos, que sobran hachas para recibirlos en la costa!»',
+  },
+  sk_olaf: { name: 'Olaf' },
+  sk_svanrige: {
+    name: 'Svanrige',
+    description: '«Hijo de Bran, dispuesto a reclamar su derecho con la espada en la mano».',
+  },
+  sk_udalryk: {
+    name: 'Udalryk',
+    description: '«Atormentado por sombras antiguas en las costas sombrías de Spikeroog».',
+  },
+  sk_war_longship: { name: 'Drakkar de guerra' },
+  sk_young_berserker: { name: 'Joven berserker' },
 };
 
 const ROW_MAP: Readonly<Record<string, RowType>> = {
@@ -338,6 +393,8 @@ const EXISTING_SOURCE_NAME_TO_BASE_ID: Readonly<Record<string, string>> = {
   "Commander's Horn": 'sp_commanders_horn',
   Decoy: 'sp_decoy',
   Scorch: 'sp_scorch',
+  Mardroeme: 'sk_mardroeme',
+  'Skellige Storm': 'sp_skellige_storm',
 };
 
 function toSlug(name: string): string {
@@ -366,9 +423,13 @@ function mapAbility(raw: AboeUnitRecord): AbilityType | null {
       case 'Muster':
         return 'MUSTER';
       case 'Scorch':
-        return 'SCORCH_ROW';
+        return raw.Name === 'Clan Dimun Pirate' ? 'SCORCH' : 'SCORCH_ROW';
       case 'Horn':
         return 'COMMANDERS_HORN';
+      case 'Berserker':
+        return 'BERSERKER';
+      case 'Mardroeme':
+        return 'MARDROEME';
       default:
         break;
     }
@@ -404,14 +465,27 @@ function buildDescription(
     case 'MUSTER':
       parts.push('Reunión: invoca todas las cartas iguales o del mismo grupo desde mano y mazo.');
       break;
+    case 'SCORCH':
+      parts.push('Tierra quemada: al entrar destruye las unidades no-Héroe más fuertes en ambos lados del tablero.');
+      break;
     case 'SCORCH_ROW':
       parts.push('Tierra quemada de fila: destruye la unidad no-Héroe rival más fuerte si esa fila suma >= 10.');
       break;
     case 'COMMANDERS_HORN':
       parts.push('Cuerno del comandante: duplica la fuerza de las demás unidades de la fila.');
       break;
+    case 'BERSERKER':
+      parts.push('Berserker: se transforma en Vildkaarl o Joven Vildkaarl bajo Mardroeme.');
+      break;
+    case 'MARDROEME':
+      parts.push('Mardroeme: transforma los Berserkers de su fila en Vildkaarl durante esta ronda.');
+      break;
     default:
       break;
+  }
+
+  if (raw.Name === 'Kambi') {
+    parts.push('Vengador: al entrar al descarte al final de la ronda, invoca a Hemdall (11, Héroe) en Cuerpo a cuerpo.');
   }
 
   if (parts.length > 0) {
@@ -440,7 +514,7 @@ function main(): void {
   const existingIds = new Set(baseCards.map((c) => c.id));
 
   for (const raw of sourceRecords) {
-    if (raw.Faction === 'Skellige' || raw.DLC === 'Blood and Wine' || raw.Deckable !== 'Yes') {
+    if (raw.Deckable !== 'Yes') {
       continue;
     }
     if (EXISTING_SOURCE_NAME_TO_BASE_ID[raw.Name]) {
@@ -475,7 +549,11 @@ function main(): void {
     const slug = toSlug(raw.Name);
     const bondGroup = ability === 'TIGHT_BOND' ? slug : undefined;
     const musterGroup =
-      ability === 'MUSTER' ? toSlug(raw['Effect Prefix'] || raw.Name) : undefined;
+      raw.Name === 'Cerys' || raw.Name === 'Clan Drummond Shield Maiden'
+        ? 'shield_maiden'
+        : ability === 'MUSTER'
+          ? toSlug(raw['Effect Prefix'] || raw.Name)
+          : undefined;
     const isAgile = rows.length > 1 || raw['Effect 1'] === 'Agile' || raw['Effect 2'] === 'Agile';
 
     const localized = ES_CARD_LOCALIZATION[id];

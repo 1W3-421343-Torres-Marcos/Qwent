@@ -81,14 +81,17 @@ describe('Offline Audit & Android Packaging Compliance (F6.3)', () => {
     expect(styles).toContain('@drawable/qwent_splash');
   });
 
-  it('embeds valid offline JPEG portraits in src/assets/cards/ covering all 154 cards, tokens and 29 alt variants without orphans', () => {
+  it('embeds valid offline JPEG portraits in src/assets/cards/ covering all 181 cards, 4 tokens and 31 alt variants without orphans', () => {
     const cardsJson = JSON.parse(
       readFileSync(path.join(SRC_DIR, 'assets', 'data', 'cards.json'), 'utf8'),
     ) as ReadonlyArray<{ readonly id: string; readonly name: string; readonly description: string }>;
-    expect(cardsJson).toHaveLength(154);
+    expect(cardsJson).toHaveLength(181);
 
     const validIds = new Set(cardsJson.map((card) => card.id));
     validIds.add('nt_bovine_defense_force');
+    validIds.add('sk_hemdall');
+    validIds.add('sk_vildkaarl');
+    validIds.add('sk_young_vildkaarl');
     for (const altId of getExpectedAltSpriteIds()) {
       validIds.add(altId);
     }
@@ -97,7 +100,7 @@ describe('Offline Audit & Android Packaging Compliance (F6.3)', () => {
     expect(existsSync(spritesDir)).toBe(true);
 
     const jpgFiles = readdirSync(spritesDir).filter((name) => name.endsWith('.jpg'));
-    expect(jpgFiles.length).toBe(184);
+    expect(jpgFiles.length).toBe(216);
     expect(jpgFiles.length).toBe(validIds.size);
 
     for (const fileName of jpgFiles) {
@@ -112,7 +115,7 @@ describe('Offline Audit & Android Packaging Compliance (F6.3)', () => {
     }
   });
 
-  it('localizes all 154 catalog card names and descriptions to Spanish without English dataset residue', () => {
+  it('localizes all 181 catalog card names and descriptions to Spanish without English dataset residue', () => {
     const cardsJson = JSON.parse(
       readFileSync(path.join(SRC_DIR, 'assets', 'data', 'cards.json'), 'utf8'),
     ) as ReadonlyArray<{ readonly id: string; readonly name: string; readonly description: string }>;
@@ -124,7 +127,7 @@ describe('Offline Audit & Android Packaging Compliance (F6.3)', () => {
     expect(unlocalized).toEqual([]);
   });
 
-  it('embeds all 29 offline SFX and 4 tavern BGM MP3 files with valid audio headers', () => {
+  it('embeds all 30 offline SFX and 4 tavern BGM MP3 files with valid audio headers', () => {
     const expectedSfx = [
       'common_close.mp3',
       'common_ranged.mp3',
@@ -133,6 +136,7 @@ describe('Offline Audit & Android Packaging Compliance (F6.3)', () => {
       'bond.mp3',
       'morale.mp3',
       'horn.mp3',
+      'mardroeme.mp3',
       'medic.mp3',
       'muster.mp3',
       'spy.mp3',

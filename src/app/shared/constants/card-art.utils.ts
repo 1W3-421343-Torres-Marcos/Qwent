@@ -19,6 +19,7 @@ export const CARD_ALT_VARIANT_COUNTS: Readonly<Record<string, number>> = {
   st_havekar_smuggler: 2,
   st_mahakaman_defender: 4,
   st_vrihedd_brigade: 1,
+  sk_clan_drummond_shield_maiden: 2,
 };
 
 /**

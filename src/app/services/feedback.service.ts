@@ -11,6 +11,7 @@ export type FeedbackCue =
   | 'bond'
   | 'morale'
   | 'horn'
+  | 'mardroeme'
   | 'medic'
   | 'muster'
   | 'spy'
@@ -56,6 +57,7 @@ const SFX_PATH_MAP: Readonly<Record<FeedbackCue, string>> = {
   bond: 'assets/audio/sfx/bond.mp3',
   morale: 'assets/audio/sfx/morale.mp3',
   horn: 'assets/audio/sfx/horn.mp3',
+  mardroeme: 'assets/audio/sfx/mardroeme.mp3',
   medic: 'assets/audio/sfx/medic.mp3',
   muster: 'assets/audio/sfx/muster.mp3',
   spy: 'assets/audio/sfx/spy.mp3',
@@ -267,6 +269,7 @@ export class FeedbackService {
         hero: [18, 22, 26],
         bond: [12, 18, 16],
         morale: [14, 18, 16],
+        mardroeme: [16, 18, 28],
         horn: [18, 25, 22],
         medic: [15, 22, 20],
         muster: [14, 14, 20],

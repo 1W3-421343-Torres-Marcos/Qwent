@@ -11,6 +11,7 @@ export interface RowState {
   readonly cards: readonly CardInstance[];
   readonly hornCard: CardInstance | null;
   readonly totalStrength: number;
+  readonly mardroemeActive?: boolean;
 }
 
 export interface WeatherSlot {

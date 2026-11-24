@@ -2,10 +2,12 @@ import { ROW_TYPES, type AbilityType, type CardInstance, type PlayerId, type Row
 import type { GameAction } from '../models/actions';
 import type { GameState, PlayerState, WeatherState } from '../models/game-state';
 import {
+  collectWeatherSlotDiscards,
   hasValidDecoyTarget,
   isValidDecoyTarget,
   resolveAgileSelection,
   resolveDecoy,
+  resolveMardroemeOnRow,
   resolveMedicSelection,
   resolveScorchGlobal,
   resolveSpy,
@@ -73,11 +75,19 @@ export function canPlayCard(
       );
     }
 
+    if (card.ability === 'MARDROEME') {
+      if (targetRow === undefined) {
+        return card.allowedRows.length > 0;
+      }
+      return card.allowedRows.includes(targetRow);
+    }
+
     return (
       card.ability === 'SCORCH' ||
       card.ability === 'WEATHER_FROST' ||
       card.ability === 'WEATHER_FOG' ||
       card.ability === 'WEATHER_RAIN' ||
+      card.ability === 'WEATHER_STORM' ||
       card.ability === 'WEATHER_CLEAR'
     );
   }
@@ -184,31 +194,68 @@ function playWeatherCard(
   });
 }
 
+function playWeatherStorm(
+  state: GameState,
+  playerId: PlayerId,
+  instance: CardInstance,
+  remainingHand: readonly CardInstance[],
+): GameState {
+  const player = state.players[playerId];
+  const fogFree = state.weather.fog === null;
+  const rainFree = state.weather.rain === null;
+  const bothOccupied = !fogFree && !rainFree;
+
+  const nextWeather: WeatherState = bothOccupied
+    ? state.weather
+    : {
+        ...state.weather,
+        fog: fogFree ? { card: instance, owner: playerId } : state.weather.fog,
+        rain: rainFree ? { card: instance, owner: playerId } : state.weather.rain,
+      };
+
+  return recalculateBoard({
+    ...state,
+    weather: nextWeather,
+    players: {
+      ...state.players,
+      [playerId]: {
+        ...player,
+        hand: remainingHand,
+        discard: bothOccupied ? [...player.discard, instance] : player.discard,
+      },
+    },
+  });
+}
+
+function playMardroemeSpecial(
+  state: GameState,
+  playerId: PlayerId,
+  instance: CardInstance,
+  remainingHand: readonly CardInstance[],
+  targetRow: RowType,
+): GameState {
+  const player = state.players[playerId];
+  const preparedState: GameState = {
+    ...state,
+    players: {
+      ...state.players,
+      [playerId]: {
+        ...player,
+        hand: remainingHand,
+        discard: [...player.discard, instance],
+      },
+    },
+  };
+  return resolveMardroemeOnRow(preparedState, playerId, targetRow);
+}
+
 function playClearWeather(
   state: GameState,
   playerId: PlayerId,
   instance: CardInstance,
   remainingHand: readonly CardInstance[],
 ): GameState {
-  const p1ExtraDiscards: CardInstance[] = [];
-  const p2ExtraDiscards: CardInstance[] = [];
-
-  for (const key of ['frost', 'fog', 'rain'] as const) {
-    const slot = state.weather[key];
-    if (slot === null) continue;
-    if (slot.owner === 'PLAYER_1') {
-      p1ExtraDiscards.push(slot.card);
-    } else {
-      p2ExtraDiscards.push(slot.card);
-    }
-  }
-
-  if (playerId === 'PLAYER_1') {
-    p1ExtraDiscards.push(instance);
-  } else {
-    p2ExtraDiscards.push(instance);
-  }
-
+  const weatherDiscards = collectWeatherSlotDiscards(state.weather);
   const p1 = state.players.PLAYER_1;
   const p2 = state.players.PLAYER_2;
 
@@ -219,12 +266,18 @@ function playClearWeather(
       PLAYER_1: {
         ...p1,
         hand: playerId === 'PLAYER_1' ? remainingHand : p1.hand,
-        discard: [...p1.discard, ...p1ExtraDiscards],
+        discard:
+          playerId === 'PLAYER_1'
+            ? [...p1.discard, ...weatherDiscards.PLAYER_1, instance]
+            : [...p1.discard, ...weatherDiscards.PLAYER_1],
       },
       PLAYER_2: {
         ...p2,
         hand: playerId === 'PLAYER_2' ? remainingHand : p2.hand,
-        discard: [...p2.discard, ...p2ExtraDiscards],
+        discard:
+          playerId === 'PLAYER_2'
+            ? [...p2.discard, ...weatherDiscards.PLAYER_2, instance]
+            : [...p2.discard, ...weatherDiscards.PLAYER_2],
       },
     },
   });
@@ -291,6 +344,19 @@ function handlePlayCard(state: GameState, action: Extract<GameAction, { type: 'P
     const weatherKey = card.ability ? WEATHER_ABILITY_TO_KEY[card.ability] : undefined;
     if (weatherKey) {
       const nextState = playWeatherCard(state, playerId, instance, remainingHand, weatherKey);
+      return finalizeTurn(nextState, playerId);
+    }
+
+    if (card.ability === 'WEATHER_STORM') {
+      const nextState = playWeatherStorm(state, playerId, instance, remainingHand);
+      return finalizeTurn(nextState, playerId);
+    }
+
+    if (card.ability === 'MARDROEME') {
+      if (!targetRow || !card.allowedRows.includes(targetRow)) {
+        return state;
+      }
+      const nextState = playMardroemeSpecial(state, playerId, instance, remainingHand, targetRow);
       return finalizeTurn(nextState, playerId);
     }
 

@@ -20,6 +20,7 @@ module.exports = {
         'nilfgaard': '#18181B',
         'monsters': '#991B1B',
         'scoiatael': '#15803D',
+        'skellige': '#7E22CE',
         'neutral': '#57534E',
         'weather-frost': '#38BDF8',
         'weather-fog': '#94A3B8',

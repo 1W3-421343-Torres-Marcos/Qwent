@@ -182,6 +182,43 @@ const CARD_ID_TO_SPRITE_FILE: Readonly<Record<string, string>> = {
   sp_decoy: 'special_decoy.jpg',
   sp_clear_weather: 'weather_clear.jpg',
   sp_scorch: 'special_scorch.jpg',
+  sp_skellige_storm: 'weather_storm.jpg',
+  sk_mardroeme: 'special_mardroeme.jpg',
+
+  // Skellige Leaders
+  sk_leader_crach_an_craite: 'skellige_crach_an_craite.jpg',
+  sk_leader_king_bran: 'skellige_king_bran.jpg',
+
+  // Skellige Units
+  sk_berserker: 'skellige_berserker.jpg',
+  sk_birna_bran: 'skellige_birna.jpg',
+  sk_blueboy_lugos: 'skellige_blueboy.jpg',
+  sk_cerys: 'skellige_cerys.jpg',
+  sk_clan_an_craite_warrior: 'skellige_craite_warrior.jpg',
+  sk_clan_brokvar_archer: 'skellige_brokva_archer.jpg',
+  sk_clan_dimun_pirate: 'skellige_dimun_pirate.jpg',
+  sk_clan_drummond_shield_maiden: 'skellige_shield_maiden.jpg',
+  sk_clan_heymaey_skald: 'skellige_heymaey.jpg',
+  sk_clan_tordarroch_armorsmith: 'skellige_tordarroch.jpg',
+  sk_donar_an_hindar: 'skellige_donar.jpg',
+  sk_draig_bon_dhu: 'skellige_draig.jpg',
+  sk_ermion: 'skellige_ermion.jpg',
+  sk_hjalmar: 'skellige_hjalmar.jpg',
+  sk_holger_blackhand: 'skellige_holger.jpg',
+  sk_kambi: 'skellige_kambi.jpg',
+  sk_light_longship: 'skellige_light_longship.jpg',
+  sk_madman_lugos: 'skellige_madmad_lugos.jpg',
+  sk_olaf: 'skellige_olaf.jpg',
+  sk_svanrige: 'skellige_svanrige.jpg',
+  sk_udalryk: 'skellige_udalryk.jpg',
+  sk_war_longship: 'skellige_war_longship.jpg',
+  sk_young_berserker: 'skellige_young_berserker.jpg',
+};
+
+const TOKEN_SPRITE_FILES: Readonly<Record<string, string>> = {
+  sk_hemdall: 'skellige_hemdall.jpg',
+  sk_vildkaarl: 'skellige_vildkaarl.jpg',
+  sk_young_vildkaarl: 'skellige_young_vildkaarl.jpg',
 };
 
 const ALT_SPRITE_FILES: Readonly<Record<string, readonly string[]>> = {
@@ -207,6 +244,7 @@ const ALT_SPRITE_FILES: Readonly<Record<string, readonly string[]>> = {
     'scoiatael_mahakam_4.jpg',
   ],
   st_vrihedd_brigade: ['scoiatael_vrihedd_brigade_1.jpg'],
+  sk_clan_drummond_shield_maiden: ['skellige_shield_maiden_1.jpg', 'skellige_shield_maiden_2.jpg'],
 };
 
 interface SpriteJob {
@@ -252,6 +290,14 @@ async function importSprites(): Promise<void> {
     });
   }
 
+  for (const [tokenId, sourceFileName] of Object.entries(TOKEN_SPRITE_FILES)) {
+    jobs.push({
+      key: tokenId,
+      targetFileName: `${tokenId}.jpg`,
+      sourceFileName,
+    });
+  }
+
   let downloaded = 0;
   let skipped = 0;
   let totalBytes = 0;
@@ -294,9 +340,10 @@ async function importSprites(): Promise<void> {
   await Promise.all(Array.from({ length: workerCount }, () => runWorker()));
 
   const altTotal = Object.values(ALT_SPRITE_FILES).reduce((sum, list) => sum + list.length, 0);
+  const tokenTotal = Object.keys(TOKEN_SPRITE_FILES).length;
   const mb = (totalBytes / (1024 * 1024)).toFixed(2);
   console.log(
-    `[SPRITES OK] ${downloaded + skipped}/${jobs.length} sprites válidos en src/assets/cards/ (${cards.length} base + ${altTotal} variantes; ${downloaded} descargados, ${skipped} existentes, ${mb} MB totales)`,
+    `[SPRITES OK] ${downloaded + skipped}/${jobs.length} sprites válidos en src/assets/cards/ (${cards.length} base + ${altTotal} variantes + ${tokenTotal} tokens; ${downloaded} descargados, ${skipped} existentes, ${mb} MB totales)`,
   );
 }
 

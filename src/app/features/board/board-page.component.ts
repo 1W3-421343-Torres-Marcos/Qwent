@@ -167,24 +167,26 @@ const WEATHER_BOX_SLOTS = [
             </p>
             <div class="grid grid-cols-3 gap-1">
               @for (slot of weatherSlots; track slot.key) {
-                @let isActive = facade.state().weather[slot.key] !== null;
+                @let weatherEntry = facade.state().weather[slot.key];
+                @let isActive = weatherEntry !== null;
+                @let activeSpriteId = weatherEntry ? weatherEntry.card.definitionId : slot.cardId;
                 <div
                   class="relative flex h-10 items-center justify-center overflow-hidden rounded border transition"
                   [class]="isActive ? slot.activeClass : 'border-bronze/40 text-parchment/25'"
-                  [title]="slot.label"
+                  [title]="weatherEntry ? weatherEntry.card.card.name : slot.label"
                 >
-                  @if (isActive && art.hasSprite(slot.cardId)) {
+                  @if (isActive && art.hasSprite(activeSpriteId)) {
                     <img
-                      [src]="art.spritePath(slot.cardId)"
-                      [alt]="slot.label"
+                      [src]="art.spritePath(activeSpriteId)"
+                      [alt]="weatherEntry ? weatherEntry.card.card.name : slot.label"
                       decoding="async"
-                      (error)="art.markFailed(slot.cardId)"
+                      (error)="art.markFailed(activeSpriteId)"
                       class="pointer-events-none absolute inset-0 h-full w-full object-cover object-top"
                     />
                     <span
                       class="relative z-10 flex h-4 w-4 items-center justify-center rounded-full bg-tavern-dark/80 p-0.5 shadow"
                     >
-                      <app-ability-icon [ability]="slot.ability" />
+                      <app-ability-icon [ability]="weatherEntry?.card?.card?.ability ?? slot.ability" />
                     </span>
                   } @else {
                     <span class="h-5 w-5"><app-ability-icon [ability]="slot.ability" /></span>
@@ -387,7 +389,7 @@ const WEATHER_BOX_SLOTS = [
             <span
               class="inline-block rounded border border-bronze/60 bg-tavern-dark/80 px-1.5 py-0.5 text-[9px] font-bold uppercase text-gold"
             >
-              v1.6.0
+              v1.7.0
             </span>
             <div class="grid grid-cols-2 gap-1">
               <button

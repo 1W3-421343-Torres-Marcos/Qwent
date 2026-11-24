@@ -1,11 +1,14 @@
 import { ROW_TYPES, type CardDefinition, type CardInstance, type PlayerId, type RowType } from '../models/types';
-import type { GameState, PlayerState, RoundResult, WeatherSlot } from '../models/game-state';
+import type { GameState, PlayerState, RoundResult } from '../models/game-state';
+import { collectWeatherSlotDiscards } from '../abilities/ability-resolver';
 import {
   applyNorthernRealmsWinDraw,
+  applySkelligeRound3Revive,
   resolveRoundWinnerWithFactions,
   selectMonstersCarryover,
 } from '../abilities/factions';
 import { LEADER_HORN_DEFINITION_ID } from '../abilities/leaders';
+import { HEMDALL_CARD, KAMBI_CARD_ID } from '../abilities/skellige-tokens';
 import { recalculateBoard } from '../scoring/calculate-strength';
 import { nextRng } from './prng';
 import { createEmptyRows, createEmptyWeather } from './setup';
@@ -39,6 +42,13 @@ function spawnAvengerTokens(
         card: BOVINE_DEFENSE_FORCE_CARD,
         effectiveStrength: BOVINE_DEFENSE_FORCE_CARD.baseStrength,
       });
+    } else if (card.definitionId === KAMBI_CARD_ID) {
+      tokens.push({
+        instanceId: `avenger_hemdall_${playerId}_r${nextRoundNumber}_${tokens.length}`,
+        definitionId: HEMDALL_CARD.id,
+        card: HEMDALL_CARD,
+        effectiveStrength: HEMDALL_CARD.baseStrength,
+      });
     }
   }
   return tokens;
@@ -68,24 +78,6 @@ function collectPlayerBoardCardsToDiscard(
     }
   }
   return toDiscard;
-}
-
-function collectWeatherSlotsToDiscard(
-  weatherSlots: readonly (WeatherSlot | null)[],
-): Readonly<Record<PlayerId, readonly CardInstance[]>> {
-  const p1Cards: CardInstance[] = [];
-  const p2Cards: CardInstance[] = [];
-
-  for (const slot of weatherSlots) {
-    if (slot === null) continue;
-    if (slot.owner === 'PLAYER_1') {
-      p1Cards.push(slot.card);
-    } else {
-      p2Cards.push(slot.card);
-    }
-  }
-
-  return { PLAYER_1: p1Cards, PLAYER_2: p2Cards };
 }
 
 /**
@@ -147,11 +139,7 @@ export function advanceToNextRound(state: GameState): GameState {
   const p2 = state.players.PLAYER_2;
   const lastRound = state.roundHistory[state.roundHistory.length - 1];
 
-  const weatherDiscards = collectWeatherSlotsToDiscard([
-    state.weather.frost,
-    state.weather.fog,
-    state.weather.rain,
-  ]);
+  const weatherDiscards = collectWeatherSlotDiscards(state.weather);
 
   const p1Monsters = selectMonstersCarryover(p1, state.rngSeed);
   const p2Monsters = selectMonstersCarryover(p2, p1Monsters.nextSeed);
@@ -204,13 +192,13 @@ export function advanceToNextRound(state: GameState): GameState {
     );
   };
 
-  const p1Next = preparePlayerForNextRound(
+  let p1Next = preparePlayerForNextRound(
     p1,
     p1Monsters.kept,
     weatherDiscards.PLAYER_1,
     lastRound?.winner === 'PLAYER_1',
   );
-  const p2Next = preparePlayerForNextRound(
+  let p2Next = preparePlayerForNextRound(
     p2,
     p2Monsters.kept,
     weatherDiscards.PLAYER_2,
@@ -218,6 +206,15 @@ export function advanceToNextRound(state: GameState): GameState {
   );
 
   let nextSeed = p2Monsters.nextSeed;
+
+  if (nextRoundNumber === 3) {
+    const p1Skellige = applySkelligeRound3Revive(p1Next, nextSeed);
+    p1Next = p1Skellige.player;
+    const p2Skellige = applySkelligeRound3Revive(p2Next, p1Skellige.nextSeed);
+    p2Next = p2Skellige.player;
+    nextSeed = p2Skellige.nextSeed;
+  }
+
   let startingPlayer: PlayerId;
 
   if (lastRound && lastRound.winner !== 'DRAW') {

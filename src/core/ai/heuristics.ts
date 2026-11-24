@@ -3,7 +3,9 @@ import type { GameAction } from '../models/actions';
 import type { PlayerState, RowState, WeatherState } from '../models/game-state';
 import { isScorchVulnerable, isValidDecoyTarget } from '../abilities/ability-resolver';
 import { optimizeAgilePlayerRows } from '../abilities/leaders';
+import { KAMBI_CARD_ID, transformBerserkerInstance } from '../abilities/skellige-tokens';
 import { calculateRowStrength, isWeatherActiveForRow } from '../scoring/calculate-strength';
+import type { AIDifficulty } from './ai-difficulty';
 import type { AIPlayerView } from './ai-view';
 
 export interface ScoredPlayCandidate {
@@ -28,6 +30,7 @@ function sumRowTotals(
   rows: Readonly<Record<RowType, RowState>>,
   weather: WeatherState,
   doubleSpyStrength = false,
+  halfWeatherPenalty = false,
 ): number {
   let total = 0;
   for (const rowType of ROW_TYPES) {
@@ -35,6 +38,7 @@ function sumRowTotals(
       rows[rowType],
       isWeatherActiveForRow(weather, rowType),
       doubleSpyStrength,
+      halfWeatherPenalty,
     ).totalStrength;
   }
   return total;
@@ -57,25 +61,39 @@ function countHandWeatherDuplicates(hand: readonly CardInstance[]): ReadonlyMap<
 /**
  * Selects a sub-optimal card instanceId to swap during MULLIGAN, or null to keep hand.
  */
-export function pickMulliganSwap(view: AIPlayerView): string | null {
+export function pickMulliganSwap(
+  view: AIPlayerView,
+  difficulty: AIDifficulty = 'TAVERNER',
+): string | null {
   if (view.me.mulligansRemaining <= 0 || view.me.myDeckCount <= 0) {
+    return null;
+  }
+  if (difficulty === 'NOVICE' && view.me.mulligansRemaining <= 1) {
     return null;
   }
 
   const hand = view.me.hand;
   const musterCounts = new Map<string, number>();
   for (const c of hand) {
-    if (c.card.ability === 'MUSTER' && c.card.musterGroup) {
+    if (c.card.musterGroup) {
       musterCounts.set(c.card.musterGroup, (musterCounts.get(c.card.musterGroup) ?? 0) + 1);
     }
   }
 
   // 1. Excess Muster copies in hand (playing 1 already summons the rest)
   const extraMuster = hand.find(
-    (c) => c.card.ability === 'MUSTER' && c.card.musterGroup && (musterCounts.get(c.card.musterGroup) ?? 0) > 1,
+    (c) =>
+      c.card.type === 'UNIT' &&
+      !c.card.isHero &&
+      c.card.musterGroup !== undefined &&
+      (musterCounts.get(c.card.musterGroup) ?? 0) > 1,
   );
   if (extraMuster) {
     return extraMuster.instanceId;
+  }
+
+  if (difficulty === 'NOVICE') {
+    return null;
   }
 
   // 2. Duplicate weather cards
@@ -87,9 +105,25 @@ export function pickMulliganSwap(view: AIPlayerView): string | null {
     return dupWeather.instanceId;
   }
 
-  // 3. Weakest vanilla unit <= 2 strength
+  // 3. MASTER also avoids stranded Roach or swaps weak filler units up to strength 3
+  if (difficulty === 'MASTER') {
+    const roach = hand.find((c) => c.definitionId === 'nt_roach');
+    if (roach) {
+      return roach.instanceId;
+    }
+  }
+
+  // 4. Weakest vanilla unit <= threshold
+  const maxWeakStrength = difficulty === 'MASTER' ? 3 : 2;
   const weakVanilla = [...hand]
-    .filter((c) => c.card.type === 'UNIT' && !c.card.isHero && c.card.ability === null && c.card.baseStrength <= 2)
+    .filter(
+      (c) =>
+        c.card.type === 'UNIT' &&
+        !c.card.isHero &&
+        c.card.ability === null &&
+        c.definitionId !== 'nt_cow' &&
+        c.card.baseStrength <= maxWeakStrength,
+    )
     .sort((a, b) => a.card.baseStrength - b.card.baseStrength)[0];
   if (weakVanilla) {
     return weakVanilla.instanceId;
@@ -184,6 +218,7 @@ export function pickAgileRow(
       { ...currentRow, cards: [...currentRow.cards, card] },
       weatherActive,
       view.doubleSpyStrength,
+      view.halfWeatherPenalty,
     );
     const delta = simulatedRow.totalStrength - currentRow.totalStrength;
     if (delta > bestDelta) {
@@ -195,8 +230,12 @@ export function pickAgileRow(
   return bestRow;
 }
 
-function evaluateScorchGlobal(view: AIPlayerView): number {
-  let maxStrength = 0;
+function evaluateScorchGlobal(
+  view: AIPlayerView,
+  difficulty: AIDifficulty,
+  addedOwnStrength = 0,
+): { readonly score: number; readonly swing: number } {
+  let maxStrength = addedOwnStrength;
   for (const sideRows of [view.me.rows, view.opponent.rows]) {
     for (const rowType of ROW_TYPES) {
       for (const unit of sideRows[rowType].cards) {
@@ -208,10 +247,10 @@ function evaluateScorchGlobal(view: AIPlayerView): number {
   }
 
   if (maxStrength <= 0) {
-    return -40;
+    return { score: -40, swing: 0 };
   }
 
-  let ownLoss = 0;
+  let ownLoss = addedOwnStrength === maxStrength && addedOwnStrength > 0 ? addedOwnStrength : 0;
   let oppLoss = 0;
   for (const rowType of ROW_TYPES) {
     for (const unit of view.me.rows[rowType].cards) {
@@ -227,7 +266,13 @@ function evaluateScorchGlobal(view: AIPlayerView): number {
   }
 
   const net = oppLoss - ownLoss;
-  return net > 0 ? net * 1.45 : -50;
+  if (difficulty === 'MASTER' && oppLoss <= ownLoss) {
+    return { score: -60, swing: net };
+  }
+  return {
+    score: net > 0 ? net * 1.45 : -50,
+    swing: net,
+  };
 }
 
 function evaluateWeatherCard(view: AIPlayerView, ability: AbilityType): { score: number; swing: number } {
@@ -243,11 +288,13 @@ function evaluateWeatherCard(view: AIPlayerView, ability: AbilityType): { score:
     view.opponent.rows[rowType],
     true,
     view.doubleSpyStrength,
+    view.oppHalfWeatherPenalty,
   ).totalStrength;
   const meAfter = calculateRowStrength(
     view.me.rows[rowType],
     true,
     view.doubleSpyStrength,
+    view.halfWeatherPenalty,
   ).totalStrength;
 
   const swing = oppBefore - oppAfter - (meBefore - meAfter);
@@ -257,14 +304,85 @@ function evaluateWeatherCard(view: AIPlayerView, ability: AbilityType): { score:
   };
 }
 
+function evaluateWeatherStorm(view: AIPlayerView): { score: number; swing: number } {
+  const targets: RowType[] = [];
+  if (view.weather.fog === null) targets.push('RANGED');
+  if (view.weather.rain === null) targets.push('SIEGE');
+  if (targets.length === 0) {
+    return { score: -100, swing: 0 };
+  }
+
+  let swing = 0;
+  for (const rowType of targets) {
+    const oppBefore = view.opponent.rows[rowType].totalStrength;
+    const meBefore = view.me.rows[rowType].totalStrength;
+    const oppAfter = calculateRowStrength(
+      view.opponent.rows[rowType],
+      true,
+      view.doubleSpyStrength,
+      view.oppHalfWeatherPenalty,
+    ).totalStrength;
+    const meAfter = calculateRowStrength(
+      view.me.rows[rowType],
+      true,
+      view.doubleSpyStrength,
+      view.halfWeatherPenalty,
+    ).totalStrength;
+    swing += oppBefore - oppAfter - (meBefore - meAfter);
+  }
+
+  return {
+    score: swing > 2 ? swing * 1.25 : -30,
+    swing,
+  };
+}
+
+function evaluateMardroemeRow(
+  view: AIPlayerView,
+  rowType: RowType,
+  difficulty: AIDifficulty,
+): { readonly score: number; readonly swing: number } {
+  const row = view.me.rows[rowType];
+  const hasBerserker = row.cards.some((c) => c.card.ability === 'BERSERKER');
+  if (!hasBerserker) {
+    return { score: -30, swing: 0 };
+  }
+
+  const transformedCards = row.cards.map((c) =>
+    c.card.ability === 'BERSERKER' ? transformBerserkerInstance(c) : c,
+  );
+  const simulated = calculateRowStrength(
+    { ...row, cards: transformedCards, mardroemeActive: true },
+    isWeatherActiveForRow(view.weather, rowType),
+    view.doubleSpyStrength,
+    view.halfWeatherPenalty,
+  );
+  const gain = simulated.totalStrength - row.totalStrength;
+  const masterBonus = difficulty === 'MASTER' ? 6 : 0;
+  return {
+    score: gain > 0 ? gain * 1.35 + masterBonus : -20,
+    swing: gain,
+  };
+}
+
 function evaluateClearWeather(view: AIPlayerView): { score: number; swing: number } {
   if (view.weather.frost === null && view.weather.fog === null && view.weather.rain === null) {
     return { score: -100, swing: 0 };
   }
 
   const clearWeather: WeatherState = { frost: null, fog: null, rain: null };
-  const myAfter = sumRowTotals(view.me.rows, clearWeather, view.doubleSpyStrength);
-  const oppAfter = sumRowTotals(view.opponent.rows, clearWeather, view.doubleSpyStrength);
+  const myAfter = sumRowTotals(
+    view.me.rows,
+    clearWeather,
+    view.doubleSpyStrength,
+    view.halfWeatherPenalty,
+  );
+  const oppAfter = sumRowTotals(
+    view.opponent.rows,
+    clearWeather,
+    view.doubleSpyStrength,
+    view.oppHalfWeatherPenalty,
+  );
   const swing = myAfter - view.me.totalScore - (oppAfter - view.opponent.totalScore);
 
   return {
@@ -287,7 +405,12 @@ function evaluateDecoyTarget(view: AIPlayerView, target: CardInstance): { score:
   return { score: -15 - lostStrength, swing: -lostStrength };
 }
 
-function scoreUnitPlacement(view: AIPlayerView, instance: CardInstance, targetRow: RowType): ScoredPlayCandidate {
+function scoreUnitPlacement(
+  view: AIPlayerView,
+  instance: CardInstance,
+  targetRow: RowType,
+  difficulty: AIDifficulty,
+): ScoredPlayCandidate {
   const { card } = instance;
   if (card.ability === 'SPY') {
     const oppRow = view.opponent.rows[targetRow];
@@ -295,6 +418,7 @@ function scoreUnitPlacement(view: AIPlayerView, instance: CardInstance, targetRo
       { ...oppRow, cards: [...oppRow.cards, instance] },
       isWeatherActiveForRow(view.weather, targetRow),
       view.doubleSpyStrength,
+      view.oppHalfWeatherPenalty,
     );
     const oppGain = oppSimulated.totalStrength - oppRow.totalStrength;
     const drawBonus = view.me.myDeckCount >= 2 ? 26 : view.me.myDeckCount * 10;
@@ -308,10 +432,15 @@ function scoreUnitPlacement(view: AIPlayerView, instance: CardInstance, targetRo
 
   const currentRow = view.me.rows[targetRow];
   const weatherActive = isWeatherActiveForRow(view.weather, targetRow);
+  const effectiveUnit =
+    card.ability === 'BERSERKER' && currentRow.mardroemeActive
+      ? transformBerserkerInstance(instance)
+      : instance;
   const simulated = calculateRowStrength(
-    { ...currentRow, cards: [...currentRow.cards, instance] },
+    { ...currentRow, cards: [...currentRow.cards, effectiveUnit] },
     weatherActive,
     view.doubleSpyStrength,
+    view.halfWeatherPenalty,
   );
   const rowGain = simulated.totalStrength - currentRow.totalStrength;
   let score = rowGain;
@@ -324,6 +453,9 @@ function scoreUnitPlacement(view: AIPlayerView, instance: CardInstance, targetRo
   } else if (card.ability === 'MEDIC') {
     const hasMedicTarget = view.me.discard.some((c) => c.card.type === 'UNIT' && !c.card.isHero);
     score += hasMedicTarget ? 13 : -2;
+  } else if (card.ability === 'SCORCH') {
+    const scorchEval = evaluateScorchGlobal(view, difficulty, effectiveUnit.card.baseStrength);
+    score += scorchEval.score;
   } else if (card.ability === 'SCORCH_ROW') {
     const mirror = view.opponent.rows[targetRow];
     if (mirror.totalStrength >= 10) {
@@ -335,11 +467,31 @@ function scoreUnitPlacement(view: AIPlayerView, instance: CardInstance, targetRo
       }
       score += maxOpp * 1.4;
     }
+  } else if (card.ability === 'MARDROEME') {
+    const mardroemeEval = evaluateMardroemeRow(view, targetRow, difficulty);
+    if (mardroemeEval.swing > 0) {
+      score += mardroemeEval.score;
+    }
+  } else if (card.ability === 'BERSERKER') {
+    const hasMardroemeTrigger =
+      currentRow.mardroemeActive ||
+      view.me.hand.some(
+        (c) =>
+          c.card.ability === 'MARDROEME' &&
+          (c.card.type === 'SPECIAL' || c.card.allowedRows.includes(targetRow)),
+      );
+    if (hasMardroemeTrigger) {
+      score += difficulty === 'MASTER' ? 12 : 7;
+    }
+  }
+
+  if (instance.definitionId === KAMBI_CARD_ID) {
+    score += view.roundNumber <= 2 ? (difficulty === 'MASTER' ? 11 : 7) : -25;
   }
 
   // In Round 1, mildly prefer preserving 10+ Hero cards when weaker plays suffice
   if (card.isHero && view.roundNumber === 1 && view.me.gems === 2) {
-    score -= 2;
+    score -= difficulty === 'MASTER' ? 4 : 2;
   }
 
   return {
@@ -349,7 +501,10 @@ function scoreUnitPlacement(view: AIPlayerView, instance: CardInstance, targetRo
   };
 }
 
-function evaluateLeaderCandidate(view: AIPlayerView): ScoredPlayCandidate | null {
+function evaluateLeaderCandidate(
+  view: AIPlayerView,
+  difficulty: AIDifficulty,
+): ScoredPlayCandidate | null {
   if (!view.me.canUseLeader || !view.me.leader?.leaderAbility) {
     return null;
   }
@@ -382,6 +537,7 @@ function evaluateLeaderCandidate(view: AIPlayerView): ScoredPlayCandidate | null
       { ...row, hornCard: dummyHorn },
       isWeatherActiveForRow(view.weather, rowType),
       view.doubleSpyStrength,
+      view.halfWeatherPenalty,
     );
     const gain = afterHorn.totalStrength - row.totalStrength;
     return {
@@ -464,12 +620,33 @@ function evaluateLeaderCandidate(view: AIPlayerView): ScoredPlayCandidate | null
       mulligansRemaining: view.me.mulligansRemaining,
       mulliganDone: view.me.mulliganDone,
     };
-    const optimized = optimizeAgilePlayerRows(selfSnapshot, view.weather, view.doubleSpyStrength);
+    const optimized = optimizeAgilePlayerRows(
+      selfSnapshot,
+      view.weather,
+      view.doubleSpyStrength,
+      view.halfWeatherPenalty,
+    );
     const gain = optimized.totalScore - view.me.totalScore;
     return {
       action,
       tacticalScore: gain > 0 ? gain * 1.35 : -35,
       netPointSwing: gain,
+    };
+  }
+
+  if (ability === 'SHUFFLE_DISCARDS_TO_DECK') {
+    const ownDiscard = view.me.discard.length;
+    if (ownDiscard >= 4 && view.me.myDeckCount <= 5) {
+      return {
+        action,
+        tacticalScore: 10 + ownDiscard * 1.5,
+        netPointSwing: 0,
+      };
+    }
+    return {
+      action,
+      tacticalScore: ownDiscard > view.opponent.discard.length + 2 ? ownDiscard : -15,
+      netPointSwing: 0,
     };
   }
 
@@ -497,9 +674,12 @@ function evaluateLeaderCandidate(view: AIPlayerView): ScoredPlayCandidate | null
 /**
  * Generates and scores all legal PLAY_CARD and USE_LEADER candidates visible in AIPlayerView.
  */
-export function generatePlayCandidates(view: AIPlayerView): readonly ScoredPlayCandidate[] {
+export function generatePlayCandidates(
+  view: AIPlayerView,
+  difficulty: AIDifficulty = 'TAVERNER',
+): readonly ScoredPlayCandidate[] {
   const candidates: ScoredPlayCandidate[] = [];
-  const leaderCandidate = evaluateLeaderCandidate(view);
+  const leaderCandidate = evaluateLeaderCandidate(view, difficulty);
   if (leaderCandidate) {
     candidates.push(leaderCandidate);
   }
@@ -508,7 +688,7 @@ export function generatePlayCandidates(view: AIPlayerView): readonly ScoredPlayC
     const { card } = instance;
     if (card.type === 'UNIT') {
       for (const rowType of card.allowedRows) {
-        candidates.push(scoreUnitPlacement(view, instance, rowType));
+        candidates.push(scoreUnitPlacement(view, instance, rowType, difficulty));
       }
       continue;
     }
@@ -522,12 +702,22 @@ export function generatePlayCandidates(view: AIPlayerView): readonly ScoredPlayC
             { ...row, hornCard: instance },
             isWeatherActiveForRow(view.weather, rowType),
             view.doubleSpyStrength,
+            view.halfWeatherPenalty,
           );
           const gain = afterHorn.totalStrength - row.totalStrength;
           candidates.push({
             action: { type: 'PLAY_CARD', playerId: view.me.id, instanceId: instance.instanceId, targetRow: rowType },
             tacticalScore: gain > 0 ? gain * 1.15 : -20,
             netPointSwing: gain,
+          });
+        }
+      } else if (card.ability === 'MARDROEME') {
+        for (const rowType of card.allowedRows) {
+          const mardroemeEval = evaluateMardroemeRow(view, rowType, difficulty);
+          candidates.push({
+            action: { type: 'PLAY_CARD', playerId: view.me.id, instanceId: instance.instanceId, targetRow: rowType },
+            tacticalScore: mardroemeEval.score,
+            netPointSwing: mardroemeEval.swing,
           });
         }
       } else if (card.ability === 'DECOY') {
@@ -548,11 +738,11 @@ export function generatePlayCandidates(view: AIPlayerView): readonly ScoredPlayC
           }
         }
       } else if (card.ability === 'SCORCH') {
-        const scorchScore = evaluateScorchGlobal(view);
+        const scorchEval = evaluateScorchGlobal(view, difficulty);
         candidates.push({
           action: { type: 'PLAY_CARD', playerId: view.me.id, instanceId: instance.instanceId },
-          tacticalScore: scorchScore,
-          netPointSwing: Math.max(0, scorchScore),
+          tacticalScore: scorchEval.score,
+          netPointSwing: Math.max(0, scorchEval.swing),
         });
       } else if (card.ability === 'WEATHER_CLEAR') {
         const clearEval = evaluateClearWeather(view);
@@ -560,6 +750,13 @@ export function generatePlayCandidates(view: AIPlayerView): readonly ScoredPlayC
           action: { type: 'PLAY_CARD', playerId: view.me.id, instanceId: instance.instanceId },
           tacticalScore: clearEval.score,
           netPointSwing: clearEval.swing,
+        });
+      } else if (card.ability === 'WEATHER_STORM') {
+        const stormEval = evaluateWeatherStorm(view);
+        candidates.push({
+          action: { type: 'PLAY_CARD', playerId: view.me.id, instanceId: instance.instanceId },
+          tacticalScore: stormEval.score,
+          netPointSwing: stormEval.swing,
         });
       } else if (
         card.ability === 'WEATHER_FROST' ||
@@ -580,12 +777,37 @@ export function generatePlayCandidates(view: AIPlayerView): readonly ScoredPlayC
 }
 
 /**
+ * Selects which ranked candidate the AI plays according to its difficulty profile.
+ */
+export function selectCandidateForDifficulty(
+  view: AIPlayerView,
+  candidates: readonly ScoredPlayCandidate[],
+  difficulty: AIDifficulty = 'TAVERNER',
+): ScoredPlayCandidate | undefined {
+  if (candidates.length === 0) {
+    return undefined;
+  }
+  if (difficulty !== 'NOVICE') {
+    return candidates[0];
+  }
+
+  const positive = candidates.filter((c) => c.tacticalScore > 0);
+  if (positive.length < 2) {
+    return candidates[0];
+  }
+  const poolSize = Math.min(3, positive.length);
+  const offset = (view.roundNumber + view.me.hand.length + view.opponent.handCount) % poolSize;
+  return positive[offset] ?? candidates[0];
+}
+
+/**
  * Evaluates whether the bot should pass the current round based on card advantage,
- * round context, and Nilfgaard tie-win passive awareness.
+ * round context, AI difficulty, and Nilfgaard tie-win passive awareness.
  */
 export function shouldBotPass(
   view: AIPlayerView,
   bestCandidate: ScoredPlayCandidate | undefined,
+  difficulty: AIDifficulty = 'TAVERNER',
 ): boolean {
   if (!bestCandidate) {
     return true;
@@ -605,16 +827,14 @@ export function shouldBotPass(
     if (isTrailing && view.roundNumber === 1 && view.me.gems === 2) {
       const deficit = -scoreDiff + (oppWinsTie ? 1 : 0);
       const canPassLeadInOnePlay = bestCandidate.netPointSwing >= deficit;
-      // If deficit is huge (> 15) and best play cannot catch up in 1 card, concede R1 to keep hand
-      if (deficit > 15 && !canPassLeadInOnePlay) {
+      const deficitThreshold = difficulty === 'NOVICE' ? 24 : difficulty === 'MASTER' ? 12 : 15;
+      if (deficit > deficitThreshold && !canPassLeadInOnePlay) {
         return true;
       }
-      // If all plays are negative/harmful (e.g. useless weather/scorch) -> pass
       if (bestCandidate.tacticalScore <= 0) {
         return true;
       }
     }
-    // In elimination rounds (me.gems === 1 or R3), never pass while behind if any constructive play exists
     if (bestCandidate.tacticalScore <= 0 && bestCandidate.netPointSwing <= 0) {
       return true;
     }
@@ -622,11 +842,12 @@ export function shouldBotPass(
   }
 
   // Opponent has NOT passed yet:
-  // Round 1: concede early if falling far behind (> 16 pts) without card-advantage play
+  // Round 1: concede early if falling far behind without card-advantage play
+  const r1ConcedeGap = difficulty === 'NOVICE' ? -24 : difficulty === 'MASTER' ? -13 : -16;
   if (
     view.roundNumber === 1 &&
     view.me.gems === 2 &&
-    scoreDiff < -16 &&
+    scoreDiff < r1ConcedeGap &&
     view.me.hand.length <= view.opponent.handCount &&
     bestCandidate.tacticalScore < 18
   ) {
@@ -635,12 +856,13 @@ export function shouldBotPass(
 
   // Round 2 after winning Round 1 (up 2 gems vs 1): preserve cards if behind in hand count
   if (
+    difficulty !== 'NOVICE' &&
     view.roundNumber === 2 &&
     view.me.gems === 2 &&
     view.opponent.gems === 1 &&
     view.me.hand.length < view.opponent.handCount &&
     view.me.totalScore > 0 &&
-    bestCandidate.tacticalScore < 15
+    bestCandidate.tacticalScore < (difficulty === 'MASTER' ? 18 : 15)
   ) {
     return true;
   }

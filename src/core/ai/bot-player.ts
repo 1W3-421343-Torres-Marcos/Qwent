@@ -1,4 +1,5 @@
 import type { GameAction } from '../models/actions';
+import { DEFAULT_AI_DIFFICULTY, type AIDifficulty } from './ai-difficulty';
 import type { AIPlayerView } from './ai-view';
 import {
   generatePlayCandidates,
@@ -7,17 +8,21 @@ import {
   pickMedicTarget,
   pickMulliganSwap,
   pickScoiataelStarter,
+  selectCandidateForDifficulty,
   shouldBotPass,
 } from './heuristics';
 
 /**
  * Pure bot decision entry point reading ONLY filtered AIPlayerView (never raw GameState).
  */
-export function decideAction(view: AIPlayerView): GameAction {
+export function decideAction(
+  view: AIPlayerView,
+  difficulty: AIDifficulty = DEFAULT_AI_DIFFICULTY,
+): GameAction {
   const botId = view.me.id;
 
   if (view.phase === 'MULLIGAN') {
-    const swapId = pickMulliganSwap(view);
+    const swapId = pickMulliganSwap(view, difficulty);
     if (swapId !== null) {
       return {
         type: 'MULLIGAN_SWAP',
@@ -77,15 +82,15 @@ export function decideAction(view: AIPlayerView): GameAction {
     return { type: 'ADVANCE_ROUND' };
   }
 
-  const candidates = generatePlayCandidates(view);
-  const bestCandidate = candidates[0];
+  const candidates = generatePlayCandidates(view, difficulty);
+  const chosenCandidate = selectCandidateForDifficulty(view, candidates, difficulty);
 
-  if (shouldBotPass(view, bestCandidate)) {
+  if (shouldBotPass(view, chosenCandidate, difficulty)) {
     return {
       type: 'PASS_TURN',
       playerId: botId,
     };
   }
 
-  return bestCandidate!.action;
+  return chosenCandidate!.action;
 }

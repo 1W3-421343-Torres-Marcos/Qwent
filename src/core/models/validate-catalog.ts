@@ -17,6 +17,7 @@ const VALID_FACTIONS: ReadonlySet<FactionId> = new Set([
   'NILFGAARD',
   'MONSTERS',
   'SCOIATAEL',
+  'SKELLIGE',
   'NEUTRAL',
 ]);
 

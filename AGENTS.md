@@ -23,14 +23,14 @@ App Android (`.apk`) 100% offline que replica el minijuego **Gwent** de *The Wit
      e) Cuerno del Comandante (`COMMANDERS_HORN` o unidad con efecto cuerno): duplica (`x2`) la fila (tope: un `x2` por fila; una unidad con efecto cuerno no se duplica por su propia habilidad, pero sí si hay `COMMANDERS_HORN` en la ranura u otra unidad cuerno en la fila).
 3. **Esquema normalizado y estrategia de datos**:
    - `allowedRows` siempre es array (`["CLOSE_COMBAT"]`, `["CLOSE_COMBAT", "RANGED"]`, etc.), resolviendo Ágiles sin lógica especial.
-   - Habilidades tipadas: `TIGHT_BOND`, `MORALE_BOOST`, `SPY`, `MEDIC`, `MUSTER`, `SCORCH`, `SCORCH_ROW`, `DECOY`, `COMMANDERS_HORN`, `WEATHER_FROST`, `WEATHER_FOG`, `WEATHER_RAIN`, `WEATHER_CLEAR`.
+   - Habilidades tipadas: `TIGHT_BOND`, `MORALE_BOOST`, `SPY`, `MEDIC`, `MUSTER`, `SCORCH`, `SCORCH_ROW`, `DECOY`, `COMMANDERS_HORN`, `WEATHER_FROST`, `WEATHER_FOG`, `WEATHER_RAIN`, `WEATHER_CLEAR`, `BERSERKER`, `MARDROEME`, `WEATHER_STORM`.
    - F2–F4 usan un `cards.json` de prueba (20–35 cartas) cubriendo casos borde. En F5 un script ETL determinista genera el catálogo completo desde un dataset local curado (CSV/JSON aportado por el usuario o importado desde una fuente pública verificada), validado por tests.
 4. **Entregable APK obligatorio en CADA fase (Walking Skeleton)**:
    - F1 configura Capacitor, orientación `sensorLandscape`, modo inmersivo y `npm run build:apk`.
    - Toda fase (F1–F6) cierra ejecutando tests en verde, sync de Capacitor, compilación de `gwent-f<N>-debug.apk` y verificación de arranque.
 
 ## Supuestos de Diseño ante Ambigüedades
-- **Facciones base**: Incluye las 4 facciones base de TW3 (`NORTHERN_REALMS`, `NILFGAARD`, `MONSTERS`, `SCOIATAEL`) y `NEUTRAL`, excluyendo Skellige (DLC) para acotar el alcance.
+- **Facciones jugables**: Incluye las 5 facciones clásicas de TW3 (`NORTHERN_REALMS`, `NILFGAARD`, `MONSTERS`, `SCOIATAEL`, y `SKELLIGE` de *Blood and Wine*) más `NEUTRAL`.
 - **Modo 2 jugadores en F2–F3**: Pantalla de transición entre turnos ("Pasar dispositivo") sobre tablero único para ocultar la mano hasta integrar IA en F4.
 - **Almacenamiento local**: `localStorage` tras repositorio tipado por ser síncrono, offline y nativo en WebView sin plugins extra.
 

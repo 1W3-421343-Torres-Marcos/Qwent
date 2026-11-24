@@ -1,5 +1,5 @@
 import { Injectable, computed, signal } from '@angular/core';
-import type { GameState } from '../../core';
+import type { AIDifficulty, GameState } from '../../core';
 import {
   MATCH_HISTORY_STORAGE_KEY,
   appendHistoryEntry,
@@ -18,8 +18,8 @@ export class MatchHistoryService {
   readonly entries = this.entriesSignal.asReadonly();
   readonly stats = computed(() => computeHistoryStats(this.entriesSignal()));
 
-  recordCompletedMatch(state: GameState, mode: MatchHistoryMode): void {
-    const entry = buildMatchHistoryEntry(state, mode);
+  recordCompletedMatch(state: GameState, mode: MatchHistoryMode, aiDifficulty?: AIDifficulty): void {
+    const entry = buildMatchHistoryEntry(state, mode, undefined, aiDifficulty);
     const updated = appendHistoryEntry(this.entriesSignal(), entry);
     this.entriesSignal.set(updated);
     this.saveToStorage(updated);

@@ -1089,6 +1089,59 @@
     "description": "Destruye las unidades no-Héroe de mayor fuerza efectiva en ambos lados del tablero."
   },
   {
+    "id": "sp_skellige_storm",
+    "name": "Tormenta de Skellige",
+    "faction": "NEUTRAL",
+    "type": "SPECIAL",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [],
+    "ability": "WEATHER_STORM",
+    "maxCopies": 3,
+    "description": "Clima dual: reduce la fuerza de las unidades normales en Distancia y Asedio de ambos lados."
+  },
+  {
+    "id": "sk_mardroeme",
+    "name": "Mardroeme",
+    "faction": "SKELLIGE",
+    "type": "SPECIAL",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT",
+      "RANGED"
+    ],
+    "ability": "MARDROEME",
+    "maxCopies": 3,
+    "description": "Especial: transforma en Vildkaarl o Joven Vildkaarl a tus unidades Berserker de la fila elegida durante esta ronda."
+  },
+  {
+    "id": "sk_leader_crach_an_craite",
+    "name": "Crach an Craite",
+    "faction": "SKELLIGE",
+    "type": "LEADER",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [],
+    "ability": null,
+    "leaderAbility": "SHUFFLE_DISCARDS_TO_DECK",
+    "maxCopies": 1,
+    "description": "Líder: baraja todos los descartes de ambos jugadores de vuelta en sus respectivos mazos."
+  },
+  {
+    "id": "sk_leader_king_bran",
+    "name": "Rey Bran",
+    "faction": "SKELLIGE",
+    "type": "LEADER",
+    "baseStrength": 0,
+    "isHero": false,
+    "allowedRows": [],
+    "ability": null,
+    "leaderAbility": "HALF_WEATHER_PENALTY",
+    "maxCopies": 1,
+    "description": "Líder pasivo: tus unidades afectadas por clima conservan la mitad de su fuerza base (redondeada hacia arriba)."
+  },
+  {
     "id": "ng_albrich",
     "name": "Albrich",
     "faction": "NILFGAARD",
@@ -1130,6 +1183,48 @@
     "ability": null,
     "maxCopies": 1,
     "description": "Ágil (Cuerpo o Distancia)."
+  },
+  {
+    "id": "sk_berserker",
+    "name": "Berserker",
+    "faction": "SKELLIGE",
+    "type": "UNIT",
+    "baseStrength": 4,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "BERSERKER",
+    "maxCopies": 1,
+    "description": "Berserker: se transforma en Vildkaarl o Joven Vildkaarl bajo Mardroeme."
+  },
+  {
+    "id": "sk_birna_bran",
+    "name": "Birna Bran",
+    "faction": "SKELLIGE",
+    "type": "UNIT",
+    "baseStrength": 2,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "MEDIC",
+    "maxCopies": 1,
+    "description": "Médico: revive una unidad no-Héroe de tu descarte."
+  },
+  {
+    "id": "sk_blueboy_lugos",
+    "name": "Lugos el Azul",
+    "faction": "SKELLIGE",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "«Dicen que surca mares helados con tanta furia como su padre en batalla»."
   },
   {
     "id": "mo_botchling",
@@ -1176,6 +1271,21 @@
     "description": "Ágil (Cuerpo o Distancia)."
   },
   {
+    "id": "sk_cerys",
+    "name": "Cerys",
+    "faction": "SKELLIGE",
+    "type": "UNIT",
+    "baseStrength": 10,
+    "isHero": true,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "MUSTER",
+    "musterGroup": "shield_maiden",
+    "maxCopies": 1,
+    "description": "Héroe (inmune a climas y efectos). Reunión: invoca todas las cartas iguales o del mismo grupo desde mano y mazo."
+  },
+  {
     "id": "st_ciaran_aep_easnillien",
     "name": "Ciaran aep Easnillien",
     "faction": "SCOIATAEL",
@@ -1203,6 +1313,93 @@
     "ability": null,
     "maxCopies": 1,
     "description": "Héroe (inmune a climas y efectos)."
+  },
+  {
+    "id": "sk_clan_an_craite_warrior",
+    "name": "Guerrero del clan An Craite",
+    "faction": "SKELLIGE",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "TIGHT_BOND",
+    "bondGroup": "clan_an_craite_warrior",
+    "maxCopies": 3,
+    "description": "Vínculo estrecho: multiplica su fuerza por cada copia igual en la fila."
+  },
+  {
+    "id": "sk_clan_brokvar_archer",
+    "name": "Arquero del clan Brokvar",
+    "faction": "SKELLIGE",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 3,
+    "description": "«Ninguna gaviota vuela más rápido que una flecha de Brokvar entre las olas»."
+  },
+  {
+    "id": "sk_clan_dimun_pirate",
+    "name": "Pirata del clan Dimun",
+    "faction": "SKELLIGE",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": "SCORCH",
+    "maxCopies": 1,
+    "description": "Tierra quemada: al entrar destruye las unidades no-Héroe más fuertes en ambos lados del tablero."
+  },
+  {
+    "id": "sk_clan_drummond_shield_maiden",
+    "name": "Doncella escudera de Drummond",
+    "faction": "SKELLIGE",
+    "type": "UNIT",
+    "baseStrength": 4,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": "TIGHT_BOND",
+    "bondGroup": "clan_drummond_shield_maiden",
+    "musterGroup": "shield_maiden",
+    "maxCopies": 3,
+    "description": "Vínculo estrecho: multiplica su fuerza por cada copia igual en la fila."
+  },
+  {
+    "id": "sk_clan_heymaey_skald",
+    "name": "Escaldo del clan Heymaey",
+    "faction": "SKELLIGE",
+    "type": "UNIT",
+    "baseStrength": 4,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "«Canta gestas de hidromiel, acero y tormentas hasta helar la sangre rival»."
+  },
+  {
+    "id": "sk_clan_tordarroch_armorsmith",
+    "name": "Armero del clan Tordarroch",
+    "faction": "SKELLIGE",
+    "type": "UNIT",
+    "baseStrength": 4,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "«Acero templado entre glaciares para resistir el empuje de cualquier monstruo»."
   },
   {
     "id": "mo_cockatrice",
@@ -1334,6 +1531,34 @@
     "description": "«Da otro paso, dh'oine. Te verías mejor con una flecha entre los ojos»."
   },
   {
+    "id": "sk_donar_an_hindar",
+    "name": "Donar an Hindar",
+    "faction": "SKELLIGE",
+    "type": "UNIT",
+    "baseStrength": 4,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "«Anciano jarl de Hindarsfjall, respetado en cada consejo de las islas»."
+  },
+  {
+    "id": "sk_draig_bon_dhu",
+    "name": "Draig Bon-Dhu",
+    "faction": "SKELLIGE",
+    "type": "UNIT",
+    "baseStrength": 2,
+    "isHero": false,
+    "allowedRows": [
+      "SIEGE"
+    ],
+    "ability": "COMMANDERS_HORN",
+    "maxCopies": 1,
+    "description": "Cuerno del comandante: duplica la fuerza de las demás unidades de la fila."
+  },
+  {
     "id": "mo_draug",
     "name": "Draug",
     "faction": "MONSTERS",
@@ -1389,6 +1614,20 @@
     "ability": null,
     "maxCopies": 1,
     "description": "«¡El nido! ¡Acabad con el nido o estas alimañas no dejarán de salir!»"
+  },
+  {
+    "id": "sk_ermion",
+    "name": "Armiño",
+    "faction": "SKELLIGE",
+    "type": "UNIT",
+    "baseStrength": 8,
+    "isHero": true,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": "MARDROEME",
+    "maxCopies": 1,
+    "description": "Héroe (inmune a climas y efectos). Mardroeme: transforma los Berserkers de su fila en Vildkaarl durante esta ronda."
   },
   {
     "id": "st_filavandrel_aen_fidhail",
@@ -1518,6 +1757,34 @@
     "description": "«A los grifos les gusta jugar con su presa y devorarla viva, pedazo a pedazo»."
   },
   {
+    "id": "sk_hjalmar",
+    "name": "Hjalmar",
+    "faction": "SKELLIGE",
+    "type": "UNIT",
+    "baseStrength": 10,
+    "isHero": true,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "Héroe (inmune a climas y efectos)."
+  },
+  {
+    "id": "sk_holger_blackhand",
+    "name": "Holger Manonegra",
+    "faction": "SKELLIGE",
+    "type": "UNIT",
+    "baseStrength": 4,
+    "isHero": false,
+    "allowedRows": [
+      "SIEGE"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "«Saquear naves nilfgaardianas es una tradición tan vieja como las mareas»."
+  },
+  {
     "id": "st_ida_emean_aep_sivney",
     "name": "Ida Emean aep Sivney",
     "faction": "SCOIATAEL",
@@ -1560,6 +1827,20 @@
     "description": "Héroe (inmune a climas y efectos)."
   },
   {
+    "id": "sk_kambi",
+    "name": "Kambi",
+    "faction": "SKELLIGE",
+    "type": "UNIT",
+    "baseStrength": 0,
+    "isHero": true,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "Héroe (inmune a climas y efectos). Vengador: al entrar al descarte al final de la ronda, invoca a Hemdall (11, Héroe) en Cuerpo a cuerpo."
+  },
+  {
     "id": "nr_keira_metz",
     "name": "Keira Metz",
     "faction": "NORTHERN_REALMS",
@@ -1572,6 +1853,35 @@
     "ability": null,
     "maxCopies": 1,
     "description": "«Si voy a morir hoy, prefiero lucir deslumbrante para la ocasión»."
+  },
+  {
+    "id": "sk_light_longship",
+    "name": "Drakkar ligero",
+    "faction": "SKELLIGE",
+    "type": "UNIT",
+    "baseStrength": 4,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": "MUSTER",
+    "musterGroup": "light_longship",
+    "maxCopies": 3,
+    "description": "Reunión: invoca todas las cartas iguales o del mismo grupo desde mano y mazo."
+  },
+  {
+    "id": "sk_madman_lugos",
+    "name": "Lugos el Loco",
+    "faction": "SKELLIGE",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "«¡Que vengan mil enemigos, que sobran hachas para recibirlos en la costa!»"
   },
   {
     "id": "ng_menno_coehoorn",
@@ -1614,6 +1924,21 @@
     "ability": null,
     "maxCopies": 1,
     "description": "Héroe (inmune a climas y efectos)."
+  },
+  {
+    "id": "sk_olaf",
+    "name": "Olaf",
+    "faction": "SKELLIGE",
+    "type": "UNIT",
+    "baseStrength": 12,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT",
+      "RANGED"
+    ],
+    "ability": "MORALE_BOOST",
+    "maxCopies": 1,
+    "description": "Ágil (Cuerpo o Distancia). Inyección de moral: suma +1 a las demás unidades normales de su fila."
   },
   {
     "id": "nr_philippa_eilhart",
@@ -1883,6 +2208,20 @@
     "description": "«La Logia carece de humildad. Nuestra sed de poder será nuestra perdición»."
   },
   {
+    "id": "sk_svanrige",
+    "name": "Svanrige",
+    "faction": "SKELLIGE",
+    "type": "UNIT",
+    "baseStrength": 4,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "«Hijo de Bran, dispuesto a reclamar su derecho con la espada en la mano»."
+  },
+  {
     "id": "ng_sweers",
     "name": "Sweers",
     "faction": "NILFGAARD",
@@ -1937,6 +2276,20 @@
     "ability": null,
     "maxCopies": 1,
     "description": "Héroe (inmune a climas y efectos)."
+  },
+  {
+    "id": "sk_udalryk",
+    "name": "Udalryk",
+    "faction": "SKELLIGE",
+    "type": "UNIT",
+    "baseStrength": 4,
+    "isHero": false,
+    "allowedRows": [
+      "CLOSE_COMBAT"
+    ],
+    "ability": null,
+    "maxCopies": 1,
+    "description": "«Atormentado por sombras antiguas en las costas sombrías de Spikeroog»."
   },
   {
     "id": "mo_vampire_bruxa",
@@ -2084,6 +2437,21 @@
     "description": "«El odio arde más que cualquier fuego y corta más profundo que cualquier hoja»."
   },
   {
+    "id": "sk_war_longship",
+    "name": "Drakkar de guerra",
+    "faction": "SKELLIGE",
+    "type": "UNIT",
+    "baseStrength": 6,
+    "isHero": false,
+    "allowedRows": [
+      "SIEGE"
+    ],
+    "ability": "TIGHT_BOND",
+    "bondGroup": "war_longship",
+    "maxCopies": 3,
+    "description": "Vínculo estrecho: multiplica su fuerza por cada copia igual en la fila."
+  },
+  {
     "id": "mo_werewolf",
     "name": "Hombre lobo",
     "faction": "MONSTERS",
@@ -2139,6 +2507,20 @@
     "ability": null,
     "maxCopies": 1,
     "description": "«El mundo pertenece a quienes mejor saben partir cráneos en batalla»."
+  },
+  {
+    "id": "sk_young_berserker",
+    "name": "Joven berserker",
+    "faction": "SKELLIGE",
+    "type": "UNIT",
+    "baseStrength": 2,
+    "isHero": false,
+    "allowedRows": [
+      "RANGED"
+    ],
+    "ability": "BERSERKER",
+    "maxCopies": 3,
+    "description": "Berserker: se transforma en Vildkaarl o Joven Vildkaarl bajo Mardroeme."
   },
   {
     "id": "ng_young_emissary",

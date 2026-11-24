@@ -92,19 +92,20 @@ describe('Deterministic Cards ETL (F5.2)', () => {
     ).toThrow(/Habilidad inválida/);
   });
 
-  it('ensures generated src/assets/data/cards.json is sorted deterministically, valid, and covers all 4 factions & leader abilities', () => {
+  it('ensures generated src/assets/data/cards.json is sorted deterministically, valid, and covers all 5 factions & leader abilities', () => {
     const catalog = rawCards as readonly CardDefinition[];
     const validation = validateCatalog(catalog);
     expect(validation.errors).toEqual([]);
     expect(validation.valid).toBe(true);
-    expect(catalog).toHaveLength(154);
+    expect(catalog).toHaveLength(181);
 
     const retransformed = transformDatasetToCatalog(catalog);
     expect(JSON.stringify(catalog)).toBe(JSON.stringify(retransformed));
 
     for (const faction of PLAYABLE_FACTIONS) {
       const factionLeaders = catalog.filter((c) => c.type === 'LEADER' && c.faction === faction);
-      expect(factionLeaders).toHaveLength(5);
+      const expectedLeaderCount = faction === 'SKELLIGE' ? 2 : 5;
+      expect(factionLeaders).toHaveLength(expectedLeaderCount);
     }
 
     const coveredLeaderAbilities = new Set(

@@ -37,9 +37,9 @@ describe('Card Art Variant Resolution (U5.1)', () => {
     ]);
   });
 
-  it('declares all 29 expected alternate sprite stems uniquely', () => {
+  it('declares all 31 expected alternate sprite stems uniquely', () => {
     const altIds = getExpectedAltSpriteIds();
-    expect(altIds).toHaveLength(29);
-    expect(new Set(altIds).size).toBe(29);
+    expect(altIds).toHaveLength(31);
+    expect(new Set(altIds).size).toBe(31);
   });
 });

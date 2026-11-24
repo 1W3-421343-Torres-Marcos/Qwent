@@ -1,8 +1,9 @@
 import { ROW_TYPES, type AbilityType, type CardInstance, type LeaderAbilityType, type PlayerId, type RowType } from '../models/types';
 import type { GameState, PlayerState, WeatherState } from '../models/game-state';
+import { shuffleDeterministic } from '../engine/prng';
 import { recalculateBoard, recalculatePlayer } from '../scoring/calculate-strength';
-import { drawCards, resolveScorchRow } from './ability-resolver';
-import { isPassiveLeaderActive } from './passive-leaders';
+import { collectWeatherSlotDiscards, drawCards, resolveScorchRow } from './ability-resolver';
+import { isPassiveLeaderActive, isPlayerPassiveLeaderActive } from './passive-leaders';
 
 export const LEADER_HORN_DEFINITION_ID = 'leader_horn_effect' as const;
 
@@ -41,7 +42,8 @@ export function applyPassiveStartLeaders(
   const isStartPassive = (ability?: LeaderAbilityType): boolean =>
     ability === 'DRAW_EXTRA_CARD_START' ||
     ability === 'RANDOMIZE_REVIVES' ||
-    ability === 'DOUBLE_SPY_STRENGTH';
+    ability === 'DOUBLE_SPY_STRENGTH' ||
+    ability === 'HALF_WEATHER_PENALTY';
 
   if (isStartPassive(nextP1.leader?.leaderAbility) && !nextP1.leaderUsed) {
     nextP1 =
@@ -77,7 +79,8 @@ export function canUseLeader(state: GameState, playerId: PlayerId): boolean {
     ability === 'CANCEL_ENEMY_LEADER' ||
     ability === 'DRAW_EXTRA_CARD_START' ||
     ability === 'RANDOMIZE_REVIVES' ||
-    ability === 'DOUBLE_SPY_STRENGTH'
+    ability === 'DOUBLE_SPY_STRENGTH' ||
+    ability === 'HALF_WEATHER_PENALTY'
   ) {
     return false;
   }
@@ -105,6 +108,10 @@ export function canUseLeader(state: GameState, playerId: PlayerId): boolean {
     return ROW_TYPES.some((row) =>
       player.rows[row].cards.some((c) => !c.card.isHero && c.card.allowedRows.length > 1),
     );
+  }
+
+  if (ability === 'SHUFFLE_DISCARDS_TO_DECK') {
+    return state.players.PLAYER_1.discard.length > 0 || state.players.PLAYER_2.discard.length > 0;
   }
 
   return (
@@ -173,17 +180,7 @@ export function resolveLeaderUse(state: GameState, playerId: PlayerId): GameStat
   }
 
   if (ability === 'CLEAR_WEATHER_LEADER') {
-    const p1Discards: CardInstance[] = [];
-    const p2Discards: CardInstance[] = [];
-    for (const key of ['frost', 'fog', 'rain'] as const) {
-      const slot = baseState.weather[key];
-      if (!slot) continue;
-      if (slot.owner === 'PLAYER_1') {
-        p1Discards.push(slot.card);
-      } else {
-        p2Discards.push(slot.card);
-      }
-    }
+    const weatherDiscards = collectWeatherSlotDiscards(baseState.weather);
 
     return recalculateBoard({
       ...baseState,
@@ -191,11 +188,11 @@ export function resolveLeaderUse(state: GameState, playerId: PlayerId): GameStat
       players: {
         PLAYER_1: {
           ...baseState.players.PLAYER_1,
-          discard: [...baseState.players.PLAYER_1.discard, ...p1Discards],
+          discard: [...baseState.players.PLAYER_1.discard, ...weatherDiscards.PLAYER_1],
         },
         PLAYER_2: {
           ...baseState.players.PLAYER_2,
-          discard: [...baseState.players.PLAYER_2.discard, ...p2Discards],
+          discard: [...baseState.players.PLAYER_2.discard, ...weatherDiscards.PLAYER_2],
         },
       },
     });
@@ -259,6 +256,36 @@ export function resolveLeaderUse(state: GameState, playerId: PlayerId): GameStat
 
   if (ability === 'OPTIMIZE_AGILE_ROWS') {
     return resolveOptimizeAgileRows(baseState, playerId);
+  }
+
+  if (ability === 'SHUFFLE_DISCARDS_TO_DECK') {
+    const p1State = baseState.players.PLAYER_1;
+    const p2State = baseState.players.PLAYER_2;
+    if (p1State.discard.length === 0 && p2State.discard.length === 0) {
+      return state;
+    }
+
+    const p1Reset = p1State.discard.map((c) => ({ ...c, effectiveStrength: c.card.baseStrength }));
+    const p2Reset = p2State.discard.map((c) => ({ ...c, effectiveStrength: c.card.baseStrength }));
+    const p1Shuffled = shuffleDeterministic([...p1State.deck, ...p1Reset], baseState.rngSeed);
+    const p2Shuffled = shuffleDeterministic([...p2State.deck, ...p2Reset], p1Shuffled.nextSeed);
+
+    return {
+      ...baseState,
+      rngSeed: p2Shuffled.nextSeed,
+      players: {
+        PLAYER_1: {
+          ...p1State,
+          deck: p1Shuffled.items,
+          discard: [],
+        },
+        PLAYER_2: {
+          ...p2State,
+          deck: p2Shuffled.items,
+          discard: [],
+        },
+      },
+    };
   }
 
   if (ability === 'REVIVE_OWN_DISCARD_TO_HAND' || ability === 'STEAL_ENEMY_DISCARD_TO_HAND') {
@@ -381,8 +408,9 @@ export function optimizeAgilePlayerRows(
   player: PlayerState,
   weather: WeatherState,
   doubleSpyStrength: boolean,
+  halfWeatherPenalty = false,
 ): PlayerState {
-  let currentPlayer = recalculatePlayer(player, weather, doubleSpyStrength);
+  let currentPlayer = recalculatePlayer(player, weather, doubleSpyStrength, halfWeatherPenalty);
 
   const agileUnits: CardInstance[] = [];
   for (const rowType of ROW_TYPES) {
@@ -417,6 +445,7 @@ export function optimizeAgilePlayerRows(
         { ...currentPlayer, rows: candidateRows },
         weather,
         doubleSpyStrength,
+        halfWeatherPenalty,
       ).totalScore;
       if (candidateScore > bestScore) {
         bestScore = candidateScore;
@@ -425,7 +454,12 @@ export function optimizeAgilePlayerRows(
     }
 
     if (bestRows !== currentPlayer.rows) {
-      currentPlayer = recalculatePlayer({ ...currentPlayer, rows: bestRows }, weather, doubleSpyStrength);
+      currentPlayer = recalculatePlayer(
+        { ...currentPlayer, rows: bestRows },
+        weather,
+        doubleSpyStrength,
+        halfWeatherPenalty,
+      );
     }
   }
 
@@ -434,7 +468,13 @@ export function optimizeAgilePlayerRows(
 
 function resolveOptimizeAgileRows(state: GameState, playerId: PlayerId): GameState {
   const doubleSpyStrength = isPassiveLeaderActive(state, 'DOUBLE_SPY_STRENGTH');
-  const currentPlayer = optimizeAgilePlayerRows(state.players[playerId], state.weather, doubleSpyStrength);
+  const halfWeatherPenalty = isPlayerPassiveLeaderActive(state, playerId, 'HALF_WEATHER_PENALTY');
+  const currentPlayer = optimizeAgilePlayerRows(
+    state.players[playerId],
+    state.weather,
+    doubleSpyStrength,
+    halfWeatherPenalty,
+  );
 
   return recalculateBoard({
     ...state,

@@ -2,12 +2,14 @@ import { describe, expect, it } from 'vitest';
 import rawCards from '../../../assets/data/cards.json';
 import rawDecks from '../../../assets/data/starter-decks.json';
 import {
+  AI_DIFFICULTIES,
   LEADER_ABILITY_TYPES,
   PLAYABLE_FACTIONS,
   createAIView,
   createInitialGameState,
   decideAction,
   dispatch,
+  type AIDifficulty,
   type CardDefinition,
   type GameState,
   type LeaderAbilityType,
@@ -39,6 +41,8 @@ function makeSimLeader(faction: PlayableFactionId, ability: LeaderAbilityType): 
 function runMatchToCompletion(
   initialState: GameState,
   seed: number,
+  p1Difficulty: AIDifficulty = 'TAVERNER',
+  p2Difficulty: AIDifficulty = 'TAVERNER',
 ): { readonly finalState: GameState; readonly steps: number } {
   let state = initialState;
   let steps = 0;
@@ -48,10 +52,11 @@ function runMatchToCompletion(
       throw new Error(`Match exceeded ${MAX_ACTIONS_PER_MATCH} steps at seed=${seed}, phase=${state.phase}`);
     }
 
+    const difficulty = state.activePlayer === 'PLAYER_1' ? p1Difficulty : p2Difficulty;
     const action =
       state.phase === 'ROUND_END'
         ? ({ type: 'ADVANCE_ROUND' } as const)
-        : decideAction(createAIView(state, state.activePlayer));
+        : decideAction(createAIView(state, state.activePlayer), difficulty);
 
     const nextState = dispatch(state, action);
     if (nextState === state) {
@@ -104,6 +109,8 @@ function simulateRealStarterMatch(
   seed: number,
   deckA: StarterDeckDefinition,
   deckB: StarterDeckDefinition,
+  p1Difficulty: AIDifficulty = 'TAVERNER',
+  p2Difficulty: AIDifficulty = 'TAVERNER',
 ): { readonly finalState: GameState; readonly steps: number } {
   const leaderA = deckA.leaderId ? (catalog.find((c) => c.id === deckA.leaderId) ?? null) : null;
   const leaderB = deckB.leaderId ? (catalog.find((c) => c.id === deckB.leaderId) ?? null) : null;
@@ -125,7 +132,7 @@ function simulateRealStarterMatch(
     },
   });
 
-  return runMatchToCompletion(initialState, seed);
+  return runMatchToCompletion(initialState, seed, p1Difficulty, p2Difficulty);
 }
 
 describe('Bot vs. Bot Stress Simulation (F4.3 & F5.3)', () => {
@@ -158,8 +165,8 @@ describe('Bot vs. Bot Stress Simulation (F4.3 & F5.3)', () => {
     }
   });
 
-  it('completes 120 multi-faction and Leader Bot vs. Bot matches covering all 4 factions & leader abilities', () => {
-    for (let i = 0; i < 120; i++) {
+  it('completes 150 multi-faction and Leader Bot vs. Bot matches covering all 5 factions & leader abilities', () => {
+    for (let i = 0; i < 150; i++) {
       const f1 = PLAYABLE_FACTIONS[i % PLAYABLE_FACTIONS.length]!;
       const f2 = PLAYABLE_FACTIONS[(i + 1) % PLAYABLE_FACTIONS.length]!;
       const l1Ability = LEADER_ABILITY_TYPES[i % LEADER_ABILITY_TYPES.length]!;
@@ -179,11 +186,13 @@ describe('Bot vs. Bot Stress Simulation (F4.3 & F5.3)', () => {
     }
   });
 
-  it('completes 120 matches using all 4 real starter decks and their real leaders', () => {
+  it('completes 120 matches using all 5 real starter decks (incl. Skellige) and all 3 AI difficulties', () => {
     for (let i = 0; i < 120; i++) {
       const deckA = decks[i % decks.length]!;
-      const deckB = decks[(i + 1 + (i % 3)) % decks.length]!;
-      const { finalState, steps } = simulateRealStarterMatch(5000 + i, deckA, deckB);
+      const deckB = decks[(i + 1 + (i % 4)) % decks.length]!;
+      const diff1 = AI_DIFFICULTIES[i % AI_DIFFICULTIES.length]!;
+      const diff2 = AI_DIFFICULTIES[(i + 1) % AI_DIFFICULTIES.length]!;
+      const { finalState, steps } = simulateRealStarterMatch(5000 + i, deckA, deckB, diff1, diff2);
       expect(finalState.phase).toBe('MATCH_END');
       expect(finalState.winner).not.toBeNull();
       expect(steps).toBeLessThan(MAX_ACTIONS_PER_MATCH);

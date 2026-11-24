@@ -14,7 +14,7 @@
 | U4 | Sensación en vivo de partida TW3 (banners, preview IA, corona y gemas) | [x] | 100% |
 | U5 | Fidelidad visual del tablero, artes alternativos, dorsos y climas | [x] | 100% |
 | U6 | 5.º Líder por facción (*Hearts of Stone*) y localización completa al español | [x] | 100% |
-| U7 | Expansión *Blood and Wine* (Skellige) y niveles de dificultad de IA | [ ] | 0% |
+| U7 | Expansión *Blood and Wine* (Skellige) y niveles de dificultad de IA | [x] | 100% |
 
 **Estados:** `[ ]` pendiente | `[~]` en curso | `[x]` completada
 
@@ -42,10 +42,10 @@
 - [x] **U6.3**: Validación ETL + tests en verde, versión `1.6.0`, `gwent-u6-debug.apk` (`--phase=u6`) y tag `v1.6.0`
 
 ## U7: Expansión *Blood and Wine* (Facción Skellige) y niveles de dificultad de IA (`v1.7.0`)
-- [ ] **U7.1**: Actualizar alcance en `AGENTS.md` e implementar en Clean Core la 5.ª facción `SKELLIGE`: pasiva de Ronda 3 (revive hasta 2 unidades no-Héroe aleatorias del descarte con `rngSeed`), habilidades `BERSERKER` + `MARDROEME` (*Ermion* + especial *Mardroeme* → *Vildkaarl* / *Joven Vildkaarl* + `sfx/mardroeme.mp3`), *Kambi* → *Hemdall* (`11` Héroe), *Cerys* (`MUSTER` con *Doncellas Escuderas*), clima dual *Tormenta de Skellige* (`WEATHER_STORM`: Niebla + Lluvia) y líderes *Crach an Craite* y *Rey Bran*
-- [ ] **U7.2**: Importar las cartas de Skellige + 2 líderes + 3 tokens + *Tormenta de Skellige* y sus sprites (incluidas variantes de *Shield Maiden*), emblema SVG, paleta en `faction-meta.ts` y mazo inicial en `starter-decks.json`
-- [ ] **U7.3**: Niveles de dificultad del Bot en `src/core/ai/` (`NOVICE`, `TAVERNER`, `MASTER`) manteniendo intacta la vista honesta `AIPlayerView`, selector en Menú Principal persistido en `localStorage` e indicador en `MatchHistoryService`
-- [ ] **U7.4**: Simulaciones Bot vs. Bot con las 5 facciones y 3 dificultades en `bot-simulation.spec.ts`, auditoría offline, versión `1.7.0`, `gwent-u7-debug.apk` (`--phase=u7`) y tag `v1.7.0`
+- [x] **U7.1**: Actualizar alcance en `AGENTS.md` e implementar en Clean Core la 5.ª facción `SKELLIGE`: pasiva de Ronda 3 (revive hasta 2 unidades no-Héroe aleatorias del descarte con `rngSeed`), habilidades `BERSERKER` + `MARDROEME` (*Ermion* + especial *Mardroeme* → *Vildkaarl* / *Joven Vildkaarl* + `sfx/mardroeme.mp3`), *Kambi* → *Hemdall* (`11` Héroe), *Cerys* (`MUSTER` con *Doncellas Escuderas*), clima dual *Tormenta de Skellige* (`WEATHER_STORM`: Niebla + Lluvia) y líderes *Crach an Craite* y *Rey Bran*
+- [x] **U7.2**: Importar las cartas de Skellige + 2 líderes + 3 tokens + *Tormenta de Skellige* y sus sprites (incluidas variantes de *Shield Maiden*), emblema SVG, paleta en `faction-meta.ts` y mazo inicial en `starter-decks.json`
+- [x] **U7.3**: Niveles de dificultad del Bot en `src/core/ai/` (`NOVICE`, `TAVERNER`, `MASTER`) manteniendo intacta la vista honesta `AIPlayerView`, selector en Menú Principal persistido en `localStorage` e indicador en `MatchHistoryService`
+- [x] **U7.4**: Simulaciones Bot vs. Bot con las 5 facciones y 3 dificultades en `bot-simulation.spec.ts`, auditoría offline, versión `1.7.0`, `gwent-u7-debug.apk` (`--phase=u7`) y tag `v1.7.0`
 
 ### Completadas
 
@@ -100,3 +100,7 @@
 | 2026-11-24 | **U6.1**: Implementados los 4 quintos líderes (*Hearts of Stone*: `SCORCH_ENEMY_RANGED_10`, `RANDOMIZE_REVIVES`, `DOUBLE_SPY_STRENGTH`, `OPTIMIZE_AGILE_ROWS`) en Core (`passive-leaders.ts`, `leaders.ts`, `calculate-strength.ts`, `ability-resolver.ts`), IA (`ai-view.ts`, `heuristics.ts`), `base-cards.json` y `import-tw3-sprites.ts` (390 simulaciones Bot vs. Bot en verde) | U6.2: Diccionario de localización al español oficial TW3 y descarga de los 4 sprites nuevos |
 | 2026-11-24 | **U6.2**: Localizadas al español las **76** cartas importadas en `import-tw3-dataset.ts` manteniendo intactos todos los `id`, regenerado `cards.json` (**154** cartas / **20** Líderes) e importados los **4** sprites nuevos (`183/183` en `import:sprites`, **184** total `.jpg`) | U6.3: Tests de los nuevos líderes, auditoría ETL/offline, versión `1.6.0`, APK y tag `v1.6.0` |
 | 2026-11-24 | **U6.3 (`v1.6.0`)**: Añadidos tests de los 4 nuevos líderes (`leaders.spec.ts`), auditoría ETL exacta de **5 líderes por facción** (`etl-cards.spec.ts`), auditoría offline de **184** sprites `.jpg` y localización completa al español (**18** archivos / **78** tests en verde), build Angular `412.41 kB` iniciales y APK **`gwent-u6-debug.apk`** (`18.17 MB`) compilado en verde | Completada **U6**; siguiente etapa planificada: **U7** |
+| 2026-11-24 | **U7.1**: Actualizado alcance en `AGENTS.md` a **5 facciones jugables** e implementada `SKELLIGE` en Clean Core (`types.ts`, `game-state.ts`, `skellige-tokens.ts`, `factions.ts` pasiva Ronda 3, `round-resolution.ts` Kambi→Hemdall y clima dual deduplicado, `ability-resolver.ts` Berserker/Mardroeme/Cerys/Pirata Scorch, `reducer.ts`, `leaders.ts` Crach/Rey Bran y `calculate-strength.ts`) | U7.2: Catálogo Skellige, sprites/SFX offline, paleta/emblema UI y mazo inicial |
+| 2026-11-24 | **U7.2**: Generado catálogo completo (**181** definiciones / **22** Líderes), importados **215** sprites + Chort (**216** `.jpg` totales) y `mardroeme.mp3` (**30** SFX + **4** BGM), añadidos paleta/emblema/dorso/iconos de Skellige, `starter_skellige` y selector UI de `MARDROEME` / `WEATHER_STORM` | U7.3: Niveles de dificultad de IA (`NOVICE`, `TAVERNER`, `MASTER`), selector en Menú e historial |
+| 2026-11-24 | **U7.3**: Implementados 3 niveles de dificultad (`NOVICE`, `TAVERNER`, `MASTER`) en `ai-difficulty.ts`, `heuristics.ts` y `bot-player.ts` (con heurísticas Skellige), persistencia `qwent.ai.v1` (`AiSettingsService`), selector táctil en Menú (`AppComponent`) y badge en `MatchHistoryPageComponent` | U7.4: Tests de Skellige/dificultades, simulaciones 5 facciones, versión `1.7.0`, APK y tag `v1.7.0` |
+| 2026-11-24 | **U7.4**: Cerrada **U7 (`v1.7.0`)**: `npm test` (`19` archivos / `85` tests en verde, incluyendo `skellige.spec.ts` y simulaciones Bot vs. Bot en `bot-simulation.spec.ts`), `npm run build` (`432.82 kB` inicial, `216` sprites `.jpg`, `30` SFX + `4` BGM), versión `1.7.0` (`versionCode 8`), `gwent-u7-debug.apk` (`19.26 MB`), commit en `main` y tag anotado `v1.7.0` | U7 completada al 100% (`v1.7.0`) |

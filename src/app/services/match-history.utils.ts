@@ -1,4 +1,4 @@
-import type { FactionId, GameState, PlayerId } from '../../core';
+import { isValidAIDifficulty, type AIDifficulty, type FactionId, type GameState, type PlayerId } from '../../core';
 
 export type MatchOutcome = 'WIN' | 'LOSS' | 'DRAW';
 export type MatchHistoryMode = 'VS_AI' | 'LOCAL_2P';
@@ -20,6 +20,7 @@ export interface MatchHistoryEntry {
   readonly id: string;
   readonly playedAtIso: string;
   readonly mode: MatchHistoryMode;
+  readonly aiDifficulty?: AIDifficulty;
   readonly player1: MatchHistoryPlayerSummary;
   readonly player2: MatchHistoryPlayerSummary;
   readonly winner: PlayerId | 'DRAW';
@@ -48,6 +49,7 @@ const VALID_FACTIONS: ReadonlySet<string> = new Set([
   'NILFGAARD',
   'MONSTERS',
   'SCOIATAEL',
+  'SKELLIGE',
   'NEUTRAL',
 ]);
 
@@ -93,6 +95,7 @@ function isHistoryEntryValid(value: unknown): value is MatchHistoryEntry {
     candidate.id.length > 0 &&
     typeof candidate.playedAtIso === 'string' &&
     (candidate.mode === 'VS_AI' || candidate.mode === 'LOCAL_2P') &&
+    (candidate.aiDifficulty === undefined || isValidAIDifficulty(candidate.aiDifficulty)) &&
     isPlayerSummaryValid(candidate.player1) &&
     isPlayerSummaryValid(candidate.player2) &&
     typeof candidate.winner === 'string' &&
@@ -112,6 +115,7 @@ export function buildMatchHistoryEntry(
   state: GameState,
   mode: MatchHistoryMode,
   playedAtIso = new Date().toISOString(),
+  aiDifficulty?: AIDifficulty,
 ): MatchHistoryEntry {
   const winner: PlayerId | 'DRAW' = state.winner ?? 'DRAW';
   const p1 = state.players.PLAYER_1;
@@ -121,6 +125,7 @@ export function buildMatchHistoryEntry(
     id: `${playedAtIso}_${state.rngSeed}_${state.roundHistory.length}`,
     playedAtIso,
     mode,
+    ...(mode === 'VS_AI' && aiDifficulty !== undefined ? { aiDifficulty } : {}),
     player1: {
       name: p1.name,
       faction: p1.faction,

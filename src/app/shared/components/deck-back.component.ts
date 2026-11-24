@@ -8,6 +8,7 @@ const DECK_BACK_STYLES: Readonly<Record<FactionId, string>> = {
   NILFGAARD: 'border-yellow-500/80 bg-gradient-to-b from-zinc-900 via-neutral-950 to-black',
   MONSTERS: 'border-red-500/75 bg-gradient-to-b from-red-950 via-stone-950 to-tavern-dark',
   SCOIATAEL: 'border-emerald-500/75 bg-gradient-to-b from-emerald-950 via-stone-900 to-tavern-dark',
+  SKELLIGE: 'border-purple-400/75 bg-gradient-to-b from-purple-950 via-stone-950 to-tavern-dark',
   NEUTRAL: 'border-bronze/75 bg-gradient-to-b from-board-wood to-tavern-dark',
 };
 
