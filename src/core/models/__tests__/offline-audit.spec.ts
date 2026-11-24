@@ -79,4 +79,28 @@ describe('Offline Audit & Android Packaging Compliance (F6.3)', () => {
     const styles = readFileSync(path.join(resDir, 'values', 'styles.xml'), 'utf8');
     expect(styles).toContain('@drawable/qwent_splash');
   });
+
+  it('embeds valid offline JPEG portraits in src/assets/cards/ covering all 150 cards without orphans', () => {
+    const cardsJson = JSON.parse(
+      readFileSync(path.join(SRC_DIR, 'assets', 'data', 'cards.json'), 'utf8'),
+    ) as ReadonlyArray<{ readonly id: string }>;
+    const validIds = new Set(cardsJson.map((card) => card.id));
+
+    const spritesDir = path.join(SRC_DIR, 'assets', 'cards');
+    expect(existsSync(spritesDir)).toBe(true);
+
+    const jpgFiles = readdirSync(spritesDir).filter((name) => name.endsWith('.jpg'));
+    expect(jpgFiles.length).toBe(validIds.size);
+
+    for (const fileName of jpgFiles) {
+      const cardId = fileName.slice(0, -4);
+      expect(validIds.has(cardId)).toBe(true);
+
+      const bytes = readFileSync(path.join(spritesDir, fileName));
+      expect(bytes.byteLength).toBeGreaterThan(1000);
+      expect(bytes[0]).toBe(0xff);
+      expect(bytes[1]).toBe(0xd8);
+      expect(bytes[2]).toBe(0xff);
+    }
+  });
 });

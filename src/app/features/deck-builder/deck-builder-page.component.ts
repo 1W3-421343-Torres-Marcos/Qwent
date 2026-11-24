@@ -3,11 +3,13 @@ import {
   PLAYABLE_FACTIONS,
   validateDeck,
   type CardDefinition,
+  type FactionId,
   type PlayableFactionId,
 } from '../../../core';
 import { DeckStorageService } from '../../services/deck-storage.service';
 import { AbilityIconComponent, RowIconComponent } from '../../shared/components/card-icons.component';
 import { FactionEmblemComponent } from '../../shared/components/faction-emblem.component';
+import { createSpriteFallbackTracker } from '../../shared/constants/card-art';
 import { FACTION_META } from '../../shared/constants/faction-meta';
 
 type CollectionFilter = 'ALL' | 'CLOSE_COMBAT' | 'RANGED' | 'SIEGE' | 'SPECIAL';
@@ -85,6 +87,23 @@ const FILTER_OPTIONS: ReadonlyArray<{ readonly id: CollectionFilter; readonly la
       <!-- Leader Selector & Live Validation Bar -->
       <section class="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-bronze/50 bg-tavern-dark/95 px-3 py-1.5 text-xs">
         <div class="flex min-w-0 flex-1 items-center gap-2">
+          @if (selectedLeader(); as leader) {
+            <span
+              class="relative flex h-10 w-[30px] shrink-0 items-center justify-center overflow-hidden rounded border border-gold/60 bg-tavern-dark"
+            >
+              @if (art.hasSprite(leader.id)) {
+                <img
+                  [src]="art.spritePath(leader.id)"
+                  [alt]="leader.name"
+                  decoding="async"
+                  (error)="art.markFailed(leader.id)"
+                  class="h-full w-full object-cover object-top"
+                />
+              } @else {
+                <span class="h-4 w-4 text-gold"><app-faction-emblem [faction]="leader.faction" /></span>
+              }
+            </span>
+          }
           <label for="leader-select" class="shrink-0 font-bold uppercase tracking-wider text-gold">
             ♛ Líder:
           </label>
@@ -177,6 +196,25 @@ const FILTER_OPTIONS: ReadonlyArray<{ readonly id: CollectionFilter; readonly la
               >
                 <div class="flex min-w-0 items-center gap-2">
                   <span
+                    class="relative flex h-10 w-[30px] shrink-0 items-center justify-center overflow-hidden rounded border bg-tavern-dark"
+                    [class]="card.isHero ? 'border-gold-bright/80' : 'border-bronze/60'"
+                  >
+                    @if (art.hasSprite(card.id)) {
+                      <img
+                        [src]="art.spritePath(card.id)"
+                        [alt]="card.name"
+                        loading="lazy"
+                        decoding="async"
+                        (error)="art.markFailed(card.id)"
+                        class="h-full w-full object-cover object-top"
+                      />
+                    } @else {
+                      <span class="h-4 w-4" [class]="factionAccent(card.faction)">
+                        <app-faction-emblem [faction]="card.faction" />
+                      </span>
+                    }
+                  </span>
+                  <span
                     class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-extrabold"
                     [class]="
                       card.isHero
@@ -250,6 +288,25 @@ const FILTER_OPTIONS: ReadonlyArray<{ readonly id: CollectionFilter; readonly la
               >
                 <div class="flex min-w-0 items-center gap-2">
                   <span
+                    class="relative flex h-10 w-[30px] shrink-0 items-center justify-center overflow-hidden rounded border bg-tavern-dark"
+                    [class]="entry.card.isHero ? 'border-gold-bright/80' : 'border-bronze/60'"
+                  >
+                    @if (art.hasSprite(entry.card.id)) {
+                      <img
+                        [src]="art.spritePath(entry.card.id)"
+                        [alt]="entry.card.name"
+                        loading="lazy"
+                        decoding="async"
+                        (error)="art.markFailed(entry.card.id)"
+                        class="h-full w-full object-cover object-top"
+                      />
+                    } @else {
+                      <span class="h-4 w-4" [class]="factionAccent(entry.card.faction)">
+                        <app-faction-emblem [faction]="entry.card.faction" />
+                      </span>
+                    }
+                  </span>
+                  <span
                     class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-extrabold"
                     [class]="
                       entry.card.isHero
@@ -289,6 +346,7 @@ export class DeckBuilderPageComponent {
   private readonly storage = inject(DeckStorageService);
 
   readonly closed = output<void>();
+  readonly art = createSpriteFallbackTracker();
   readonly factions = PLAYABLE_FACTIONS;
   readonly filters = FILTER_OPTIONS;
 
@@ -367,7 +425,7 @@ export class DeckBuilderPageComponent {
     return FACTION_META[faction].shortLabel;
   }
 
-  factionAccent(faction: PlayableFactionId): string {
+  factionAccent(faction: FactionId): string {
     return FACTION_META[faction].accentClass;
   }
 

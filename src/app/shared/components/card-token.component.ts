@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import type { CardInstance } from '../../../core';
+import { getCardSpritePath } from '../constants/card-art';
 import { FACTION_META } from '../constants/faction-meta';
 import { AbilityIconComponent } from './card-icons.component';
 import { FactionEmblemComponent } from './faction-emblem.component';
@@ -17,18 +18,20 @@ import { FactionEmblemComponent } from './faction-emblem.component';
       class="qwent-card-enter relative flex h-full aspect-[3/4] shrink-0 flex-col justify-between overflow-hidden rounded border p-0.5 transition active:scale-95"
       [class]="containerClasses()"
     >
-      <!-- Optional local sprite with transparent SVG faction emblem fallback -->
-      @if (spritePath(); as sprite) {
-        @if (!spriteFailed()) {
-          <img
-            [src]="sprite"
-            [alt]="card().card.name"
-            (error)="spriteFailed.set(true)"
-            class="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-80"
-          />
-        }
-      }
-      @if (!spritePath() || spriteFailed()) {
+      <!-- Bundled local TW3 portrait with transparent SVG faction emblem fallback -->
+      @if (hasSprite()) {
+        <img
+          [src]="resolvedSpritePath()!"
+          [alt]="card().card.name"
+          loading="lazy"
+          decoding="async"
+          (error)="markSpriteFailed(resolvedSpritePath()!)"
+          class="pointer-events-none absolute inset-0 h-full w-full object-cover object-top"
+        />
+        <span
+          class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-transparent"
+        ></span>
+      } @else {
         <span
           class="pointer-events-none absolute inset-0 flex items-center justify-center opacity-15"
           [class]="emblemAccentClass()"
@@ -46,7 +49,7 @@ import { FactionEmblemComponent } from './faction-emblem.component';
       </span>
 
       <!-- Minimal inner name strip -->
-      <span class="relative z-10 line-clamp-1 px-0.5 text-center text-[8px] font-medium leading-tight text-parchment/90">
+      <span class="qwent-num-shadow relative z-10 line-clamp-1 px-0.5 text-center text-[8px] font-semibold leading-tight text-parchment">
         {{ card().card.name }}
       </span>
 
@@ -69,7 +72,20 @@ export class CardTokenComponent {
   readonly spritePath = input<string | null>(null);
   readonly cardClicked = output<CardInstance>();
 
-  readonly spriteFailed = signal(false);
+  readonly failedSpriteUrl = signal<string | null>(null);
+
+  readonly resolvedSpritePath = computed(
+    () => this.spritePath() ?? getCardSpritePath(this.card().card.id),
+  );
+
+  readonly hasSprite = computed(() => {
+    const path = this.resolvedSpritePath();
+    return path !== null && this.failedSpriteUrl() !== path;
+  });
+
+  markSpriteFailed(url: string): void {
+    this.failedSpriteUrl.set(url);
+  }
 
   readonly emblemAccentClass = computed(() => FACTION_META[this.card().card.faction].accentClass);
 

@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import type { CardInstance, RowType } from '../../../core';
+import { getCardSpritePath } from '../constants/card-art';
 import { FACTION_META } from '../constants/faction-meta';
 import { AbilityIconComponent, RowIconComponent } from './card-icons.component';
 import { FactionEmblemComponent } from './faction-emblem.component';
@@ -56,24 +57,46 @@ const ROW_LABEL: Readonly<Record<RowType, string>> = {
         </button>
       </div>
 
-      <!-- Offline SVG emblem graphic slot ready for future local sprites -->
+      <!-- Local TW3 portrait showcase with offline SVG faction emblem fallback -->
       <div
-        class="mt-2 flex h-16 items-center justify-between gap-2 rounded-lg border border-bronze/60 bg-tavern-dark/85 px-3"
+        class="relative mt-2 flex h-36 items-end overflow-hidden rounded-lg border border-bronze/60 bg-tavern-dark/85"
       >
-        <span class="h-9 w-9 shrink-0 opacity-85" [class]="factionAccentClass()">
-          <app-faction-emblem [faction]="card().card.faction" />
-        </span>
-        <div class="flex flex-wrap items-center justify-end gap-2">
-          @for (row of card().card.allowedRows; track row) {
-            <div class="flex items-center gap-1 text-xs text-parchment/85">
-              <span class="h-4 w-4 text-gold"><app-row-icon [row]="row" /></span>
-              <span>{{ rowLabel(row) }}</span>
-            </div>
-          } @empty {
-            <span class="text-xs text-parchment/75">
-              {{ card().card.type === 'LEADER' ? 'Carta de Líder' : 'Carta especial global' }}
-            </span>
-          }
+        @if (hasSprite()) {
+          <img
+            [src]="spriteUrl()"
+            [alt]="card().card.name"
+            decoding="async"
+            (error)="markSpriteFailed(spriteUrl())"
+            class="pointer-events-none absolute inset-0 h-full w-full object-cover object-top"
+          />
+          <span
+            class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/95 via-black/35 to-transparent"
+          ></span>
+        } @else {
+          <span
+            class="pointer-events-none absolute inset-0 flex items-center justify-center opacity-35"
+            [class]="factionAccentClass()"
+          >
+            <span class="h-16 w-16"><app-faction-emblem [faction]="card().card.faction" /></span>
+          </span>
+        }
+
+        <div class="relative z-10 flex w-full flex-wrap items-center justify-between gap-2 px-2.5 py-2">
+          <span class="h-5 w-5 shrink-0 opacity-90" [class]="factionAccentClass()">
+            <app-faction-emblem [faction]="card().card.faction" />
+          </span>
+          <div class="flex flex-wrap items-center justify-end gap-2">
+            @for (row of card().card.allowedRows; track row) {
+              <div class="flex items-center gap-1 rounded bg-tavern-dark/80 px-1.5 py-0.5 text-[11px] font-medium text-parchment">
+                <span class="h-3.5 w-3.5 text-gold"><app-row-icon [row]="row" /></span>
+                <span>{{ rowLabel(row) }}</span>
+              </div>
+            } @empty {
+              <span class="rounded bg-tavern-dark/80 px-1.5 py-0.5 text-[11px] text-parchment/90">
+                {{ card().card.type === 'LEADER' ? 'Carta de Líder' : 'Carta especial global' }}
+              </span>
+            }
+          </div>
         </div>
       </div>
 
@@ -119,8 +142,16 @@ export class CardDetailComponent {
   readonly closed = output<void>();
   readonly playRequested = output<CardInstance>();
 
+  readonly failedSpriteUrl = signal<string | null>(null);
+  readonly spriteUrl = computed(() => getCardSpritePath(this.card().card.id));
+  readonly hasSprite = computed(() => this.failedSpriteUrl() !== this.spriteUrl());
+
   readonly factionName = computed(() => FACTION_META[this.card().card.faction].label);
   readonly factionAccentClass = computed(() => FACTION_META[this.card().card.faction].accentClass);
+
+  markSpriteFailed(url: string): void {
+    this.failedSpriteUrl.set(url);
+  }
 
   readonly strengthBadgeClass = computed(() => {
     const c = this.card();

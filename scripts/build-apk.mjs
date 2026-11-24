@@ -14,8 +14,8 @@ function parsePhaseArg(argv) {
   const arg = argv.find((item) => item.startsWith('--phase='));
   const raw = arg ? arg.split('=')[1] : 'f1';
   const normalized = (raw || 'f1').trim().toLowerCase();
-  if (!/^f\d+$/.test(normalized)) {
-    throw new Error(`Formato de fase inválido "${normalized}". Usa ej: --phase=f1`);
+  if (!/^[fu]\d+$/.test(normalized)) {
+    throw new Error(`Formato de fase inválido "${normalized}". Usa ej: --phase=f1 o --phase=u1`);
   }
   return normalized;
 }

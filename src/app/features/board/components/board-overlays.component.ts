@@ -1,11 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import type { CardInstance, GameState, PlayerId, PlayerState } from '../../../../core';
 import { AbilityIconComponent, RowIconComponent } from '../../../shared/components/card-icons.component';
+import { FactionEmblemComponent } from '../../../shared/components/faction-emblem.component';
+import { createSpriteFallbackTracker } from '../../../shared/constants/card-art';
 
 @Component({
   selector: 'app-board-overlays',
   standalone: true,
-  imports: [AbilityIconComponent, RowIconComponent],
+  imports: [AbilityIconComponent, RowIconComponent, FactionEmblemComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <!-- Opaque 2P Turn Handoff Overlay -->
@@ -66,13 +68,33 @@ import { AbilityIconComponent, RowIconComponent } from '../../../shared/componen
                 type="button"
                 (click)="mulliganSwapRequested.emit(card.instanceId)"
                 [disabled]="activePlayer().mulligansRemaining <= 0 || activePlayer().deck.length === 0"
-                class="flex min-h-[76px] flex-col justify-between rounded-lg border bg-tavern-dark/90 p-2 text-left transition hover:border-gold-bright active:scale-95 disabled:opacity-60"
+                class="relative flex min-h-[108px] flex-col justify-between overflow-hidden rounded-lg border bg-tavern-dark/90 p-2 text-left transition hover:border-gold-bright active:scale-95 disabled:opacity-60"
                 [class.border-gold-bright]="card.card.isHero"
                 [class.border-bronze]="!card.card.isHero"
               >
-                <div class="flex items-start justify-between gap-1">
+                @if (art.hasSprite(card.card.id)) {
+                  <img
+                    [src]="art.spritePath(card.card.id)"
+                    [alt]="card.card.name"
+                    loading="lazy"
+                    decoding="async"
+                    (error)="art.markFailed(card.card.id)"
+                    class="pointer-events-none absolute inset-0 h-full w-full object-cover object-top"
+                  />
                   <span
-                    class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs font-extrabold"
+                    class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/95 via-black/65 to-black/25"
+                  ></span>
+                } @else {
+                  <span
+                    class="pointer-events-none absolute inset-0 flex items-center justify-center opacity-15 text-gold"
+                  >
+                    <span class="h-10 w-10"><app-faction-emblem [faction]="card.card.faction" /></span>
+                  </span>
+                }
+
+                <div class="relative z-10 flex items-start justify-between gap-1">
+                  <span
+                    class="qwent-num-shadow flex h-6 w-6 shrink-0 items-center justify-center rounded-full border bg-tavern-dark/90 text-xs font-extrabold"
                     [class.border-gold-bright]="card.card.isHero"
                     [class.text-gold-bright]="card.card.isHero"
                     [class.border-bronze]="!card.card.isHero"
@@ -83,23 +105,23 @@ import { AbilityIconComponent, RowIconComponent } from '../../../shared/componen
 
                   <div class="flex items-center gap-1">
                     @if (card.card.allowedRows.length > 0 && card.card.type === 'UNIT') {
-                      <span class="h-4 w-4 text-parchment/80">
+                      <span class="flex h-4 w-4 items-center justify-center rounded-full bg-tavern-dark/80 p-0.5 text-parchment/90">
                         <app-row-icon [row]="card.card.allowedRows.length > 1 ? 'AGILE' : card.card.allowedRows[0]!" />
                       </span>
                     }
                     @if (card.card.ability; as ability) {
-                      <span class="h-4 w-4 text-gold-bright">
+                      <span class="flex h-4 w-4 items-center justify-center rounded-full bg-tavern-dark/85 p-0.5 text-gold-bright">
                         <app-ability-icon [ability]="ability" />
                       </span>
                     }
                   </div>
                 </div>
 
-                <div>
-                  <p class="line-clamp-2 text-[11px] font-bold leading-tight text-parchment">
+                <div class="relative z-10">
+                  <p class="qwent-num-shadow line-clamp-2 text-[11px] font-bold leading-tight text-parchment">
                     {{ card.card.name }}
                   </p>
-                  <p class="mt-0.5 line-clamp-1 text-[9px] text-parchment/65">
+                  <p class="mt-0.5 line-clamp-1 text-[9px] text-parchment/75">
                     {{ card.card.ability ?? 'Unidad estándar' }}
                   </p>
                 </div>
@@ -230,15 +252,28 @@ import { AbilityIconComponent, RowIconComponent } from '../../../shared/componen
               <button
                 type="button"
                 (click)="medicTargetSelected.emit(card.instanceId)"
-                class="flex min-h-[56px] items-center gap-2 rounded-lg border border-bronze bg-tavern-dark/90 p-2 text-left transition hover:border-gold-bright active:scale-95"
+                class="relative flex min-h-[68px] items-center gap-2 overflow-hidden rounded-lg border border-bronze bg-tavern-dark/90 p-2 text-left transition hover:border-gold-bright active:scale-95"
               >
+                @if (art.hasSprite(card.card.id)) {
+                  <img
+                    [src]="art.spritePath(card.card.id)"
+                    [alt]="card.card.name"
+                    loading="lazy"
+                    decoding="async"
+                    (error)="art.markFailed(card.card.id)"
+                    class="pointer-events-none absolute inset-0 h-full w-full object-cover object-top"
+                  />
+                  <span
+                    class="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/90 via-black/75 to-black/45"
+                  ></span>
+                }
                 <span
-                  class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-gold/70 bg-row-leather text-sm font-extrabold text-strength-normal"
+                  class="qwent-num-shadow relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-gold/70 bg-row-leather/95 text-sm font-extrabold text-strength-normal"
                 >
                   {{ card.card.baseStrength }}
                 </span>
-                <div class="min-w-0 flex-1">
-                  <p class="truncate text-xs font-bold text-parchment">{{ card.card.name }}</p>
+                <div class="relative z-10 min-w-0 flex-1">
+                  <p class="qwent-num-shadow truncate text-xs font-bold text-parchment">{{ card.card.name }}</p>
                   @if (card.card.ability; as ability) {
                     <div class="mt-0.5 flex items-center gap-1 text-[10px] text-gold-bright">
                       <span class="h-3 w-3"><app-ability-icon [ability]="ability" /></span>
@@ -273,15 +308,28 @@ import { AbilityIconComponent, RowIconComponent } from '../../../shared/componen
               <button
                 type="button"
                 (click)="leaderTargetSelected.emit(card.instanceId)"
-                class="flex min-h-[56px] items-center gap-2 rounded-lg border border-bronze bg-tavern-dark/90 p-2 text-left transition hover:border-gold-bright active:scale-95"
+                class="relative flex min-h-[68px] items-center gap-2 overflow-hidden rounded-lg border border-bronze bg-tavern-dark/90 p-2 text-left transition hover:border-gold-bright active:scale-95"
               >
+                @if (art.hasSprite(card.card.id)) {
+                  <img
+                    [src]="art.spritePath(card.card.id)"
+                    [alt]="card.card.name"
+                    loading="lazy"
+                    decoding="async"
+                    (error)="art.markFailed(card.card.id)"
+                    class="pointer-events-none absolute inset-0 h-full w-full object-cover object-top"
+                  />
+                  <span
+                    class="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/90 via-black/75 to-black/45"
+                  ></span>
+                }
                 <span
-                  class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-gold/70 bg-row-leather text-sm font-extrabold text-strength-normal"
+                  class="qwent-num-shadow relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-gold/70 bg-row-leather/95 text-sm font-extrabold text-strength-normal"
                 >
                   {{ card.card.baseStrength }}
                 </span>
-                <div class="min-w-0 flex-1">
-                  <p class="truncate text-xs font-bold text-parchment">{{ card.card.name }}</p>
+                <div class="relative z-10 min-w-0 flex-1">
+                  <p class="qwent-num-shadow truncate text-xs font-bold text-parchment">{{ card.card.name }}</p>
                   @if (card.card.ability; as ability) {
                     <div class="mt-0.5 flex items-center gap-1 text-[10px] text-gold-bright">
                       <span class="h-3 w-3"><app-ability-icon [ability]="ability" /></span>
@@ -355,13 +403,26 @@ import { AbilityIconComponent, RowIconComponent } from '../../../shared/componen
 
           <div class="mt-3 grid grid-cols-2 gap-2 overflow-y-auto sm:grid-cols-3">
             @for (card of player.discard; track card.instanceId) {
-              <div class="flex items-center gap-2 rounded border border-bronze/60 bg-tavern-dark/80 p-2 text-xs">
+              <div class="relative flex min-h-[56px] items-center gap-2 overflow-hidden rounded border border-bronze/60 bg-tavern-dark/80 p-2 text-xs">
+                @if (art.hasSprite(card.card.id)) {
+                  <img
+                    [src]="art.spritePath(card.card.id)"
+                    [alt]="card.card.name"
+                    loading="lazy"
+                    decoding="async"
+                    (error)="art.markFailed(card.card.id)"
+                    class="pointer-events-none absolute inset-0 h-full w-full object-cover object-top"
+                  />
+                  <span
+                    class="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/90 via-black/75 to-black/45"
+                  ></span>
+                }
                 <span
-                  class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-bronze font-bold"
+                  class="qwent-num-shadow relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-bronze bg-tavern-dark/90 font-bold"
                 >
                   {{ card.card.type === 'SPECIAL' ? '★' : card.card.baseStrength }}
                 </span>
-                <span class="line-clamp-2 text-parchment">{{ card.card.name }}</span>
+                <span class="qwent-num-shadow relative z-10 line-clamp-2 text-parchment">{{ card.card.name }}</span>
               </div>
             } @empty {
               <p class="col-span-full py-6 text-center text-sm text-parchment/60">
@@ -393,6 +454,8 @@ export class BoardOverlaysComponent {
   readonly scoiataelStarterSelected = output<PlayerId>();
   readonly mulliganSwapRequested = output<string>();
   readonly finishMulliganRequested = output<void>();
+
+  readonly art = createSpriteFallbackTracker();
 
   readonly leaderPending = computed(() => {
     const s = this.state();

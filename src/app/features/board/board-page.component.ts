@@ -5,6 +5,7 @@ import { GameFacadeService } from '../../services/game-facade.service';
 import { AbilityIconComponent } from '../../shared/components/card-icons.component';
 import { CardDetailComponent } from '../../shared/components/card-detail.component';
 import { FactionEmblemComponent } from '../../shared/components/faction-emblem.component';
+import { createSpriteFallbackTracker } from '../../shared/constants/card-art';
 import { FACTION_META } from '../../shared/constants/faction-meta';
 import { BoardOverlaysComponent } from './components/board-overlays.component';
 import { BoardRowComponent } from './components/board-row.component';
@@ -86,7 +87,20 @@ const HOLD_TO_PASS_MS = 600;
                 (click)="$event.stopPropagation(); facade.inspectLeader(facade.topPlayer().id)"
                 class="mt-1 flex w-full items-center justify-between gap-1 rounded border border-bronze/50 bg-row-leather/80 px-1.5 py-0.5 text-left text-[9px] hover:border-gold"
               >
-                <span class="truncate font-semibold text-parchment/90">♛ {{ topLeader.name }}</span>
+                <div class="flex min-w-0 items-center gap-1.5">
+                  @if (art.hasSprite(topLeader.id)) {
+                    <img
+                      [src]="art.spritePath(topLeader.id)"
+                      [alt]="topLeader.name"
+                      decoding="async"
+                      (error)="art.markFailed(topLeader.id)"
+                      class="h-6 w-5 shrink-0 rounded-sm border border-gold/50 object-cover object-top"
+                    />
+                  } @else {
+                    <span class="shrink-0 text-gold">♛</span>
+                  }
+                  <span class="truncate font-semibold text-parchment/90">{{ topLeader.name }}</span>
+                </div>
                 <span
                   class="shrink-0 rounded px-1 font-bold uppercase"
                   [class]="facade.topPlayer().leaderUsed ? 'text-parchment/45' : 'text-gold'"
@@ -197,7 +211,20 @@ const HOLD_TO_PASS_MS = 600;
                     : 'border-bronze/50 bg-row-leather/80 text-parchment/75'
                 "
               >
-                <span class="truncate font-bold">♛ {{ bottomLeader.name }}</span>
+                <div class="flex min-w-0 items-center gap-1.5">
+                  @if (art.hasSprite(bottomLeader.id)) {
+                    <img
+                      [src]="art.spritePath(bottomLeader.id)"
+                      [alt]="bottomLeader.name"
+                      decoding="async"
+                      (error)="art.markFailed(bottomLeader.id)"
+                      class="h-6 w-5 shrink-0 rounded-sm border border-gold/50 object-cover object-top"
+                    />
+                  } @else {
+                    <span class="shrink-0">♛</span>
+                  }
+                  <span class="truncate font-bold">{{ bottomLeader.name }}</span>
+                </div>
                 <span class="shrink-0 text-[9px] font-extrabold uppercase">
                   {{
                     facade.bottomPlayer().leaderUsed
@@ -473,6 +500,7 @@ export class BoardPageComponent {
 
   readonly exitToMenu = output<void>();
   readonly holdProgress = signal(0);
+  readonly art = createSpriteFallbackTracker();
   private holdIntervalId: ReturnType<typeof setInterval> | null = null;
   private holdStartTimestamp = 0;
 
