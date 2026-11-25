@@ -16,7 +16,7 @@
 | U6 | 5.º Líder por facción (*Hearts of Stone*) y localización completa al español | [x] | 100% |
 | U7 | Expansión *Blood and Wine* (Skellige) y niveles de dificultad de IA | [x] | 100% |
 | U8 | Botones de facción y líder aleatorios (jugador y rival) | [x] | 100% |
-| U9 | Descripción de las cartas del rival al tocarlas | [~] | 75% |
+| U9 | Descripción de las cartas del rival al tocarlas | [x] | 100% |
 
 **Estados:** `[ ]` pendiente | `[~]` en curso | `[x]` completada
 
@@ -59,7 +59,7 @@
 - [x] **U9.1**: Corregir que al tocar una carta puesta en el tablero (del rival o propia) no se abra la tarjeta: el clic del token llama a `inspectCard` pero burbujea hasta `onBackdropClick()` de `BoardPageComponent`, que ejecuta `clearSelection()` y la cierra al instante (la mano evita esto con `stopPropagation`). La tarjeta debe abrirse con `CardDetailComponent` como al seleccionar cartas propias, con test de regresión
 - [x] **U9.2**: Hacer inspeccionables también la carta de la ranura de Cuerno, las cartas de clima activas y las cartas de los modales de descarte (propio y rival), reutilizando `CardDetailComponent` sin lógica de reglas en la UI
 - [x] **U9.3**: Test de auditoría de datos (toda carta con habilidad tiene `description` no vacía) y revisión de que la tarjeta del rival muestre el texto completo
-- [ ] **U9.4**: Tests en verde, versión `1.9.0`, compilación de `gwent-u9-debug.apk` (`--phase=u9`), criterios en `board-ui/SKILL.md` y tag `v1.9.0`
+- [x] **U9.4**: Tests en verde, versión `1.9.0`, compilación de `gwent-u9-debug.apk` (`--phase=u9`), criterios en `board-ui/SKILL.md` y tag `v1.9.0`
 
 ### Completadas
 
@@ -124,3 +124,4 @@
 | 2026-11-24 | **U8.4 (`v1.8.0`)**: 
 pm test (**23** archivos / **105** tests en verde), 
 pm run build (436.70 kB inicial), versión `1.8.0` (`versionCode 9`) y APK **`gwent-u8-debug.apk`** (19.26 MB) compilado en verde en la rama `feature/u8-u9` (tag pendiente hasta el merge a `main`) | U8 completada; U9.4 pendiente de cierre |
+| 2026-11-24 | **U9.4 (`v1.9.0`)**: `npm test` (**23** archivos / **105** tests en verde), `npm run build` (`436.70 kB` inicial), versión `1.9.0` (`versionCode 10`) y APK **`gwent-u9-debug.apk`** (`19.26 MB`) compilado en verde en la rama `feature/u8-u9` (tag pendiente hasta probar y mergear a `main`) | U9 completada; pendiente prueba manual del usuario y merge |
