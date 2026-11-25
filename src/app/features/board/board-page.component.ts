@@ -173,6 +173,8 @@ const WEATHER_BOX_SLOTS = [
                 <div
                   class="relative flex h-10 items-center justify-center overflow-hidden rounded border transition"
                   [class]="isActive ? slot.activeClass : 'border-bronze/40 text-parchment/25'"
+                  [class.cursor-pointer]="isActive"
+                  (click)="onWeatherSlotClick($event, weatherEntry?.card ?? null)"
                   [title]="weatherEntry ? weatherEntry.card.card.name : slot.label"
                 >
                   @if (isActive && art.hasSprite(activeSpriteId)) {
@@ -608,6 +610,7 @@ const WEATHER_BOX_SLOTS = [
         (newMatchRequested)="facade.startNewMatch()"
         (menuRequested)="exitToMenu.emit()"
         (discardClosed)="facade.closeDiscardModal()"
+        (cardInspected)="onInspectFromBoard($event)"
         (medicTargetSelected)="facade.selectMedicTarget($event)"
         (leaderTargetSelected)="facade.selectLeaderTarget($event)"
         (scoiataelStarterSelected)="facade.selectScoiataelStarter($event)"
@@ -727,6 +730,15 @@ export class BoardPageComponent {
   }
 
   onInspectFromBoard(card: Parameters<GameFacadeService['inspectCard']>[0]): void {
+    this.facade.inspectCard(card);
+  }
+
+  onWeatherSlotClick(
+    event: Event,
+    card: Parameters<GameFacadeService['inspectCard']>[0] | null,
+  ): void {
+    if (!card) return;
+    event.stopPropagation();
     this.facade.inspectCard(card);
   }
 

@@ -18,7 +18,7 @@ const ROW_LABEL: Readonly<Record<RowType, string>> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <aside
-      class="qwent-wood-surface fixed right-3 top-1/2 z-40 w-60 -translate-y-1/2 rounded-xl border-2 border-bronze p-3 text-parchment shadow-2xl backdrop-blur-sm"
+      class="qwent-wood-surface fixed right-3 top-1/2 z-[55] w-60 -translate-y-1/2 rounded-xl border-2 border-bronze p-3 text-parchment shadow-2xl backdrop-blur-sm"
       [class.border-gold-bright]="card().card.isHero"
       [class.qwent-hero-frame]="card().card.isHero"
     >

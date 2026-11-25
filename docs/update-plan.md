@@ -15,6 +15,8 @@
 | U5 | Fidelidad visual del tablero, artes alternativos, dorsos y climas | [x] | 100% |
 | U6 | 5.º Líder por facción (*Hearts of Stone*) y localización completa al español | [x] | 100% |
 | U7 | Expansión *Blood and Wine* (Skellige) y niveles de dificultad de IA | [x] | 100% |
+| U8 | Botones de facción y líder aleatorios (jugador y rival) | [~] | 25% |
+| U9 | Descripción de las cartas del rival al tocarlas | [~] | 75% |
 
 **Estados:** `[ ]` pendiente | `[~]` en curso | `[x]` completada
 
@@ -46,6 +48,18 @@
 - [x] **U7.2**: Importar las cartas de Skellige + 2 líderes + 3 tokens + *Tormenta de Skellige* y sus sprites (incluidas variantes de *Shield Maiden*), emblema SVG, paleta en `faction-meta.ts` y mazo inicial en `starter-decks.json`
 - [x] **U7.3**: Niveles de dificultad del Bot en `src/core/ai/` (`NOVICE`, `TAVERNER`, `MASTER`) manteniendo intacta la vista honesta `AIPlayerView`, selector en Menú Principal persistido en `localStorage` e indicador en `MatchHistoryService`
 - [x] **U7.4**: Simulaciones Bot vs. Bot con las 5 facciones y 3 dificultades en `bot-simulation.spec.ts`, auditoría offline, versión `1.7.0`, `gwent-u7-debug.apk` (`--phase=u7`) y tag `v1.7.0`
+
+## U8: Botones de facción y líder aleatorios (`v1.8.0`)
+- [x] **U8.1**: Función pura `pickRandomLoadout` en `src/core/deck/` con RNG inyectado (sin `Math.random()` en el Core): elige una facción jugable y uno de sus 5 líderes, cubierta por tests deterministas (líder siempre de la facción, cobertura de las 5 facciones)
+- [ ] **U8.2**: `DeckStorageService`: `setPlayerLoadout` / `setOpponentLoadout` y `leaderOverrides` opcional persistido en `qwent.decks.v1` (compatible hacia atrás, con validación y fallback); el override se descarta al cambiar la facción con el `<select>` y nunca modifica los mazos guardados del Constructor
+- [ ] **U8.3**: `GameFacadeService.buildNewMatchState` usa el líder elegido; botón táctil "🎲 Aleatorio" (≥ 44 px) en *Tu Facción (J1)* y en *Rival / IA (J2)* del menú, mostrando facción y líder resultantes
+- [ ] **U8.4**: Tests en verde, versión `1.8.0`, compilación de `gwent-u8-debug.apk` (`--phase=u8`), criterios en `deck-builder/SKILL.md` y tag `v1.8.0`
+
+## U9: Descripción de las cartas del rival al tocarlas (`v1.9.0`)
+- [x] **U9.1**: Corregir que al tocar una carta puesta en el tablero (del rival o propia) no se abra la tarjeta: el clic del token llama a `inspectCard` pero burbujea hasta `onBackdropClick()` de `BoardPageComponent`, que ejecuta `clearSelection()` y la cierra al instante (la mano evita esto con `stopPropagation`). La tarjeta debe abrirse con `CardDetailComponent` como al seleccionar cartas propias, con test de regresión
+- [x] **U9.2**: Hacer inspeccionables también la carta de la ranura de Cuerno, las cartas de clima activas y las cartas de los modales de descarte (propio y rival), reutilizando `CardDetailComponent` sin lógica de reglas en la UI
+- [x] **U9.3**: Test de auditoría de datos (toda carta con habilidad tiene `description` no vacía) y revisión de que la tarjeta del rival muestre el texto completo
+- [ ] **U9.4**: Tests en verde, versión `1.9.0`, compilación de `gwent-u9-debug.apk` (`--phase=u9`), criterios en `board-ui/SKILL.md` y tag `v1.9.0`
 
 ### Completadas
 
@@ -104,3 +118,5 @@
 | 2026-11-24 | **U7.2**: Generado catálogo completo (**181** definiciones / **22** Líderes), importados **215** sprites + Chort (**216** `.jpg` totales) y `mardroeme.mp3` (**30** SFX + **4** BGM), añadidos paleta/emblema/dorso/iconos de Skellige, `starter_skellige` y selector UI de `MARDROEME` / `WEATHER_STORM` | U7.3: Niveles de dificultad de IA (`NOVICE`, `TAVERNER`, `MASTER`), selector en Menú e historial |
 | 2026-11-24 | **U7.3**: Implementados 3 niveles de dificultad (`NOVICE`, `TAVERNER`, `MASTER`) en `ai-difficulty.ts`, `heuristics.ts` y `bot-player.ts` (con heurísticas Skellige), persistencia `qwent.ai.v1` (`AiSettingsService`), selector táctil en Menú (`AppComponent`) y badge en `MatchHistoryPageComponent` | U7.4: Tests de Skellige/dificultades, simulaciones 5 facciones, versión `1.7.0`, APK y tag `v1.7.0` |
 | 2026-11-24 | **U7.4**: Cerrada **U7 (`v1.7.0`)**: `npm test` (`19` archivos / `85` tests en verde, incluyendo `skellige.spec.ts` y simulaciones Bot vs. Bot en `bot-simulation.spec.ts`), `npm run build` (`432.82 kB` inicial, `216` sprites `.jpg`, `30` SFX + `4` BGM), versión `1.7.0` (`versionCode 8`), `gwent-u7-debug.apk` (`19.26 MB`), commit en `main` y tag anotado `v1.7.0` | U7 completada al 100% (`v1.7.0`) |
+| 2026-11-24 | **U8.1**: Añadida pickRandomLoadout / pickRandomLeaderId puras con RNG inyectado en src/core/deck/random-loadout.ts (6 tests: determinismo, líder de la facción, cobertura de las 5 facciones y todos los líderes) | U8.2: persistencia del líder sorteado fuera de los mazos |
+| 2026-11-24 | **U9.1–U9.3**: Corregido el cierre inmediato de la tarjeta al tocar cartas del tablero (el clic burbujeaba a `onBackdropClick`), hechas inspeccionables la ranura de Cuerno, los climas activos y el descarte (`CardDetailComponent` pasa a `z-[55]`), y añadidos `descriptions.spec.ts` y `board-inspect.spec.ts` | U9.4 al cerrar U8 (versión `1.9.0`) |
