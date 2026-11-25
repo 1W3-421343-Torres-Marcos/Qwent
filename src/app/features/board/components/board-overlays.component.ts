@@ -403,7 +403,10 @@ import { createSpriteFallbackTracker } from '../../../shared/constants/card-art'
 
           <div class="mt-3 grid grid-cols-2 gap-2 overflow-y-auto sm:grid-cols-3">
             @for (card of player.discard; track card.instanceId) {
-              <div class="relative flex min-h-[56px] items-center gap-2 overflow-hidden rounded border border-bronze/60 bg-tavern-dark/80 p-2 text-xs">
+              <div
+                class="relative flex min-h-[56px] cursor-pointer items-center gap-2 overflow-hidden rounded border border-bronze/60 bg-tavern-dark/80 p-2 text-xs"
+                (click)="$event.stopPropagation(); cardInspected.emit(card)"
+              >
                 @if (art.hasSprite(card.card.id, card.instanceId)) {
                   <img
                     [src]="art.spritePath(card.card.id, card.instanceId)"
@@ -445,6 +448,7 @@ export class BoardOverlaysComponent {
   readonly leaderChoices = input<readonly CardInstance[]>([]);
 
   readonly handoffConfirmed = output<void>();
+  readonly cardInspected = output<CardInstance>();
   readonly advanceRoundRequested = output<void>();
   readonly newMatchRequested = output<void>();
   readonly menuRequested = output<void>();

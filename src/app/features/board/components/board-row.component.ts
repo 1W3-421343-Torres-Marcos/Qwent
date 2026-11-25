@@ -38,7 +38,7 @@ const ROW_WEATHER_CLASSES: Readonly<Record<RowType, string>> = {
       <button
         type="button"
         (click)="onHornSlotClick($event)"
-        [disabled]="!isSelectable()"
+        [disabled]="!isSelectable() && !row().hornCard"
         aria-label="Ranura de Cuerno del Comandante"
         class="relative flex h-9 w-9 sm:h-11 sm:w-11 shrink-0 items-center justify-center overflow-hidden rounded border transition"
         [class]="hornSlotClasses()"
@@ -83,6 +83,7 @@ const ROW_WEATHER_CLASSES: Readonly<Record<RowType, string>> = {
             [card]="card"
             [isSelectableTarget]="isCardDecoyTarget(card)"
             (cardClicked)="onTokenClicked($event)"
+            (click)="$event.stopPropagation()"
           />
         }
       </div>
@@ -137,8 +138,14 @@ export class BoardRowComponent {
   }
 
   onHornSlotClick(event: Event): void {
-    if (!this.isSelectable()) return;
     event.stopPropagation();
+    if (!this.isSelectable()) {
+      const horn = this.row().hornCard;
+      if (horn) {
+        this.cardInspected.emit(horn);
+      }
+      return;
+    }
     this.rowSelected.emit(this.rowType());
   }
 

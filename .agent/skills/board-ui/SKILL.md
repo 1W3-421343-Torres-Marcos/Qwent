@@ -43,3 +43,4 @@ description: Usar al construir o modificar la interfaz táctil del tablero de 6 
 - [x] Flujos interactivos completos para Ágil, Cuerno, Señuelo, Médico (incluyendo cadenas), Mulligan y overlays `ROUND_END`/`MATCH_END`.
 - [x] Botón "Pasar Ronda" protegido contra toques accidentales y cero dependencias/URLs externas.
 - [x] (F6) Diseño visual completo de `docs/design.md` + animaciones livianas fluidas aplicadas.
+- [x] (U9) Tocar cualquier carta puesta en el tablero (propia o del rival), la carta de Cuerno, un clima activo o una carta del descarte abre `CardDetailComponent` con su descripción; el toque no burbujea a `onBackdropClick`.
