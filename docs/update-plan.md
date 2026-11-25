@@ -15,7 +15,7 @@
 | U5 | Fidelidad visual del tablero, artes alternativos, dorsos y climas | [x] | 100% |
 | U6 | 5.º Líder por facción (*Hearts of Stone*) y localización completa al español | [x] | 100% |
 | U7 | Expansión *Blood and Wine* (Skellige) y niveles de dificultad de IA | [x] | 100% |
-| U8 | Botones de facción y líder aleatorios (jugador y rival) | [~] | 25% |
+| U8 | Botones de facción y líder aleatorios (jugador y rival) | [x] | 100% |
 | U9 | Descripción de las cartas del rival al tocarlas | [~] | 75% |
 
 **Estados:** `[ ]` pendiente | `[~]` en curso | `[x]` completada
@@ -51,9 +51,9 @@
 
 ## U8: Botones de facción y líder aleatorios (`v1.8.0`)
 - [x] **U8.1**: Función pura `pickRandomLoadout` en `src/core/deck/` con RNG inyectado (sin `Math.random()` en el Core): elige una facción jugable y uno de sus 5 líderes, cubierta por tests deterministas (líder siempre de la facción, cobertura de las 5 facciones)
-- [ ] **U8.2**: `DeckStorageService`: `setPlayerLoadout` / `setOpponentLoadout` y `leaderOverrides` opcional persistido en `qwent.decks.v1` (compatible hacia atrás, con validación y fallback); el override se descarta al cambiar la facción con el `<select>` y nunca modifica los mazos guardados del Constructor
-- [ ] **U8.3**: `GameFacadeService.buildNewMatchState` usa el líder elegido; botón táctil "🎲 Aleatorio" (≥ 44 px) en *Tu Facción (J1)* y en *Rival / IA (J2)* del menú, mostrando facción y líder resultantes
-- [ ] **U8.4**: Tests en verde, versión `1.8.0`, compilación de `gwent-u8-debug.apk` (`--phase=u8`), criterios en `deck-builder/SKILL.md` y tag `v1.8.0`
+- [x] **U8.2**: `DeckStorageService`: `setPlayerLoadout` / `setOpponentLoadout` y `leaderOverrides` opcional persistido en `qwent.decks.v1` (compatible hacia atrás, con validación y fallback); el override se descarta al cambiar la facción con el `<select>` y nunca modifica los mazos guardados del Constructor
+- [x] **U8.3**: `GameFacadeService.buildNewMatchState` usa el líder elegido; botón táctil "🎲 Aleatorio" (≥ 44 px) en *Tu Facción (J1)* y en *Rival / IA (J2)* del menú, mostrando facción y líder resultantes
+- [x] **U8.4**: Tests en verde, versión `1.8.0`, compilación de `gwent-u8-debug.apk` (`--phase=u8`), criterios en `deck-builder/SKILL.md` y tag `v1.8.0`
 
 ## U9: Descripción de las cartas del rival al tocarlas (`v1.9.0`)
 - [x] **U9.1**: Corregir que al tocar una carta puesta en el tablero (del rival o propia) no se abra la tarjeta: el clic del token llama a `inspectCard` pero burbujea hasta `onBackdropClick()` de `BoardPageComponent`, que ejecuta `clearSelection()` y la cierra al instante (la mano evita esto con `stopPropagation`). La tarjeta debe abrirse con `CardDetailComponent` como al seleccionar cartas propias, con test de regresión
@@ -120,3 +120,7 @@
 | 2026-11-24 | **U7.4**: Cerrada **U7 (`v1.7.0`)**: `npm test` (`19` archivos / `85` tests en verde, incluyendo `skellige.spec.ts` y simulaciones Bot vs. Bot en `bot-simulation.spec.ts`), `npm run build` (`432.82 kB` inicial, `216` sprites `.jpg`, `30` SFX + `4` BGM), versión `1.7.0` (`versionCode 8`), `gwent-u7-debug.apk` (`19.26 MB`), commit en `main` y tag anotado `v1.7.0` | U7 completada al 100% (`v1.7.0`) |
 | 2026-11-24 | **U8.1**: Añadida pickRandomLoadout / pickRandomLeaderId puras con RNG inyectado en src/core/deck/random-loadout.ts (6 tests: determinismo, líder de la facción, cobertura de las 5 facciones y todos los líderes) | U8.2: persistencia del líder sorteado fuera de los mazos |
 | 2026-11-24 | **U9.1–U9.3**: Corregido el cierre inmediato de la tarjeta al tocar cartas del tablero (el clic burbujeaba a `onBackdropClick`), hechas inspeccionables la ranura de Cuerno, los climas activos y el descarte (`CardDetailComponent` pasa a `z-[55]`), y añadidos `descriptions.spec.ts` y `board-inspect.spec.ts` | U9.4 al cerrar U8 (versión `1.9.0`) |
+| 2026-11-24 | **U8.2–U8.3**: DeckStorageService con andomizePlayerLoadout / andomizeOpponentLoadout, líder efectivo (playerLeaderId / opponentLeaderId) y leaderOverrides persistido en qwent.decks.v1 sin tocar los mazos guardados (se descarta al cambiar de facción o editar su mazo); GameFacadeService usa el líder efectivo y el menú tiene un botón **🎲 Aleatorio** por lado (deck-storage.spec.ts, 7 tests) | U8.4: cierre y APK |
+| 2026-11-24 | **U8.4 (`v1.8.0`)**: 
+pm test (**23** archivos / **105** tests en verde), 
+pm run build (436.70 kB inicial), versión `1.8.0` (`versionCode 9`) y APK **`gwent-u8-debug.apk`** (19.26 MB) compilado en verde en la rama `feature/u8-u9` (tag pendiente hasta el merge a `main`) | U8 completada; U9.4 pendiente de cierre |

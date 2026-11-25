@@ -31,6 +31,8 @@ export type { GameAction } from './models/actions';
 export { validateCatalog, validateStarterDeck } from './models/validate-catalog';
 export type { CatalogValidationResult } from './models/validate-catalog';
 export { validateDeck } from './deck/validate-deck';
+export { pickRandomLeaderId, pickRandomLoadout } from './deck/random-loadout';
+export type { RandomLoadout, RandomSource } from './deck/random-loadout';
 export type {
   DeckValidationError,
   DeckValidationErrorCode,

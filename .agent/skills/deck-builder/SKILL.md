@@ -36,3 +36,4 @@ description: Usar al implementar el constructor de mazos, selector de facción y
 - [x] El usuario puede cambiar entre las 4 facciones, elegir Líder y armar/editar mazos táctilmente.
 - [x] Los mazos guardados persisten 100% offline en `localStorage` y pueden seleccionarse para iniciar partida contra la IA.
 - [x] Mazos prearmados funcionales disponibles sin necesidad de armar uno desde cero.
+- [x] (U8) Botón **🎲 Aleatorio** por lado en el menú: sortea facción y líder (`pickRandomLoadout` puro con RNG inyectado); el líder sorteado se guarda como selección aparte y nunca modifica los mazos guardados.

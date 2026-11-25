@@ -20,6 +20,13 @@ import { FACTION_META } from './shared/constants/faction-meta';
 
 type ScreenView = 'MENU' | 'DECK_BUILDER' | 'BOARD' | 'HISTORY';
 
+/** Fuente de azar de la UI (el Core nunca usa `Math.random()`); devuelve un número en [0, 1). */
+function secureRandom(): number {
+  const buffer = new Uint32Array(1);
+  crypto.getRandomValues(buffer);
+  return buffer[0] / 0x100000000;
+}
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -43,7 +50,7 @@ type ScreenView = 'MENU' | 'DECK_BUILDER' | 'BOARD' | 'HISTORY';
             <span
               class="rounded border border-gold/60 bg-row-leather px-3 py-0.5 text-[11px] font-bold uppercase tracking-widest text-gold"
             >
-              v1.7.0 — Release Offline
+              v1.8.0 — Release Offline
             </span>
             <span
               class="rounded border border-bronze bg-tavern-dark/80 px-3 py-0.5 text-[11px] font-medium text-parchment/80"
@@ -78,6 +85,15 @@ type ScreenView = 'MENU' | 'DECK_BUILDER' | 'BOARD' | 'HISTORY';
                     <option [value]="faction">{{ factionLabel(faction) }}</option>
                   }
                 </select>
+                <button
+                  type="button"
+                  (click)="randomizePlayer()"
+                  aria-label="Sortear facción y líder del jugador"
+                  title="Sortear facción y líder"
+                  class="min-h-[34px] min-w-[44px] rounded border border-gold/70 bg-gold/15 px-2 py-0.5 text-xs font-bold text-gold-bright transition hover:border-gold-bright active:scale-95"
+                >
+                  🎲 Aleatorio
+                </button>
               </div>
               <p class="mt-1 truncate text-[11px] font-semibold text-gold-bright">
                 ♛ {{ playerLeaderName() }} · {{ playerCardCount() }} cartas
@@ -105,6 +121,15 @@ type ScreenView = 'MENU' | 'DECK_BUILDER' | 'BOARD' | 'HISTORY';
                     <option [value]="faction">{{ factionLabel(faction) }}</option>
                   }
                 </select>
+                <button
+                  type="button"
+                  (click)="randomizeOpponent()"
+                  aria-label="Sortear facción y líder del rival"
+                  title="Sortear facción y líder"
+                  class="min-h-[34px] min-w-[44px] rounded border border-bronze bg-board-wood px-2 py-0.5 text-xs font-bold text-parchment transition hover:border-gold-bright active:scale-95"
+                >
+                  🎲 Aleatorio
+                </button>
               </div>
               <p class="mt-1 truncate text-[11px] font-semibold text-parchment">
                 ♛ {{ opponentLeaderName() }} · {{ opponentCardCount() }} cartas
@@ -232,13 +257,11 @@ export class AppComponent {
   readonly screen = signal<ScreenView>('MENU');
 
   readonly playerLeaderName = computed(() => {
-    const deck = this.deckStorage.getDeckForFaction(this.deckStorage.selectedPlayerFaction());
-    return this.deckStorage.getLeaderDefinition(deck.leaderId)?.name ?? 'Sin líder';
+    return this.deckStorage.getLeaderDefinition(this.deckStorage.playerLeaderId())?.name ?? 'Sin líder';
   });
 
   readonly opponentLeaderName = computed(() => {
-    const deck = this.deckStorage.getDeckForFaction(this.deckStorage.selectedOpponentFaction());
-    return this.deckStorage.getLeaderDefinition(deck.leaderId)?.name ?? 'Sin líder';
+    return this.deckStorage.getLeaderDefinition(this.deckStorage.opponentLeaderId())?.name ?? 'Sin líder';
   });
 
   readonly playerCardCount = computed(
@@ -263,6 +286,16 @@ export class AppComponent {
 
   factionAccent(faction: PlayableFactionId): string {
     return FACTION_META[faction].accentClass;
+  }
+
+  randomizePlayer(): void {
+    this.feedback.play('tap');
+    this.deckStorage.randomizePlayerLoadout(secureRandom);
+  }
+
+  randomizeOpponent(): void {
+    this.feedback.play('tap');
+    this.deckStorage.randomizeOpponentLoadout(secureRandom);
   }
 
   onPlayerFactionChange(event: Event): void {

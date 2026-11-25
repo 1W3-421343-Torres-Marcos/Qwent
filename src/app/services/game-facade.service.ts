@@ -698,8 +698,8 @@ export class GameFacadeService {
     const p2Faction = this.deckStorage.selectedOpponentFaction();
     const deck1 = this.deckStorage.getDeckForFaction(p1Faction);
     const deck2 = this.deckStorage.getDeckForFaction(p2Faction);
-    const leader1 = this.deckStorage.getLeaderDefinition(deck1.leaderId);
-    const leader2 = this.deckStorage.getLeaderDefinition(deck2.leaderId);
+    const leader1 = this.deckStorage.getLeaderDefinition(this.deckStorage.playerLeaderId());
+    const leader2 = this.deckStorage.getLeaderDefinition(this.deckStorage.opponentLeaderId());
 
     const p1Label = FACTION_META[p1Faction].shortLabel;
     const p2Label = FACTION_META[p2Faction].shortLabel;
