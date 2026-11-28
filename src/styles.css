@@ -407,3 +407,23 @@ body {
     transition: none !important;
   }
 }
+
+html.qwent-controller-mode .qwent-tv-overscan {
+  box-sizing: border-box;
+  padding-top: max(env(safe-area-inset-top), clamp(10px, 2.5vh, 32px));
+  padding-right: max(env(safe-area-inset-right), clamp(10px, 2.5vw, 32px));
+  padding-bottom: max(env(safe-area-inset-bottom), clamp(10px, 2.5vh, 32px));
+  padding-left: max(env(safe-area-inset-left), clamp(10px, 2.5vw, 32px));
+}
+
+html:not(.qwent-controller-mode) :focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+html.qwent-controller-mode :focus,
+html.qwent-controller-mode [data-qwent-focused='true'] {
+  outline: 3px solid #FDE047 !important;
+  outline-offset: -2px;
+  box-shadow: inset 0 0 0 2px #1A1410, 0 0 16px rgba(253, 224, 71, 0.9);
+}

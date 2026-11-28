@@ -10,7 +10,10 @@ import { DeckStorageService } from '../../services/deck-storage.service';
 import { FeedbackService } from '../../services/feedback.service';
 import { AbilityIconComponent, RowIconComponent } from '../../shared/components/card-icons.component';
 import { FactionEmblemComponent } from '../../shared/components/faction-emblem.component';
+import { InputLegendComponent } from '../../shared/components/input-legend.component';
 import { createSpriteFallbackTracker } from '../../shared/constants/card-art';
+import { QwentFocusableDirective } from '../../shared/directives/qwent-focusable.directive';
+import { QwentFocusScopeDirective } from '../../shared/directives/qwent-focus-scope.directive';
 import { FACTION_META } from '../../shared/constants/faction-meta';
 
 type CollectionFilter = 'ALL' | 'CLOSE_COMBAT' | 'RANGED' | 'SIEGE' | 'SPECIAL';
@@ -31,11 +34,19 @@ const FILTER_OPTIONS: ReadonlyArray<{ readonly id: CollectionFilter; readonly la
 @Component({
   selector: 'app-deck-builder-page',
   standalone: true,
-  imports: [AbilityIconComponent, RowIconComponent, FactionEmblemComponent],
+  imports: [
+    AbilityIconComponent,
+    RowIconComponent,
+    FactionEmblemComponent,
+    InputLegendComponent,
+    QwentFocusableDirective,
+    QwentFocusScopeDirective,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main
-      class="flex h-dvh w-screen flex-col overflow-hidden bg-tavern-dark text-parchment p-[env(safe-area-inset-top)_env(safe-area-inset-right)_env(safe-area-inset-bottom)_env(safe-area-inset-left)]"
+      qwentFocusScope="deck-builder"
+      class="qwent-tv-overscan flex h-dvh w-screen flex-col overflow-hidden bg-tavern-dark text-parchment p-[env(safe-area-inset-top)_env(safe-area-inset-right)_env(safe-area-inset-bottom)_env(safe-area-inset-left)]"
     >
       <!-- Top Bar: Factions + Actions -->
       <header class="qwent-wood-surface flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-bronze/70 px-3 py-1.5">
@@ -340,6 +351,7 @@ const FILTER_OPTIONS: ReadonlyArray<{ readonly id: CollectionFilter; readonly la
           </div>
         </div>
       </section>
+      <app-input-legend />
     </main>
   `,
 })

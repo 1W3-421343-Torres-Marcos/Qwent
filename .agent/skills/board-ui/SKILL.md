@@ -44,3 +44,4 @@ description: Usar al construir o modificar la interfaz táctil del tablero de 6 
 - [x] Botón "Pasar Ronda" protegido contra toques accidentales y cero dependencias/URLs externas.
 - [x] (F6) Diseño visual completo de `docs/design.md` + animaciones livianas fluidas aplicadas.
 - [x] (U9) Tocar cualquier carta puesta en el tablero (propia o del rival), la carta de Cuerno, un clima activo o una carta del descarte abre `CardDetailComponent` con su descripción; el toque no burbujea a `onBackdropClick`.
+- [x] (U10) La navegación D-Pad/Gamepad/teclado es aditiva: inicia en modo táctil en teléfonos (sin anillos, overscan ni leyendas) y se activa automáticamente en Android TV (`QwentNative.isTelevision()`), con resolución dinámica de focus scopes/grupos (`OnChanges`, `qwentInitialFocus`, `[data-qwent-focused='true']`), recuperación de foco, scroll `nearest`, ciclo de `<select>` y holds de pasar compatibles con la inspección y el targeting pre-jugada y `AGILE_ROW`.

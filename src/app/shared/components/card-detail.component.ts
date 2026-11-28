@@ -4,6 +4,8 @@ import { getCardSpritePath } from '../constants/card-art';
 import { FACTION_META } from '../constants/faction-meta';
 import { AbilityIconComponent, RowIconComponent } from './card-icons.component';
 import { FactionEmblemComponent } from './faction-emblem.component';
+import { QwentFocusableDirective } from '../directives/qwent-focusable.directive';
+import { QwentFocusScopeDirective } from '../directives/qwent-focus-scope.directive';
 
 const ROW_LABEL: Readonly<Record<RowType, string>> = {
   CLOSE_COMBAT: 'Cuerpo a cuerpo',
@@ -14,10 +16,18 @@ const ROW_LABEL: Readonly<Record<RowType, string>> = {
 @Component({
   selector: 'app-card-detail',
   standalone: true,
-  imports: [RowIconComponent, AbilityIconComponent, FactionEmblemComponent],
+  imports: [
+    RowIconComponent,
+    AbilityIconComponent,
+    FactionEmblemComponent,
+    QwentFocusableDirective,
+    QwentFocusScopeDirective,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <aside
+      qwentFocusScope="card-inspector"
+      [qwentTrapFocus]="trapFocus()"
       class="qwent-wood-surface fixed right-3 top-1/2 z-[55] w-60 -translate-y-1/2 rounded-xl border-2 border-bronze p-3 text-parchment shadow-2xl backdrop-blur-sm"
       [class.border-gold-bright]="card().card.isHero"
       [class.qwent-hero-frame]="card().card.isHero"
@@ -126,6 +136,7 @@ const ROW_LABEL: Readonly<Record<RowType, string>> = {
       @if (canConfirmPlay()) {
         <button
           type="button"
+          qwentInitialFocus
           (click)="playRequested.emit(card())"
           class="mt-3 min-h-[44px] w-full rounded-lg border border-gold-bright bg-gold/25 px-3 py-2 text-xs font-bold uppercase tracking-wider text-gold-bright transition active:scale-95"
         >
@@ -139,6 +150,7 @@ export class CardDetailComponent {
   readonly card = input.required<CardInstance>();
   readonly canConfirmPlay = input(false);
   readonly playButtonLabel = input('Jugar carta');
+  readonly trapFocus = input(true);
   readonly closed = output<void>();
   readonly playRequested = output<CardInstance>();
 

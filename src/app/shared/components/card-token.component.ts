@@ -4,15 +4,17 @@ import { getCardSpritePath } from '../constants/card-art';
 import { FACTION_META } from '../constants/faction-meta';
 import { AbilityIconComponent } from './card-icons.component';
 import { FactionEmblemComponent } from './faction-emblem.component';
+import { QwentFocusableDirective } from '../directives/qwent-focusable.directive';
 
 @Component({
   selector: 'app-card-token',
   standalone: true,
-  imports: [AbilityIconComponent, FactionEmblemComponent],
+  imports: [AbilityIconComponent, FactionEmblemComponent, QwentFocusableDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <button
       type="button"
+      [qwentFocusGroup]="isSelectableTarget() ? 'play-target' : 'board-unit'"
       (click)="cardClicked.emit(card())"
       [title]="card().card.name"
       class="relative flex h-full aspect-[3/4] shrink-0 flex-col justify-between overflow-hidden rounded border p-0.5 transition active:scale-95"

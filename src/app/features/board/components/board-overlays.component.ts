@@ -3,11 +3,19 @@ import type { CardInstance, GameState, PlayerId, PlayerState } from '../../../..
 import { AbilityIconComponent, RowIconComponent } from '../../../shared/components/card-icons.component';
 import { FactionEmblemComponent } from '../../../shared/components/faction-emblem.component';
 import { createSpriteFallbackTracker } from '../../../shared/constants/card-art';
+import { QwentFocusableDirective } from '../../../shared/directives/qwent-focusable.directive';
+import { QwentFocusScopeDirective } from '../../../shared/directives/qwent-focus-scope.directive';
 
 @Component({
   selector: 'app-board-overlays',
   standalone: true,
-  imports: [AbilityIconComponent, RowIconComponent, FactionEmblemComponent],
+  imports: [
+    AbilityIconComponent,
+    RowIconComponent,
+    FactionEmblemComponent,
+    QwentFocusableDirective,
+    QwentFocusScopeDirective,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <!-- Opaque 2P Turn Handoff Overlay -->
@@ -16,6 +24,7 @@ import { createSpriteFallbackTracker } from '../../../shared/constants/card-art'
       (state().phase === 'PLAYING' || state().phase === 'MULLIGAN' || state().phase === 'PENDING_SELECTION')
     ) {
       <div
+        qwentFocusScope="turn-handoff"
         class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-tavern-dark/[0.98] p-6 text-center backdrop-blur-md"
       >
         <div class="max-w-md rounded-xl border-2 border-gold/70 bg-board-wood px-8 py-6 shadow-2xl">
@@ -42,7 +51,7 @@ import { createSpriteFallbackTracker } from '../../../shared/constants/card-art'
 
     <!-- Initial Mulligan Modal (human player only) -->
     @if (state().phase === 'MULLIGAN' && !turnHandoffPending() && isHumanTurn()) {
-      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-3 backdrop-blur-sm">
+      <div qwentFocusScope="mulligan" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-3 backdrop-blur-sm">
         <div
           class="flex max-h-[92dvh] w-full max-w-4xl flex-col rounded-xl border-2 border-gold/80 bg-board-wood p-4 shadow-2xl"
         >
@@ -145,7 +154,7 @@ import { createSpriteFallbackTracker } from '../../../shared/constants/card-art'
     <!-- Round End Overlay -->
     @if (state().phase === 'ROUND_END') {
       @let lastRound = state().roundHistory[state().roundHistory.length - 1];
-      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-6 backdrop-blur-sm">
+      <div qwentFocusScope="round-end" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-6 backdrop-blur-sm">
         <div class="w-full max-w-md rounded-xl border-2 border-bronze bg-board-wood p-6 text-center shadow-2xl">
           <p class="text-xs font-bold uppercase tracking-widest text-gold">
             Fin de Ronda {{ lastRound?.roundNumber ?? state().roundNumber }}
@@ -184,7 +193,7 @@ import { createSpriteFallbackTracker } from '../../../shared/constants/card-art'
 
     <!-- Match End Overlay -->
     @if (state().phase === 'MATCH_END') {
-      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-6 backdrop-blur-sm">
+      <div qwentFocusScope="match-end" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-6 backdrop-blur-sm">
         <div class="w-full max-w-lg rounded-xl border-2 border-gold-bright bg-board-wood p-6 text-center shadow-2xl">
           <p class="text-xs font-bold uppercase tracking-widest text-gold">Fin de la Partida</p>
           <h2 class="mt-1 font-serif text-3xl font-extrabold text-gold-bright">
@@ -236,7 +245,7 @@ import { createSpriteFallbackTracker } from '../../../shared/constants/card-art'
       !turnHandoffPending() &&
       isHumanTurn()
     ) {
-      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+      <div qwentFocusScope="medic-target" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
         <div
           class="flex max-h-[85dvh] w-full max-w-2xl flex-col rounded-xl border-2 border-gold-bright bg-board-wood p-4 shadow-2xl"
         >
@@ -290,7 +299,7 @@ import { createSpriteFallbackTracker } from '../../../shared/constants/card-art'
 
     <!-- Leader Discard Target Selector (human player only) -->
     @if (leaderPending(); as leaderSel) {
-      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+      <div qwentFocusScope="leader-target" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
         <div
           class="flex max-h-[85dvh] w-full max-w-2xl flex-col rounded-xl border-2 border-gold-bright bg-board-wood p-4 shadow-2xl"
         >
@@ -346,7 +355,7 @@ import { createSpriteFallbackTracker } from '../../../shared/constants/card-art'
 
     <!-- Scoia'tael Start Choice Modal (human player only) -->
     @if (scoiataelPending(); as stChoice) {
-      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-6 backdrop-blur-sm">
+      <div qwentFocusScope="scoiatael-choice" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-6 backdrop-blur-sm">
         <div class="w-full max-w-md rounded-xl border-2 border-gold-bright bg-board-wood p-6 text-center shadow-2xl">
           <p class="text-xs font-bold uppercase tracking-[0.2em] text-gold">
             Pasiva Scoia'tael
@@ -381,6 +390,7 @@ import { createSpriteFallbackTracker } from '../../../shared/constants/card-art'
     <!-- Discard Pile Modal -->
     @if (discardPlayer(); as player) {
       <div
+        qwentFocusScope="discard-pile"
         (click)="discardClosed.emit()"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
       >
@@ -404,6 +414,10 @@ import { createSpriteFallbackTracker } from '../../../shared/constants/card-art'
           <div class="mt-3 grid grid-cols-2 gap-2 overflow-y-auto sm:grid-cols-3">
             @for (card of player.discard; track card.instanceId) {
               <div
+                qwentFocusable
+                role="button"
+                qwentFocusGroup="discard-card"
+                [attr.aria-label]="'Inspeccionar ' + card.card.name"
                 class="relative flex min-h-[56px] cursor-pointer items-center gap-2 overflow-hidden rounded border border-bronze/60 bg-tavern-dark/80 p-2 text-xs"
                 (click)="$event.stopPropagation(); cardInspected.emit(card)"
               >

@@ -17,6 +17,7 @@
 | U7 | Expansión *Blood and Wine* (Skellige) y niveles de dificultad de IA | [x] | 100% |
 | U8 | Botones de facción y líder aleatorios (jugador y rival) | [x] | 100% |
 | U9 | Descripción de las cartas del rival al tocarlas | [x] | 100% |
+| U10 | Soporte universal para Android TV, control remoto y joystick | [x] | 100% |
 
 **Estados:** `[ ]` pendiente | `[~]` en curso | `[x]` completada
 
@@ -25,6 +26,12 @@
 ## Backlog / Actualizaciones Planificadas
 
 ### Pendientes (Hoja de Ruta TW3)
+
+## U10: Soporte Universal para Android TV, Control Remoto (D-Pad) y Joystick (`v1.10.0`)
+- [x] **U10.1**: Añadidas utilidades puras `input-bridge.utils.ts` y `spatial-focus.utils.ts` con normalización de teclado/Android TV y Gamepad estándar, zona muerta `0.45`, throttle `180 ms`, deduplicación `50 ms`, protección de hold-to-pass y resolución geométrica/pila de focus scopes; **14 tests Vitest** sin `TestBed` en verde
+- [x] **U10.2**: Integrados `InputBridgeService` / `SpatialFocusService`, directivas de foco/scope, modo reactivo `touch`/`controller`, traps (incluida navegación Tab), recuperación de foco, scroll `nearest`, activación de `<select>` y navegación por menú, tablero, overlays, Constructor e Historial; `npm run build` y **14 tests dirigidos** en verde
+- [x] **U10.3**: Declarados `leanback`/touchscreen opcionales y launcher Leanback, banner taberna local vectorial 320×180, Atrás interceptado por `OnBackPressedCallback` como `qwent-native-back`/CANCEL y puente `QwentNative.exitApp()` limitado al Menú; build Angular, sync Capacitor y compilación Java/recursos Gradle en verde
+- [x] **U10.4**: Versión `1.10.0` (`versionCode 11`), suite completa/auditoría offline, APK `gwent-u10-debug.apk` y cierre de la fase U10 confirmados
 
 ## U4: Sensación en vivo de partida TW3 (`v1.4.0`)
 - [x] **U4.1**: Banners centrales no bloqueantes (`BoardBannerComponent`, ~`1200 ms`, animación GPU) y cola en `GameFacadeService` para moneda inicial, cambio de turno (*"Tu turno"* / *"Turno del rival"* con `turn_me.mp3` / `turn_op.mp3`), pase, inicio de Ronda 2/3 y activación de pasivas de facción / Vengador
@@ -125,3 +132,10 @@
 pm test (**23** archivos / **105** tests en verde), 
 pm run build (436.70 kB inicial), versión `1.8.0` (`versionCode 9`) y APK **`gwent-u8-debug.apk`** (19.26 MB) compilado en verde en la rama `feature/u8-u9` (tag pendiente hasta el merge a `main`) | U8 completada; U9.4 pendiente de cierre |
 | 2026-11-24 | **U9.4 (`v1.9.0`)**: `npm test` (**23** archivos / **105** tests en verde), `npm run build` (`436.70 kB` inicial), versión `1.9.0` (`versionCode 10`) y APK **`gwent-u9-debug.apk`** (`19.26 MB`) compilado en verde en la rama `feature/u8-u9` (tag pendiente hasta probar y mergear a `main`) | U9 completada; pendiente prueba manual del usuario y merge |
+| 2026-11-24 | **U10.1**: Añadidas utilidades puras para normalizar teclado/Android TV y Gamepad estándar y resolver navegación espacial/focus scopes; verificación inicial de **11 tests Vitest** sin `TestBed` en verde | U10.2: Integrar servicios/directivas, modo reactivo táctil/control, scopes y navegación completa en las pantallas |
+| 2026-11-24 | **U10.2**: Integrados servicios y directivas standalone con Signals/OnPush, navegación espacial y Tab con traps, retorno/recuperación del foco, scrolling automático, soporte de `<select>`, leyendas solo en modo controller y control completo en menú/tablero/pantallas secundarias; `npm run build` y **14 tests Vitest dirigidos** en verde | U10.3: Empaquetado Leanback, banner offline y puente de Atrás nativo |
+| 2026-11-24 | **U10.3**: Android declara hardware táctil/Leanback opcionales, launcher Leanback y banner local; `MainActivity` despacha Atrás como CANCEL y expone salida nativa mínima; `npm run build`, `npx cap sync android` y `:app:compileDebugJavaWithJavac` en verde | U10.4: Versionar `1.10.0`/`versionCode 11`, ejecutar la suite completa/offline audit y generar/verificar `gwent-u10-debug.apk` |
+| 2026-11-24 | **U10.4 (parcial)**: Versión `1.10.0` (`versionCode 11`), `npm run build:apk -- --phase=u10` en verde (25 archivos / 119 tests, auditoría offline incluida) y APK **`gwent-u10-debug.apk`** (`19.27 MB`) generado; falta validar instalación y primer arranque en dispositivo/emulador | Verificar el primer arranque Android para cerrar U10 al 100% |
+| 2026-11-27 | **Ajuste post-U10**: Reemplazado el banner vectorial por `drawable-xhdpi/tv_banner.png` (**320×180**), reutilizando el ícono adaptativo y fondo `#1A1410`; manifest verificado sin permisos de red. `npm test` (**25 archivos / 119 tests**) y recompilación de `gwent-u10-debug.apk` (`19.55 MB`) en verde; versión `1.10.0` sin cambios | U10 cerrada; ajuste visual completado |
+| 2026-11-27 | **Ajuste post-U10 — entrada Android TV**: `MainActivity` reenvía al WebView las teclas nativas D-Pad, OK/Enter, botones A/B/X/Y, hombros y Start/Menu como eventos de teclado para reutilizar `InputBridgeService`; versión `1.10.0` sin cambios. `npm run build:apk -- --phase=u10` en verde (**25 archivos / 119 tests**) | Instalar el APK actualizado y probar con control remoto/joystick en Android TV |
+| 2026-11-27 | **Fix TV/Gamepad U10**: Corregida la resolución de `scopeId` en `QwentFocusScopeDirective`/`QwentFocusableDirective`/`SpatialFocusService` (el `@HostBinding` corría después de `ngOnInit` de los hijos dejando todos los botones en `'root'`), añadido `OnChanges` y `qwentInitialFocus` para scopes dinámicos (`play-target`, `AGILE_ROW`, inspector y menú), anillo visual `[data-qwent-focused='true']`, soporte de sticks analógicos y cruceta HAT en `MainActivity.dispatchGenericMotionEvent`, `QwentNative.isTelevision()` antes de `super.load()`, foco en `WebView`, botones HID `BUTTON_1..4`/`NUMPAD_ENTER` y tests de regresión (`spatial-focus-service.spec.ts`, **26 archivos / 124 tests**). Recompilado `gwent-u10-debug.apk` en verde | Instalar `builds/apks/gwent-u10-debug.apk` y validar con control remoto y joystick en Android TV |

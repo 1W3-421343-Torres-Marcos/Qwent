@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import {
   AI_DIFFICULTIES,
   AI_DIFFICULTY_LABELS,
@@ -14,9 +14,22 @@ import { AiSettingsService } from './services/ai-settings.service';
 import { DeckStorageService } from './services/deck-storage.service';
 import { FeedbackService } from './services/feedback.service';
 import { GameFacadeService, type GameMode } from './services/game-facade.service';
+import { InputBridgeService } from './services/input-bridge.service';
 import { MatchHistoryService } from './services/match-history.service';
+import { QwentFocusableDirective } from './shared/directives/qwent-focusable.directive';
+import { QwentFocusScopeDirective } from './shared/directives/qwent-focus-scope.directive';
+import { InputLegendComponent } from './shared/components/input-legend.component';
 import { FactionEmblemComponent } from './shared/components/faction-emblem.component';
 import { FACTION_META } from './shared/constants/faction-meta';
+
+declare global {
+  interface Window {
+    QwentNative?: {
+      exitApp: () => void;
+      isTelevision?: () => boolean;
+    };
+  }
+}
 
 type ScreenView = 'MENU' | 'DECK_BUILDER' | 'BOARD' | 'HISTORY';
 
@@ -30,7 +43,15 @@ function secureRandom(): number {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [BoardPageComponent, DeckBuilderPageComponent, MatchHistoryPageComponent, FactionEmblemComponent],
+  imports: [
+    BoardPageComponent,
+    DeckBuilderPageComponent,
+    MatchHistoryPageComponent,
+    FactionEmblemComponent,
+    QwentFocusableDirective,
+    QwentFocusScopeDirective,
+    InputLegendComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (screen() === 'BOARD') {
@@ -41,7 +62,8 @@ function secureRandom(): number {
       <app-match-history-page (closed)="screen.set('MENU')" />
     } @else {
       <main
-        class="flex h-dvh w-screen items-center justify-center overflow-hidden bg-tavern-dark text-parchment p-[env(safe-area-inset-top)_env(safe-area-inset-right)_env(safe-area-inset-bottom)_env(safe-area-inset-left)]"
+        qwentFocusScope="main-menu"
+        class="qwent-tv-overscan flex h-dvh w-screen items-center justify-center overflow-hidden bg-tavern-dark text-parchment p-[env(safe-area-inset-top)_env(safe-area-inset-right)_env(safe-area-inset-bottom)_env(safe-area-inset-left)]"
       >
         <section
           class="qwent-wood-surface mx-4 flex w-full max-w-3xl flex-col items-center gap-3 rounded-xl border-2 border-bronze px-6 py-4 text-center shadow-2xl"
@@ -50,7 +72,7 @@ function secureRandom(): number {
             <span
               class="rounded border border-gold/60 bg-row-leather px-3 py-0.5 text-[11px] font-bold uppercase tracking-widest text-gold"
             >
-              v1.9.0 — Release Offline
+              v1.10.0 — Release Offline
             </span>
             <span
               class="rounded border border-bronze bg-tavern-dark/80 px-3 py-0.5 text-[11px] font-medium text-parchment/80"
@@ -164,6 +186,7 @@ function secureRandom(): number {
           <div class="mt-1 grid w-full grid-cols-2 gap-2 sm:grid-cols-4">
             <button
               type="button"
+              qwentInitialFocus
               (click)="startMatch('VS_AI')"
               class="min-h-[48px] rounded-lg border-2 border-gold-bright bg-gold/25 px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-gold-bright shadow-lg transition active:scale-95"
             >
@@ -240,12 +263,15 @@ function secureRandom(): number {
             </button>
           </div>
         </section>
+        <app-input-legend />
       </main>
     }
   `,
 })
 export class AppComponent {
   private readonly facade = inject(GameFacadeService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly inputBridge = inject(InputBridgeService);
   readonly aiSettings = inject(AiSettingsService);
   readonly deckStorage = inject(DeckStorageService);
   readonly feedback = inject(FeedbackService);
@@ -255,6 +281,26 @@ export class AppComponent {
   readonly factions = PLAYABLE_FACTIONS;
   readonly aiDifficulties = AI_DIFFICULTIES;
   readonly screen = signal<ScreenView>('MENU');
+
+  constructor() {
+    const subscription = this.inputBridge.commands.subscribe((event) => {
+      if (event.command === 'MENU' && this.screen() !== 'BOARD') {
+        this.screen.set('MENU');
+      } else if (
+        event.command === 'CANCEL' &&
+        event.source === 'system' &&
+        this.screen() === 'MENU'
+      ) {
+        if (typeof window !== 'undefined') window.QwentNative?.exitApp();
+      } else if (
+        event.command === 'CANCEL' &&
+        (this.screen() === 'DECK_BUILDER' || this.screen() === 'HISTORY')
+      ) {
+        this.screen.set('MENU');
+      }
+    });
+    this.destroyRef.onDestroy(() => subscription.unsubscribe());
+  }
 
   readonly playerLeaderName = computed(() => {
     return this.deckStorage.getLeaderDefinition(this.deckStorage.playerLeaderId())?.name ?? 'Sin líder';

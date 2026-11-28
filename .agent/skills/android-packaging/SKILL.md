@@ -36,3 +36,4 @@ description: Usar al configurar Capacitor, orientación horizontal, modo inmersi
 - [x] `npm run build:apk` ejecuta tests, compila web, sincroniza Android y genera `builds/apks/gwent-f<N>-debug.apk` sin intervención manual.
 - [ ] El APK de la fase se instala/arranca correctamente 100% offline (sin `android.permission.INTERNET`) y muestra la versión/fase actual.
 - [x] (F6) Ícono adaptativo y splash screen configurados y auditado sin permisos ni tráfico externo.
+- [x] (U10) Android TV se anuncia con `leanback` y pantalla táctil opcionales, launcher/banner local 320×180; `MainActivity` instala `QwentNative` (`exitApp`, `isTelevision`) antes de cargar el `WebView` con foco activo, reenvía D-Pad, botones A/B/X/Y/HID (`BUTTON_1..4`), `NUMPAD_ENTER` y ejes analógicos/HAT (`dispatchGenericMotionEvent`, zona muerta `0.45`, repeat `180 ms`) al WebView como eventos de teclado, entrega Atrás nativo como `CANCEL` y solo finaliza la Activity desde el menú.

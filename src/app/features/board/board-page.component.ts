@@ -1,11 +1,25 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, output, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  computed,
+  effect,
+  inject,
+  output,
+  signal,
+} from '@angular/core';
 import type { FactionId, PlayerState } from '../../../core';
 import { FeedbackService } from '../../services/feedback.service';
 import { GameFacadeService, type VisualEffectType } from '../../services/game-facade.service';
+import { InputBridgeService } from '../../services/input-bridge.service';
+import { SpatialFocusService } from '../../services/spatial-focus.service';
 import { AbilityIconComponent } from '../../shared/components/card-icons.component';
 import { CardDetailComponent } from '../../shared/components/card-detail.component';
 import { DeckBackComponent } from '../../shared/components/deck-back.component';
 import { FactionEmblemComponent } from '../../shared/components/faction-emblem.component';
+import { InputLegendComponent } from '../../shared/components/input-legend.component';
+import { QwentFocusableDirective } from '../../shared/directives/qwent-focusable.directive';
+import { QwentFocusScopeDirective } from '../../shared/directives/qwent-focus-scope.directive';
 import { createSpriteFallbackTracker } from '../../shared/constants/card-art';
 import { FACTION_META } from '../../shared/constants/faction-meta';
 import { BoardBannerComponent } from './components/board-banner.component';
@@ -66,12 +80,16 @@ const WEATHER_BOX_SLOTS = [
     DeckBackComponent,
     AbilityIconComponent,
     FactionEmblemComponent,
+    InputLegendComponent,
+    QwentFocusableDirective,
+    QwentFocusScopeDirective,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main
       (click)="onBackdropClick()"
-      class="h-dvh w-screen overflow-hidden bg-tavern-dark text-parchment p-[env(safe-area-inset-top)_env(safe-area-inset-right)_env(safe-area-inset-bottom)_env(safe-area-inset-left)]"
+      qwentFocusScope="board"
+      class="qwent-tv-overscan h-dvh w-screen overflow-hidden bg-tavern-dark text-parchment p-[env(safe-area-inset-top)_env(safe-area-inset-right)_env(safe-area-inset-bottom)_env(safe-area-inset-left)]"
     >
       <div class="grid h-full w-full grid-cols-[18%_68%_14%] gap-1 p-1">
         <!-- LEFT ZONE (18%): Profiles, Gems, Global Scores, Hand Counts & Shared Weather Box -->
@@ -174,6 +192,9 @@ const WEATHER_BOX_SLOTS = [
                   class="relative flex h-10 items-center justify-center overflow-hidden rounded border transition"
                   [class]="isActive ? slot.activeClass : 'border-bronze/40 text-parchment/25'"
                   [class.cursor-pointer]="isActive"
+                  qwentFocusable
+                  [attr.aria-disabled]="!isActive"
+                  qwentFocusGroup="weather-inspection"
                   (click)="onWeatherSlotClick($event, weatherEntry?.card ?? null)"
                   [title]="weatherEntry ? weatherEntry.card.card.name : slot.label"
                 >
@@ -475,10 +496,11 @@ const WEATHER_BOX_SLOTS = [
             <!-- Hold-to-Pass (600ms) Ergonomic Thumb Button -->
             <button
               type="button"
-              (pointerdown)="startHoldPass()"
-              (pointerup)="cancelHoldPass()"
-              (pointerleave)="cancelHoldPass()"
-              (pointercancel)="cancelHoldPass()"
+              data-qwent-pass
+              (pointerdown)="onPassPointerDown()"
+              (pointerup)="onPassPointerUp()"
+              (pointerleave)="onPassPointerUp()"
+              (pointercancel)="onPassPointerUp()"
               [disabled]="
                 facade.turnHandoffPending() ||
                 facade.isTransitioningTurn() ||
@@ -588,6 +610,7 @@ const WEATHER_BOX_SLOTS = [
         <div (click)="$event.stopPropagation()">
           <app-card-detail
             [card]="inspected"
+            [trapFocus]="facade.selectionPrompt() === null"
             [canConfirmPlay]="facade.inspectorCanConfirmPlay()"
             [playButtonLabel]="facade.inspectorConfirmLabel()"
             (closed)="facade.closeInspector()"
@@ -617,9 +640,11 @@ const WEATHER_BOX_SLOTS = [
         (mulliganSwapRequested)="facade.mulliganSwap($event)"
         (finishMulliganRequested)="facade.finishMulligan()"
       />
+      <app-input-legend />
       <!-- Exit Match Confirmation Modal -->
       @if (exitConfirmOpen()) {
         <div
+          qwentFocusScope="exit-confirmation"
           (click)="cancelExitMatch()"
           class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
         >
@@ -660,6 +685,8 @@ export class BoardPageComponent {
   readonly facade = inject(GameFacadeService);
   readonly feedback = inject(FeedbackService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly inputBridge = inject(InputBridgeService);
+  private readonly spatialFocus = inject(SpatialFocusService);
 
   readonly exitToMenu = output<void>();
   readonly holdProgress = signal(0);
@@ -682,7 +709,30 @@ export class BoardPageComponent {
   readonly playableChecker = (instanceId: string): boolean => this.facade.canPlayFromHand(instanceId);
 
   constructor() {
+    effect(() => this.spatialFocus.setTargetingScope(this.facade.selectionPrompt() !== null));
+
+    const subscription = this.inputBridge.commands.subscribe((event) => {
+      switch (event.command) {
+        case 'PASS_START':
+          this.startHoldPass();
+          break;
+        case 'PASS_END':
+          this.cancelHoldPass();
+          break;
+        case 'LEADER':
+          this.facade.useLeader();
+          break;
+        case 'CANCEL':
+          this.handleCancelCommand();
+          break;
+        case 'MENU':
+          this.handleMenuCommand();
+          break;
+      }
+    });
+
     this.destroyRef.onDestroy(() => {
+      subscription.unsubscribe();
       this.cancelHoldPass();
       this.facade.abandonMatch();
     });
@@ -740,6 +790,46 @@ export class BoardPageComponent {
     if (!card) return;
     event.stopPropagation();
     this.facade.inspectCard(card);
+  }
+
+  onPassPointerDown(): void {
+    this.inputBridge.beginTouchPassHold();
+    if (this.holdIntervalId === null) this.startHoldPass();
+  }
+
+  onPassPointerUp(): void {
+    this.inputBridge.endTouchPassHold();
+  }
+
+  private handleCancelCommand(): void {
+    if (this.exitConfirmOpen()) {
+      this.cancelExitMatch();
+      return;
+    }
+    if (this.facade.inspectedCard()) {
+      this.facade.closeInspector();
+      return;
+    }
+    if (this.facade.discardModalPlayer()) {
+      this.facade.closeDiscardModal();
+      return;
+    }
+    if (this.facade.canCancelSelection()) {
+      this.facade.clearSelection();
+      return;
+    }
+    if (this.facade.state().phase !== 'MATCH_END') {
+      this.requestExitMatch();
+    }
+  }
+
+  private handleMenuCommand(): void {
+    if (this.exitConfirmOpen()) return;
+    if (this.facade.state().phase === 'MATCH_END') {
+      this.exitToMenu.emit();
+    } else {
+      this.requestExitMatch();
+    }
   }
 
   startHoldPass(): void {

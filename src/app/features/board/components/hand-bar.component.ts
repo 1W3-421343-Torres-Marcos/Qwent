@@ -3,12 +3,13 @@ import type { CardInstance } from '../../../../core';
 import { AbilityIconComponent, RowIconComponent } from '../../../shared/components/card-icons.component';
 import { FactionEmblemComponent } from '../../../shared/components/faction-emblem.component';
 import { createSpriteFallbackTracker } from '../../../shared/constants/card-art';
+import { QwentFocusableDirective } from '../../../shared/directives/qwent-focusable.directive';
 import { FACTION_META } from '../../../shared/constants/faction-meta';
 
 @Component({
   selector: 'app-hand-bar',
   standalone: true,
-  imports: [RowIconComponent, AbilityIconComponent, FactionEmblemComponent],
+  imports: [RowIconComponent, AbilityIconComponent, FactionEmblemComponent, QwentFocusableDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
@@ -17,6 +18,7 @@ import { FACTION_META } from '../../../shared/constants/faction-meta';
       @for (card of hand(); track card.instanceId) {
         <button
           type="button"
+          qwentFocusGroup="hand"
           (click)="cardTapped.emit(card)"
           [class.ring-2]="selectedInstanceId() === card.instanceId"
           [class.ring-gold-bright]="selectedInstanceId() === card.instanceId"

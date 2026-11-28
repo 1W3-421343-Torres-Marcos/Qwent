@@ -2,12 +2,15 @@ import { ChangeDetectionStrategy, Component, computed, inject, output, signal } 
 import { AI_DIFFICULTY_LABELS, type AIDifficulty, type FactionId } from '../../../core';
 import { FeedbackService } from '../../services/feedback.service';
 import { MatchHistoryService } from '../../services/match-history.service';
+import { QwentFocusableDirective } from '../../shared/directives/qwent-focusable.directive';
+import { QwentFocusScopeDirective } from '../../shared/directives/qwent-focus-scope.directive';
 import {
   computeHistoryStats,
   type MatchHistoryMode,
   type MatchOutcome,
 } from '../../services/match-history.utils';
 import { FactionEmblemComponent } from '../../shared/components/faction-emblem.component';
+import { InputLegendComponent } from '../../shared/components/input-legend.component';
 import { FACTION_META } from '../../shared/constants/faction-meta';
 
 type HistoryFilter = 'ALL' | MatchHistoryMode;
@@ -36,11 +39,17 @@ const OUTCOME_META: Readonly<Record<MatchOutcome, { readonly label: string; read
 @Component({
   selector: 'app-match-history-page',
   standalone: true,
-  imports: [FactionEmblemComponent],
+  imports: [
+    FactionEmblemComponent,
+    InputLegendComponent,
+    QwentFocusableDirective,
+    QwentFocusScopeDirective,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main
-      class="flex h-dvh w-screen flex-col overflow-hidden bg-tavern-dark text-parchment p-[env(safe-area-inset-top)_env(safe-area-inset-right)_env(safe-area-inset-bottom)_env(safe-area-inset-left)]"
+      qwentFocusScope="match-history"
+      class="qwent-tv-overscan flex h-dvh w-screen flex-col overflow-hidden bg-tavern-dark text-parchment p-[env(safe-area-inset-top)_env(safe-area-inset-right)_env(safe-area-inset-bottom)_env(safe-area-inset-left)]"
     >
       <!-- Top Header -->
       <header class="qwent-wood-surface flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-bronze/70 px-3 py-1.5">
@@ -209,6 +218,7 @@ const OUTCOME_META: Readonly<Record<MatchOutcome, { readonly label: string; read
           }
         </div>
       </section>
+      <app-input-legend />
     </main>
   `,
 })

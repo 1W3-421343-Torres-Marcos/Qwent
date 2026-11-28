@@ -3,6 +3,7 @@ import type { CardInstance, RowState, RowType } from '../../../../core';
 import { AbilityIconComponent, RowIconComponent } from '../../../shared/components/card-icons.component';
 import { CardTokenComponent } from '../../../shared/components/card-token.component';
 import { createSpriteFallbackTracker } from '../../../shared/constants/card-art';
+import { QwentFocusableDirective } from '../../../shared/directives/qwent-focusable.directive';
 
 const ROW_WEATHER_CLASSES: Readonly<Record<RowType, string>> = {
   CLOSE_COMBAT: 'bg-weather-frost/15 ring-1 ring-inset ring-weather-frost/50',
@@ -13,11 +14,16 @@ const ROW_WEATHER_CLASSES: Readonly<Record<RowType, string>> = {
 @Component({
   selector: 'app-board-row',
   standalone: true,
-  imports: [RowIconComponent, AbilityIconComponent, CardTokenComponent],
+  imports: [RowIconComponent, AbilityIconComponent, CardTokenComponent, QwentFocusableDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
-      (click)="onRowContainerClick()"
+      qwentFocusable
+      role="button"
+      [attr.aria-disabled]="!isSelectable()"
+      [qwentFocusGroup]="isSelectable() && !highlightHornSlot() ? 'play-target' : 'board-row'"
+      [attr.aria-label]="'Fila ' + rowType()"
+      (click)="onRowContainerClick($event)"
       class="relative flex h-full min-h-0 items-center gap-1.5 rounded border px-1.5 py-0.5 transition"
       [class]="rowContainerClasses()"
     >
@@ -37,6 +43,7 @@ const ROW_WEATHER_CLASSES: Readonly<Record<RowType, string>> = {
       <!-- 2. Square Commander's Horn Slot -->
       <button
         type="button"
+        [qwentFocusGroup]="isSelectable() && highlightHornSlot() ? 'play-target' : 'board-row'"
         (click)="onHornSlotClick($event)"
         [disabled]="!isSelectable() && !row().hornCard"
         aria-label="Ranura de Cuerno del Comandante"
@@ -131,8 +138,9 @@ export class BoardRowComponent {
     return 'qwent-row-rain';
   }
 
-  onRowContainerClick(): void {
+  onRowContainerClick(event: Event): void {
     if (this.isSelectable()) {
+      event.stopPropagation();
       this.rowSelected.emit(this.rowType());
     }
   }
